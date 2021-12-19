@@ -49,11 +49,13 @@ public static class Core
          throw new Exception("Not a git repository");
 
       var cwd = Environment.CurrentDirectory;
+
       // set default husky folder
-      dir = dir is null ? Path.Combine(cwd, HUSKY_FOLDER_NAME) : Path.GetFullPath(Path.Combine(cwd, dir));
+      dir ??= HUSKY_FOLDER_NAME;
+      var path = Path.GetFullPath(Path.Combine(cwd, dir));
 
       // Ensure that we're not trying to install outside of cwd
-      if (!dir.StartsWith(cwd))
+      if (!path.StartsWith(cwd))
          throw new Exception($"{cwd}\nnot allowed (see {DOCS_URL})");
 
       // Ensure that cwd is git top level
@@ -63,17 +65,17 @@ public static class Core
       try
       {
          // Create .husky/_
-         Directory.CreateDirectory(Path.Combine(dir, "_"));
+         Directory.CreateDirectory(Path.Combine(path, "_"));
 
          // Create .husky/_/.  ignore
-         File.WriteAllText(Path.Combine(dir, "_/.gitignore"), "*");
+         File.WriteAllText(Path.Combine(path, "_/.gitignore"), "*");
 
          // Copy husky.sh to .husky/_/husky.sh
          {
             using var stream = Assembly.GetAssembly(typeof(Core))!.GetManifestResourceStream("Husky.husky.sh")!;
             using var sr = new StreamReader(stream);
             var content = sr.ReadToEnd();
-            File.WriteAllText(Path.Combine(dir, "_/husky.sh"), content);
+            File.WriteAllText(Path.Combine(path, "_/husky.sh"), content);
          }
 
          // Configure repo
