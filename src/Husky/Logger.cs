@@ -8,4 +8,11 @@ public static class Logger
       var msg = isHusky ? $"[Husky] - {message}" : message;
       Console.WriteLine(msg);
    }
+
+   public static void LogErr(this string message)
+   {
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.WriteLine($"{message}");
+      Console.ResetColor();
+   }
 }

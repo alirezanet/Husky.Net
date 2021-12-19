@@ -1,108 +1,48 @@
-﻿using System.Diagnostics;
-using Husky;
+﻿using Husky;
+using H = Husky.Core;
 
-const string HUSKY = ".husky";
-const string DIRNAME = ".husky";
+var ln = args.Length;
+if (ln is 0 or > 3)
+   Help();
 
-// Git command
-Process Git(params string[] args)
+var cmd = args[0].ToLower();
+
+
+void Help(int code = 0)
 {
-   try
+   @"Usage:
+  husky install [dir] (default: .husky)
+  husky uninstall
+  husky set <project directory> <file> [cmd]
+  husky set|add <file> [cmd]".Log(false);
+#if !DEBUG
+   Environment.Exit(code);
+#endif
+}
+
+// CLI commands
+Action hook = (cmd, ln) switch
+{
+   ("install", 1) => () => H.Install(),
+   ("install", 3) => () => H.Install(args[1]),
+   ("uninstall", 1) => H.Uninstall,
+   ("add", 3) => () => H.Add(args[1], args[2]),
+   ("set", 3) => () => H.Set(args[1], args[2]),
+   _ => () =>
    {
-      var pi = new ProcessStartInfo("git")
-      {
-         Arguments = string.Join(" ", args),
-         RedirectStandardOutput = true,
-         RedirectStandardInput = true,
-         RedirectStandardError = true
-      };
-      var p = new Process();
-      p.StartInfo = pi;
-      p.OutputDataReceived += (_, e) => e.Data.Log(false);
-      p.ErrorDataReceived += (_, e) => e.Data.Log(false);
-      p.Start();
-      p.BeginOutputReadLine();
-      p.BeginErrorReadLine();
-      p.WaitForExit();
-      return p;
+      "Invalid command.".Log(false);
+      Help(2);
    }
-   catch (Exception e)
-   {
-      "Git not found or is not installed".Log();
-      Environment.Exit(2);
-      throw;
-   }
-}
+};
 
-void Install(string dir = HUSKY)
+try
 {
-   // Ensure that we're inside a git repository
-   // If git command is not found, status is null and we should return.
-   // That's why status value needs to be checked explicitly.
-   if (Git("rev-parse").ExitCode != 0)
-      return;
-
-   // Custom dir help TODO: change this url to husky.NET repo
-   const string url = "https://git.io/Jc3F9";
-
-   // Ensure that we're not trying to install outside of cwd
-   var cwd = Directory.GetCurrentDirectory();
-   if (!Path.Combine(cwd, dir).StartsWith(cwd))
-      throw new Exception($".. not allowed (see ${url})");
-
-   // Ensure that cwd is git top level
-   if (!Directory.Exists(".git"))
-      throw new Exception($".git can't be found (see ${url})");
-
-   try
-   {
-      // Create .husky/_
-      Directory.CreateDirectory(Path.Combine(dir, "_"));
-
-      // Create .husky/_/.  ignore
-      File.WriteAllText(Path.Combine(dir, "_/.gitignore"), "*");
-
-      // Copy husky.sh to .husky/_/husky.sh
-      File.Copy(Path.Combine(dir,DIRNAME,"../husky.sh"), Path.Combine(dir, "_/husky.sh"));
-
-      // Configure repo
-      var p = Git("config", "core.hooksPath", dir) ;
-      if (p.ExitCode != 0)
-         throw new Exception("Failed to configure git");
-   }
-   catch (Exception e)
-   {
-      "Git hooks failed to install".Log();
-      throw;
-   }
-   "Git hooks installed".Log();
+   // Run command
+   hook();
 }
-
-void Uninstall(string dir = HUSKY)
+catch (Exception e)
 {
-   Git("config", "--unset", "core.hooksPath");
+   e.Message.LogErr();
 }
 
-void Set(string file, string cmd)
-{
-   var dir = Path.GetDirectoryName(file);
-   if (!Directory.Exists(dir))
-      throw new Exception("can't create hook, ${dir} directory doesn't exist (try running husky install)");
-
-   var content = @"#!/bin/sh
-. ""$(dirname ""$0"")/_/husky.sh""
-
-      ${cmd}
-";
-   File.WriteAllText(file,content);
-
-   $"created {file}".Log();
-}
-
-void Add(string file, string cmd)
-{
-   if (File.Exists(file))
-      File.AppendAllText(file, $"{cmd}\n");
-   else
-      Set(file,cmd);
-}
+Console.Read();
