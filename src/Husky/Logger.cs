@@ -2,11 +2,18 @@ namespace Husky;
 
 public static class Logger
 {
-   public static void Log(this string? message, bool isHusky = true)
+   public static void Husky(this string message, ConsoleColor? color = null)
    {
-      if (string.IsNullOrWhiteSpace(message)) return;
-      var msg = isHusky ? $"[Husky] - {message}" : message;
-      Console.WriteLine(msg);
+      if (color != null)
+         Console.ForegroundColor = color.Value;
+
+      Console.WriteLine($"[Husky] - {message}");
+      Console.ResetColor();
+   }
+
+   public static void Log(this string message)
+   {
+      Console.Write(message);
    }
 
    public static void LogErr(this string message)

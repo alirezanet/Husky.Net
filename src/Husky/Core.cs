@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Reflection;
 
 namespace Husky;
 
@@ -6,8 +7,11 @@ public static class Core
 {
    private const string HUSKY_FOLDER_NAME = ".husky";
 
+   // Custom dir help TODO: change this url to short version of docs
+   public const string DOCS_URL = "https://github.com/alirezanet/husky.net";
+
 // Git command
-   public static Process Git(params string[] args)
+   private static Process Git(params string[] args)
    {
       try
       {
@@ -20,7 +24,7 @@ public static class Core
          };
          var p = new Process();
          p.StartInfo = pi;
-         p.OutputDataReceived += (_, e) => e.Data.Log(false);
+         p.OutputDataReceived += (_, e) => e.Data?.Log();
          p.ErrorDataReceived += (_, e) => e.Data?.LogErr();
          p.Start();
          p.BeginOutputReadLine();
@@ -30,7 +34,7 @@ public static class Core
       }
       catch (Exception)
       {
-         "Git not found or is not installed".Log();
+         "Git not found or is not installed".Husky();
          Environment.Exit(2);
          throw;
       }
@@ -39,25 +43,22 @@ public static class Core
    public static void Install(string? dir = null)
    {
       // Ensure that we're inside a git repository
-      // If git command is not found, status is null and we should return.
-      // That's why status value needs to be checked explicitly.
+      // If git command is not found, we should return exception.
+      // That's why ExitCode needs to be checked explicitly.
       if (Git("rev-parse").ExitCode != 0)
          throw new Exception("Not a git repository");
 
-      // Custom dir help TODO: change this url to short version of docs
-      const string url = "https://github.com/alirezanet/husky.net";
-
       var cwd = Environment.CurrentDirectory;
       // set default husky folder
-      dir ??= Path.Combine(cwd, HUSKY_FOLDER_NAME);
+      dir = dir is null ? Path.Combine(cwd, HUSKY_FOLDER_NAME) : Path.GetFullPath(Path.Combine(cwd, dir));
 
       // Ensure that we're not trying to install outside of cwd
       if (!dir.StartsWith(cwd))
-         throw new Exception($".. not allowed (see {url})");
+         throw new Exception($"{cwd}\nnot allowed (see {DOCS_URL})");
 
       // Ensure that cwd is git top level
-      if (!Directory.Exists(".git"))
-         throw new Exception($".git can't be found (see {url})");
+      if (!Directory.Exists(Path.Combine(cwd, ".git")))
+         throw new Exception($".git can't be found (see {DOCS_URL})");
 
       try
       {
@@ -68,7 +69,12 @@ public static class Core
          File.WriteAllText(Path.Combine(dir, "_/.gitignore"), "*");
 
          // Copy husky.sh to .husky/_/husky.sh
-         File.Copy(Path.Combine(Path.GetDirectoryName(Environment.ProcessPath) ?? cwd, "husky.sh"), Path.Combine(dir, "_/husky.sh"));
+         {
+            using var stream = Assembly.GetAssembly(typeof(Core))!.GetManifestResourceStream("Husky.husky.sh")!;
+            using var sr = new StreamReader(stream);
+            var content = sr.ReadToEnd();
+            File.WriteAllText(Path.Combine(dir, "_/husky.sh"), content);
+         }
 
          // Configure repo
          var p = Git("config", "core.hooksPath", dir);
@@ -77,20 +83,18 @@ public static class Core
       }
       catch (Exception)
       {
-         "Git hooks failed to install".Log();
+         "Git hooks failed to install".Husky();
          throw;
       }
 
-      "Git hooks installed".Log();
+      "Git hooks installed".Husky(ConsoleColor.Green);
    }
 
    public static void Uninstall()
    {
       var p = Git("config", "--unset", "core.hooksPath");
       if (p.ExitCode == 0)
-         "Git hooks successfully uninstalled".Log(false);
-      else // todo: remove this ?
-         p.ExitCode.ToString().Log(false);
+         "Git hooks successfully uninstalled".Husky(ConsoleColor.Green);
    }
 
    public static void Set(string file, string cmd)
@@ -102,11 +106,11 @@ public static class Core
       var content = @$"#!/bin/sh
 . ""$(dirname ""$0"")/_/husky.sh""
 
-      {cmd}
+{cmd}
 ";
       File.WriteAllText(file, content);
 
-      $"created {file}".Log();
+      $"created {file}".Husky();
    }
 
    public static void Add(string file, string cmd)
@@ -114,9 +118,11 @@ public static class Core
       if (File.Exists(file))
       {
          File.AppendAllText(file, $"{cmd}\n");
-         "added to hook".Log();
+         "added to hook".Husky();
       }
       else
+      {
          Set(file, cmd);
+      }
    }
 }

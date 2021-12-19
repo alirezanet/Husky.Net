@@ -1,26 +1,28 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <OutputType>Exe</OutputType>
-        <TargetFramework>net6.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-        <PackageVersion>0.0.1</PackageVersion>
-        <Title>Husky</Title>
-        <Authors>AliReza Sabouri</Authors>
-        <Description>Git hooks made easy, woof!</Description>
-        <Copyright>2021</Copyright>
-        <RepositoryUrl>https://github.com/alirezanet/husky.net</RepositoryUrl>
-        <Company>TuxTeam</Company>
-        <AssemblyVersion>0.0.1</AssemblyVersion>
-        <FileVersion>0.0.1</FileVersion>
-    </PropertyGroup>
+   <PropertyGroup>
+      <OutputType>Exe</OutputType>
+      <TargetFrameworks>netcoreapp3.1;net5.0;net6.0</TargetFrameworks>
+      <ImplicitUsings>enable</ImplicitUsings>
+      <Nullable>enable</Nullable>
+      <LangVersion>latest</LangVersion>
+      <PackageVersion>0.0.1</PackageVersion>
+      <Title>Husky</Title>
+      <Authors>AliReza Sabouri</Authors>
+      <Description>Git hooks made easy, woof!</Description>
+      <Copyright>2021</Copyright>
+      <RepositoryUrl>https://github.com/alirezanet/husky.net</RepositoryUrl>
+      <Company>TuxTeam</Company>
+      <AssemblyVersion>0.0.1</AssemblyVersion>
+      <FileVersion>0.0.1</FileVersion>
+      <PackAsTool>true</PackAsTool>
+      <ToolCommandName>husky</ToolCommandName>
+      <PackageOutputPath>./nupkg</PackageOutputPath>
+   </PropertyGroup>
 
-    <ItemGroup>
-      <None Remove="husky.sh" />
-      <Content Include="husky.sh">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
-    </ItemGroup>
+   <ItemGroup>
+      <None Remove="husky.sh"/>
+      <EmbeddedResource Include="husky.sh"/>
+   </ItemGroup>
 
 </Project>
