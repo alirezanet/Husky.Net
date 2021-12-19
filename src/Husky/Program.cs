@@ -12,7 +12,8 @@ void Help(int code = 0)
    $@"Usage:
   husky install [dir] (default: .husky)
   husky uninstall
-  husky set|add <.husky/file> [cmd]
+  husky set <.husky/file> [cmd]
+  husky add <.husky/file> [cmd]
   -- learn more: {H.DOCS_URL}
 ".Log();
    Environment.Exit(code);
@@ -21,6 +22,7 @@ void Help(int code = 0)
 // CLI commands
 Action hook = (cmd, ln) switch
 {
+   ("--help", _) or ("-h", _) => () => Help(),
    ("install", 1) => () => H.Install(),
    ("install", 2) => () => H.Install(args[1]),
    ("uninstall", 1) => H.Uninstall,
