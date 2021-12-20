@@ -11,8 +11,7 @@ You can use it to lint your commit messages, run tests, lint code, etc... when y
 **Features**
 - Powered by modern new Git feature (core.hooksPath)
 - User-friendly messages
-- Supports
-- macOS, Linux and Windows
+- Supports macOS, Linux and Windows
 - Git GUIs
 - Custom directories
 - Monorepos
