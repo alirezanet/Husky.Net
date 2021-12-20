@@ -24,18 +24,28 @@ If you already know what is the Husky (npm library), this is very similar but yo
 dotnet tool install --global Husky
 ```
 
-## Setup husky for your project
+### Setup husky for your project
 
 ```shell
 cd <Your project root directory> # <-- important
 husky install
 ```
 
-## Add your first hook
+### Add your first hook
 
 ```shell
 husky add .husky/pre-commit "echo 'Husky is awesome!'"
+git add .husky/pre-commit
 ```
+
+### Make a commit:
+
+```shell
+git commit -m "Keep calm and commit"
+# `echo 'Husky is awesome!'` will run every time you commit
+```
+
+---
 
 ### Notes
 
