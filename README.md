@@ -12,9 +12,9 @@ You can use it to lint your commit messages, run tests, lint code, etc... when y
 - Supports macOS, Linux and Windows
 - Git GUIs
 - Custom directories
-- Monorepos
+- Monorepo
 - Staged-hooks! (soon)
-- [dotnet-format](https://github.com/dotnet/format) Intergration (soon)
+- [dotnet-format](https://github.com/dotnet/format) Integration (soon)
 
 If you already know what is the Husky (npm library), this is very similar but you can use Husky.Net without having node, yarn, etc.. installed with a lot of more features! 🚀🚀
 
@@ -29,7 +29,7 @@ cd <Your project root directory>
 dotnet new tool-manifest
 dotnet tool install Husky
 ```
-Note: With the local installation you should prefix the command with `dotnet`
+*Note: With the local installation you should prefix the command with `dotnet`*
 e.g. `dotnet husky`
 
 ### Setup husky for your project
