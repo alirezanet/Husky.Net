@@ -92,6 +92,12 @@ public static class Core
       "Git hooks installed".Husky(ConsoleColor.Green);
    }
 
+   public static void Version()
+   {
+       var v = Assembly.GetAssembly(typeof(Core))?.GetName().Version?.ToString() ?? throw new Exception("Something is not right!");
+       v.Log();
+   }
+
    public static void Uninstall()
    {
       var p = Git("config", "--unset", "core.hooksPath");
