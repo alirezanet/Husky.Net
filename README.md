@@ -1,7 +1,21 @@
 # Husky.Net
-Git hooks made easy 🐶 woof!
+
+## Introduction
 
 You can use Husky.Net without having node, yarn, etc.. installed! 🚀🚀
+
+Husky improves your commits and more 🐶 woof!
+
+You can use it to lint your commit messages, run tests, lint code, etc... when you commit or push. Husky supports all Git hooks.
+
+**Features**
+- Powered by modern new Git feature (core.hooksPath)
+- User-friendly messages
+- Supports
+- macOS, Linux and Windows
+- Git GUIs
+- Custom directories
+- Monorepos
 
 ## Installation
 
