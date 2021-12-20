@@ -21,13 +21,21 @@ If you already know what is the Husky (npm library), this is very similar but yo
 ## Installation
 
 ```shell
+# global installation
 dotnet tool install --global Husky
+
+# local installation
+cd <Your project root directory>
+dotnet new tool-manifest
+dotnet tool install Husky
 ```
+Note: With the local installation you should prefix the command with `dotnet`
+e.g. `dotnet husky`
 
 ### Setup husky for your project
 
 ```shell
-cd <Your project root directory> # <-- important
+cd <Your project root directory>
 husky install
 ```
 
