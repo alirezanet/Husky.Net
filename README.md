@@ -15,6 +15,7 @@ You can use it to lint your commit messages, run tests, lint code, etc... when y
 - Git GUIs
 - Custom directories
 - Monorepos
+- staged-hooks (soon)
 
 ## Installation
 
