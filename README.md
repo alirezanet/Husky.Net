@@ -29,7 +29,7 @@ cd <Your project root directory>
 dotnet new tool-manifest
 dotnet tool install Husky
 ```
-*Note: With the local installation you should prefix the command with `dotnet`*
+*Note: With the local installation, you have to prefix the commands with `dotnet`*
 e.g. `dotnet husky`
 
 ### Setup husky for your project
