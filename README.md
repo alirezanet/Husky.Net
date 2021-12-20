@@ -2,8 +2,6 @@
 
 ## Introduction
 
-You can use Husky.Net without having node, yarn, etc.. installed! 🚀🚀
-
 Husky improves your commits and more 🐶 woof!
 
 You can use it to lint your commit messages, run tests, lint code, etc... when you commit or push. Husky supports all Git hooks.
@@ -15,7 +13,9 @@ You can use it to lint your commit messages, run tests, lint code, etc... when y
 - Git GUIs
 - Custom directories
 - Monorepos
-- staged-hooks (soon)
+- Staged-hooks! (soon)
+
+If you already know what is the Husky (npm library), this is very similar but you can use Husky.Net without having node, yarn, etc.. installed with a lot of more features! 🚀🚀
 
 ## Installation
 
@@ -36,10 +36,11 @@ husky install
 husky add .husky/pre-commit "echo 'Husky is awesome!'"
 ```
 
-### Wanna support us?
+### Notes
 
 Don't forget to give us a ⭐ on [GitHub](https://github.com/alirezanet/husky.net)
 
 This library inspired and is a combination of [husky](https://github.com/typicode/husky) & [lint-staged](#) libraries for **DotNet**, so make sure to support them too!
 
 ### A lot of features are coming soon, so stay tuned! 👁️‍🗨️👀
+
