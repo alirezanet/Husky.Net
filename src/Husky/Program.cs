@@ -22,7 +22,7 @@ void Help(int code = 0)
 // CLI commands
 Action hook = (cmd, ln) switch
 {
-   ("--help", _) or ("-h", _) => () => Help(),
+   ("--help" or "-h" or "-?", _) => () => Help(),
    ("install", 1) => () => H.Install(),
    ("install", 2) => () => H.Install(args[1]),
    ("uninstall", 1) => H.Uninstall,
