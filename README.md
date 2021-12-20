@@ -14,6 +14,7 @@ You can use it to lint your commit messages, run tests, lint code, etc... when y
 - Custom directories
 - Monorepos
 - Staged-hooks! (soon)
+- [dotnet-format](https://github.com/dotnet/format) Intergration (soon)
 
 If you already know what is the Husky (npm library), this is very similar but you can use Husky.Net without having node, yarn, etc.. installed with a lot of more features! 🚀🚀
 
