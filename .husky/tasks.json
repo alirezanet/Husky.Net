@@ -1,0 +1,23 @@
+// this is an auto generated example ()
+// use ${files} to pass the files to the task
+// use ${wordspaceRoot} to access the workspace folder
+{
+   "Version": "1.0",
+   "tasks": [
+      {
+         "command": "cmd.exe",
+         "args": [
+            "echo",
+            "${files}"
+         ],
+         "include": [
+            "**"
+         ],
+         "exclude": [
+            "**/*.js"
+         ],
+         "group": "group-name",
+         "isShell": false
+      }
+   ]
+}

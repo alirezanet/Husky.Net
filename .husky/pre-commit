@@ -1,4 +1,17 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-echo test
+## run all tasks
+#husky run
+
+## run all tasks with group: "group-name"
+#husky run --group "group-name"
+
+## run all tasks on staged files
+#husky run --staged
+
+## run all tasks with group: "group-name" on staged files
+#husky run --staged --group "group-name"
+
+### use custom commands -------------------
+#echo "Husky.Net is awesome!"

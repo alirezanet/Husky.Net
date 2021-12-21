@@ -59,7 +59,7 @@ git commit -m "Keep calm and commit"
 
 Don't forget to give us a ⭐ on [GitHub](https://github.com/alirezanet/husky.net)
 
-This library inspired and is a combination of [husky](https://github.com/typicode/husky) & [lint-staged](https://github.com/okonet/lint-staged) libraries for **DotNet**, so make sure to support them too!
+This library inspired and is a combination of [husky](https://github.com/typicode/husky) & [lint-staged](https://github.com/okonet/lint-staged) & VsCode Task runner!, for **DotNet**, so make sure to support them too!
 
 ### A lot of features are coming soon, stay tuned! 👁️‍🗨️👀
 
