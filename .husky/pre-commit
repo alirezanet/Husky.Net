@@ -1,17 +1,16 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
+## husky task runner examples -------------------
+
 ## run all tasks
 #husky run
 
-## run all tasks with group: "group-name"
+### run all tasks with group: "group-name"
 #husky run --group "group-name"
 
-## run all tasks on staged files
-#husky run --staged
+## run task with name: "task-name"
+#husky run --name "task-name"
 
-## run all tasks with group: "group-name" on staged files
-#husky run --staged --group "group-name"
-
-### use custom commands -------------------
+## or put your custom commands -------------------
 #echo "Husky.Net is awesome!"

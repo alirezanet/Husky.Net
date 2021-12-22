@@ -1,0 +1,23 @@
+// variables
+// ${staged} -> staged files
+// ${LastCommit} -> last commit files
+// ${matched} -> matched files using glob (include/exclude)
+{
+    "tasks": [
+      {
+         "name": "task-name",             // optional (recommended)
+         "command": "dotnet-format",      // required (path to the executable or script)
+         "args": "--include ${staged}",   // optional
+         "include": [                     // required (include|exclude)
+            "**.cs"
+         ],
+//       "group": "group-name",           // optional
+//       "cwd": "${cwd}",                 // optional (default: project root directory)
+//         "exclude": [                   // optional
+//            "**/*.js"
+//        ]
+      }
+   ]
+}
+
+
