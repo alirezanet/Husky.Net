@@ -1,6 +1,4 @@
 using System.Reflection;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.FileSystemGlobbing;
 using U = Husky.Utility;
 
 namespace Husky;
@@ -37,7 +35,7 @@ public static class CliActions
       }
 
       // Ensure that cwd is git top level
-      if (!IsValidateCwd(cwd))
+      if (!Utility.IsValidateCwd(cwd))
       {
          $".git can't be found (see {DOCS_URL})".LogErr();
          return 1;
@@ -86,11 +84,6 @@ public static class CliActions
 
       "Git hooks installed".Log(ConsoleColor.Green);
       return 0;
-   }
-
-   private static bool IsValidateCwd(string cwd)
-   {
-      return Directory.Exists(Path.Combine(cwd, ".git"));
    }
 
    public static int Version()
@@ -148,127 +141,9 @@ public static class CliActions
       return 0;
    }
 
-   public static async Task<int> Run()
+   public static async Task<int> Run(string[]? runArguments = default)
    {
-      "Preparing tasks ...".Husky();
-      var git = new Git();
-      // read tasks
-      var tasks = await GetHuskyTasksAsync(git);
-
-      foreach (var task in tasks)
-      {
-         var cwd = await git.GitPath;
-         if (!string.IsNullOrEmpty(task.Cwd))
-         {
-            cwd = task.Cwd;
-            if (!IsValidateCwd(cwd))
-            {
-               $"{cwd} is not a valid git repository".LogErr();
-               return 1;
-            }
-         }
-
-         $"Preparing task '{task.Name}'".Husky();
-         if (task.Command == null) continue; // skip if no command is defined
-         var args = await GetArgStringFromTask(task, git);
-
-         if (task.Args != null && args.Count != task.Args.Length)
-         {
-            $"Skipped task '{task.Name}', no matched files".Husky();
-            continue;
-         }
-
-
-
-         // execute task in order
-         var result = await Utility.ExecAsync(task.Command, args, cwd);
-         if (result.ExitCode != 0)
-         {
-            $"Task '{task.Name}' failed".LogErr();
-            return result.ExitCode;
-         }
-
-         $"Successfully executed '{task.Name}'".Husky(ConsoleColor.DarkGreen);
-      }
-
-      "Task execution complete".Husky(ConsoleColor.Green);
-      return 0;
-   }
-
-   private static async Task<List<HuskyTask>> GetHuskyTasksAsync(Git git)
-   {
-      var gitPath = await git.GitPath;
-      var huskyPath = await git.HuskyPath;
-      var tasks = new List<HuskyTask>();
-      var dir = Path.Combine(gitPath, huskyPath, "task-runner.json");
-      var config = new ConfigurationBuilder()
-         .AddJsonFile(dir)
-         .Build();
-      config.GetSection("tasks").Bind(tasks);
-      return tasks;
-   }
-
-   private static async Task<IList<string>> GetArgStringFromTask(HuskyTask task, Git git)
-   {
-      if (task.Args == null) return new string[] { };
-
-      // this is not lazy, because each task can have different patterns
-      var matcher = GetPatternMatcher(task);
-      var args = new List<string>();
-      foreach (var arg in task.Args)
-      {
-         switch (arg.ToLower().Trim())
-         {
-            case "${staged}":
-               {
-                  var stagedFiles = (await git.StagedFiles).Where(q=> !string.IsNullOrWhiteSpace(q)).ToArray();
-                  // continue if nothing is staged
-                  if (!stagedFiles.Any()) continue;
-
-                  // get match staged files with glob
-                  var matchFiles = matcher.Match(stagedFiles);
-                  if (matchFiles.HasMatches)
-                     args.Add(string.Join(" ", matchFiles.Files.Select(q => $"{q.Path}")));
-                  continue;
-               }
-
-            case "${lastCommit}":
-               {
-                  var lastCommitFiles = (await git.LastCommitFiles).Where(q=> !string.IsNullOrWhiteSpace(q)).ToArray();
-                  if (lastCommitFiles.Length < 1) continue;
-                  var matchFiles = matcher.Match(lastCommitFiles);
-                  if (matchFiles.HasMatches)
-                     args.Add(string.Join(" ", matchFiles.Files.Select(q => $"{q.Path}")));
-                  continue;
-               }
-            default:
-               args.Add(arg);
-               break;
-         }
-      }
-
-      return args;
-   }
-
-   private static Matcher GetPatternMatcher(HuskyTask task)
-   {
-      var matcher = new Matcher();
-      var hasMatcher = false;
-      if (task.Include is { Length: > 0 })
-      {
-         matcher.AddIncludePatterns(task.Include);
-         hasMatcher = true;
-      }
-
-      if (task.Exclude is { Length: > 0 })
-      {
-         matcher.AddExcludePatterns(task.Exclude);
-         hasMatcher = true;
-      }
-
-      if (hasMatcher == false)
-         matcher.AddInclude("**/*");
-
-      return matcher;
+      // TODO : support group and name options
+      return await TaskRunner.Run();
    }
 }

@@ -3,29 +3,28 @@
 // ${LastCommit} -> last commit files
 // ${matched} -> matched files using glob (include/exclude)
 {
-    "tasks": [
+   "tasks": [
       {
-         "name": "task-name",           // optional (recommended)
+         "name": "format-staged-files", // optional (recommended)
          "command": "dotnet-format",    // required (path to the executable or script)
          "args": [                      // optional
             "--include",
             "${staged}"
          ],
-         "include": [                   // optional (include|exclude)
-            "**.cs"
+         "include": [                   // optional (include|exclude) (default: **)
+            "**/*.cs"
          ],
+//       "output": "never",             // optional [verbose,always,never] (default: verbose)
 //       "group": "group-name",         // optional
 //       "cwd": "${cwd}",               // optional (default: project root directory)
-//         "exclude": [                 // optional
+//         "exclude": [                 // optional (default: is disabled)
 //            "**/*.js"
 //        ]
       },
       {
-         "name": "ping",
-         "command": "ping",
-         "args": ["4.2.2.4"],
-      }
+         "command": "cmd",
+         "output": "always",
+         "args": [ "/c", "echo Husky.Net is awesome!"]
+      },
    ]
 }
-
-

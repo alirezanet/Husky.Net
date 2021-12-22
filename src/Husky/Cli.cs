@@ -2,31 +2,55 @@ namespace Husky;
 
 public static class Cli
 {
+   private static void Exit(int code)
+   {
+#if DEBUG
+      $"[Debug] Application Exited with code: {code}".Log(ConsoleColor.DarkMagenta);
+#else
+      Environment.Exit(code);
+#endif
+   }
+
    public static async ValueTask Start(string[] args)
    {
       var ln = args.Length;
-      if (ln is 0)
+      if (ln < 1)
+      {
          Help();
+         Exit(0);
+      }
 
       // high priority options
-      if (args.Contains("--no-color"))
-         Logger.Colors = false;
-
-      if (args.Contains("--verbose") || args.Contains("-v"))
-         Logger.Verbose = true;
+      HandleHighPriorityArgs(args);
 
       var cmd = args[0].ToLower();
       try
       {
          // Run command
          var exitCode = await RunCommand(cmd, ln, args);
-         Environment.Exit(exitCode);
+         Exit(exitCode);
       }
       catch (Exception e)
       {
          // unhandled exceptions
          e.Message.LogErr();
-         Environment.Exit(1);
+         Exit(1);
+      }
+   }
+
+
+   private static void HandleHighPriorityArgs(string[] args)
+   {
+      if (args.Contains("--no-color"))
+      {
+         args = args.Where(x => x != "--no-color").ToArray();
+         Logger.Colors = false;
+      }
+
+      if (args.Contains("--verbose") || args.Contains("-v"))
+      {
+         args = args.Where(x => x != "--verbose" && x != "-v").ToArray();
+         Logger.Verbose = true;
       }
    }
 
@@ -42,14 +66,15 @@ public static class Cli
          ("uninstall", 1) => await CliActions.Uninstall(),
          ("set", 3) => await CliActions.Set(args[1], args[2]),
          ("add", 3) => await CliActions.Add(args[1], args[2]),
-         ("run", _) => await CliActions.Run(), // TODO : support group and name options
+         ("run", 1) => await CliActions.Run(),
+         ("run", _) => await CliActions.Run(args.Skip(1).ToArray()),
          _ => InvalidCommand()
       };
    }
 
    private static int InvalidCommand()
    {
-      "Invalid command.".LogErr();
+      "Invalid command. try 'husky --help'".LogErr();
       return 1;
    }
 
@@ -58,15 +83,17 @@ public static class Cli
       $@"Usage: husky [options] [command]
 
 Options:
-   -V|--version      Show version information
-   -h|--help|-?      Show help information
+   -h | --help|-?      Show help information
+   -V | --version      Show version information
+   -v | --verbose      Show verbose output
+   -c | --no-color     Disable color output
 
 Commands:
    husky install [dir] (default: .husky)   Install Husky hooks
    husky uninstall                         Uninstall Husky hooks
    husky set <.husky/file> [cmd]           Set Husky hook (.husky/pre-push ""dotnet test"")
    husky add <.husky/file> [cmd]           Add Husky hook (.husky/pre-commit ""husky run"")
-   husky run [--name] [--group]            Run predefined Husky tasks
+   husky run [--name] [--group]            Run task-runner.json tasks
 
 -- learn more: {CliActions.DOCS_URL}
 ".Log();

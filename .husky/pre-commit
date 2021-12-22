@@ -4,7 +4,7 @@
 ## husky task runner examples -------------------
 
 ## run all tasks
-#husky run
+husky run
 
 ### run all tasks with group: "group-name"
 #husky run --group "group-name"

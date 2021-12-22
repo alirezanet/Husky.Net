@@ -39,14 +39,45 @@ public static class Utility
       }
    }
 
-   public static async Task<CommandResult> ExecAsync(string fileName, IEnumerable<string> args, string? cwd = null)
+   public static async Task<CommandResult> ExecAsync(string fileName, IEnumerable<string> args, string? cwd = null,
+      HuskyTask.Outputs output = HuskyTask.Outputs.Verbose)
    {
       try
       {
          var ps = CliWrap.Cli.Wrap(fileName)
             .WithArguments(args)
-            .WithStandardOutputPipe(PipeTarget.ToDelegate(q => q.logVerbose(ConsoleColor.DarkGray)))
-            .WithStandardErrorPipe(PipeTarget.ToDelegate(q => q.logVerbose(ConsoleColor.DarkRed)));
+            .WithStandardOutputPipe(PipeTarget.ToDelegate(q =>
+            {
+               switch (output)
+               {
+                  case HuskyTask.Outputs.Verbose:
+                     q.logVerbose();
+                     break;
+                  case HuskyTask.Outputs.Always:
+                     q.Log();
+                     break;
+                  case HuskyTask.Outputs.Never:
+                     break;
+                  default:
+                     throw new ArgumentOutOfRangeException(nameof(output), output, "Supported (always, never, verbose)");
+               }
+            }))
+            .WithStandardErrorPipe(PipeTarget.ToDelegate(q =>
+            {
+               switch (output)
+               {
+                  case HuskyTask.Outputs.Verbose:
+                     q.logVerbose(ConsoleColor.DarkRed);
+                     break;
+                  case HuskyTask.Outputs.Always:
+                     q.LogErr();
+                     break;
+                  case HuskyTask.Outputs.Never:
+                     break;
+                  default:
+                     throw new ArgumentOutOfRangeException(nameof(output), output, "Supported (always, never, verbose)");
+               }
+            }));
 
          if (!string.IsNullOrEmpty(cwd))
             ps.WithWorkingDirectory(cwd);
@@ -58,5 +89,10 @@ public static class Utility
          $"failed to execute command '{fileName}'".LogErr();
          throw;
       }
+   }
+
+   public static bool IsValidateCwd(string cwd)
+   {
+      return Directory.Exists(Path.Combine(cwd, ".git"));
    }
 }
