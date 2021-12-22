@@ -118,12 +118,19 @@ public static class CliActions
       var content = @$"#!/bin/sh
 . ""$(dirname ""$0"")/_/husky.sh""
 ## husky task runner examples -------------------
+## note : for local installation use 'dotnet husky'
 
-## run predefined tasks
+## run all tasks
 #husky run
 
+### run all tasks with group: 'group-name'
+#husky run --group group-name
+
+## run task with name: 'task-name'
+#husky run --name task-name
+
 ## or put your custom commands -------------------
-#echo ""Husky.Net is awesome!""
+#echo 'Husky.Net is awesome!'
 {cmd}
 ";
       await File.WriteAllTextAsync(file, content);
