@@ -45,8 +45,8 @@ public static class Utility
       {
          var ps = CliWrap.Cli.Wrap(fileName)
             .WithArguments(args)
-            .WithStandardOutputPipe(PipeTarget.ToDelegate(q => q.Log()))
-            .WithStandardErrorPipe(PipeTarget.ToDelegate(q => q.LogErr()));
+            .WithStandardOutputPipe(PipeTarget.ToDelegate(q => q.logVerbose(ConsoleColor.DarkGray)))
+            .WithStandardErrorPipe(PipeTarget.ToDelegate(q => q.logVerbose(ConsoleColor.DarkRed)));
 
          if (!string.IsNullOrEmpty(cwd))
             ps.WithWorkingDirectory(cwd);

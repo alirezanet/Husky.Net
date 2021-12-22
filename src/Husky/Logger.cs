@@ -7,10 +7,13 @@ public static class Logger
 
    public static void Husky(this string message, ConsoleColor? color = null)
    {
+      Console.ForegroundColor = ConsoleColor.Cyan;
+      Console.Write("[Husky] - ");
+      Console.ResetColor();
+
       if (Colors && color != null)
          Console.ForegroundColor = color.Value;
-
-      Console.WriteLine($"[Husky] - {message}");
+      Console.Write($"{message}\n");
       Console.ResetColor();
    }
 

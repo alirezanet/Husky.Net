@@ -150,7 +150,7 @@ public static class CliActions
 
    public static async Task<int> Run()
    {
-      "Preparing tasks".Husky();
+      "Preparing tasks ...".Husky();
       var git = new Git();
       // read tasks
       var tasks = await GetHuskyTasksAsync(git);
@@ -168,9 +168,15 @@ public static class CliActions
             }
          }
 
-         $"Running task '{task.Name}'".Husky();
+         $"Preparing task '{task.Name}'".Husky();
          if (task.Command == null) continue; // skip if no command is defined
          var args = await GetArgStringFromTask(task, git);
+
+         // if (task.Args != null && args.Count() != task.Args.Length)
+         // {
+         //    $"Skipped task '{task.Name}', no matched files".Husky();
+         //    continue;
+         // }
 
          // execute task in order
          var result = await Utility.ExecAsync(task.Command, args, cwd);
@@ -180,7 +186,7 @@ public static class CliActions
             return result.ExitCode;
          }
 
-         $"Successfully executed '{task.Name}'".Husky(ConsoleColor.Green);
+         $"Successfully executed '{task.Name}'".Husky(ConsoleColor.DarkGreen);
       }
 
       "Task execution complete".Husky(ConsoleColor.Green);
@@ -200,35 +206,33 @@ public static class CliActions
       return tasks;
    }
 
-   private static async Task<IEnumerable<string>> GetArgStringFromTask(HuskyTask task, Git git)
+   private static async Task<IList<string>> GetArgStringFromTask(HuskyTask task, Git git)
    {
       if (task.Args == null) return new string[] { };
 
       // this is not lazy, because each task can have different patterns
       var matcher = GetPatternMatcher(task);
       var args = new List<string>();
-
-      var stagedFiles = await git.StagedFiles;
-      var lastCommitFiles = await git.LastCommitFiles;
-
       foreach (var arg in task.Args)
       {
          switch (arg.ToLower().Trim())
          {
             case "${staged}":
                {
+                  var stagedFiles = await git.StagedFiles;
                   // continue if nothing is staged
                   if (stagedFiles.Length < 1) continue;
 
                   // get match staged files with glob
                   var matchFiles = matcher.Match(stagedFiles);
                   if (matchFiles.HasMatches)
-                     args.Add(string.Join(" ", matchFiles.Files.Select(q => $"'{q.Path}'")));
+                     args.Add(string.Join(" ", matchFiles.Files.Select(q => $"{q.Path}")));
                   continue;
                }
 
             case "${lastCommit}":
                {
+                  var lastCommitFiles = await git.LastCommitFiles;
                   if (lastCommitFiles.Length < 1) continue;
                   var matchFiles = matcher.Match(lastCommitFiles);
                   if (matchFiles.HasMatches)
