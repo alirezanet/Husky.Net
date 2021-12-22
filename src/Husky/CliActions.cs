@@ -51,7 +51,7 @@ public static class CliActions
 
          // Copy husky.sh to .husky/_/husky.sh
          {
-            await using var stream = Assembly.GetAssembly(typeof(Program))!.GetManifestResourceStream("Husky.husky.sh")!;
+            await using var stream = Assembly.GetAssembly(typeof(Program))!.GetManifestResourceStream("Husky.templates.husky.sh")!;
             using var sr = new StreamReader(stream);
             var content = await sr.ReadToEndAsync();
             await File.WriteAllTextAsync(Path.Combine(path, "_/husky.sh"), content);
@@ -61,7 +61,7 @@ public static class CliActions
          // We don't want to override this file
          if (!File.Exists(Path.Combine(path, "task-runner.json")))
          {
-            await using var stream = Assembly.GetAssembly(typeof(Program))!.GetManifestResourceStream("Husky.task-runner.json")!;
+            await using var stream = Assembly.GetAssembly(typeof(Program))!.GetManifestResourceStream("Husky.templates.task-runner.json")!;
             using var sr = new StreamReader(stream);
             var content = await sr.ReadToEndAsync();
             await File.WriteAllTextAsync(Path.Combine(path, "task-runner.json"), content);
