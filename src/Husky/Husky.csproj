@@ -6,15 +6,15 @@
       <ImplicitUsings>enable</ImplicitUsings>
       <Nullable>enable</Nullable>
       <LangVersion>latest</LangVersion>
-      <PackageVersion>0.0.1</PackageVersion>
+      <PackageVersion>0.0.2</PackageVersion>
       <Title>Husky</Title>
       <Authors>AliReza Sabouri</Authors>
       <Description>Git hooks made easy, woof!</Description>
       <Copyright>2021</Copyright>
       <RepositoryUrl>https://github.com/alirezanet/husky.net</RepositoryUrl>
       <Company>TuxTeam</Company>
-      <AssemblyVersion>0.0.1</AssemblyVersion>
-      <FileVersion>0.0.1</FileVersion>
+      <AssemblyVersion>0.0.2</AssemblyVersion>
+      <FileVersion>0.0.2</FileVersion>
       <PackAsTool>true</PackAsTool>
       <ToolCommandName>husky</ToolCommandName>
       <PackageOutputPath>./nupkg</PackageOutputPath>
