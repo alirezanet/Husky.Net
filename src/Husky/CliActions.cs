@@ -172,11 +172,13 @@ public static class CliActions
          if (task.Command == null) continue; // skip if no command is defined
          var args = await GetArgStringFromTask(task, git);
 
-         // if (task.Args != null && args.Count() != task.Args.Length)
-         // {
-         //    $"Skipped task '{task.Name}', no matched files".Husky();
-         //    continue;
-         // }
+         if (task.Args != null && args.Count != task.Args.Length)
+         {
+            $"Skipped task '{task.Name}', no matched files".Husky();
+            continue;
+         }
+
+
 
          // execute task in order
          var result = await Utility.ExecAsync(task.Command, args, cwd);
@@ -219,9 +221,9 @@ public static class CliActions
          {
             case "${staged}":
                {
-                  var stagedFiles = await git.StagedFiles;
+                  var stagedFiles = (await git.StagedFiles).Where(q=> !string.IsNullOrWhiteSpace(q)).ToArray();
                   // continue if nothing is staged
-                  if (stagedFiles.Length < 1) continue;
+                  if (!stagedFiles.Any()) continue;
 
                   // get match staged files with glob
                   var matchFiles = matcher.Match(stagedFiles);
@@ -232,7 +234,7 @@ public static class CliActions
 
             case "${lastCommit}":
                {
-                  var lastCommitFiles = await git.LastCommitFiles;
+                  var lastCommitFiles = (await git.LastCommitFiles).Where(q=> !string.IsNullOrWhiteSpace(q)).ToArray();
                   if (lastCommitFiles.Length < 1) continue;
                   var matchFiles = matcher.Match(lastCommitFiles);
                   if (matchFiles.HasMatches)
