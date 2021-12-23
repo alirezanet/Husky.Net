@@ -1,0 +1,28 @@
+﻿#https://lukelowrey.com/use-github-actions-to-publish-nuget-packages/
+name: Publish Packages
+
+on:
+   # push:
+   #    branches: [ master ]
+   workflow_dispatch:
+jobs:
+   build:
+      runs-on: ubuntu-latest
+      steps:
+         - uses: actions/checkout@v2
+         - name: Setup .NET
+           uses: actions/setup-dotnet@v1
+           with:
+              dotnet-version: 6.0.x
+         - name: Restore dependencies
+           run: dotnet restore
+         - name: Build
+           run: dotnet build --configuration Release --no-restore
+#         - name: Test
+#           run: dotnet test --configuration Release --no-build --verbosity normal
+         - name: Publish Husky
+           uses: alirezanet/publish-nuget@v3.0.0
+           with:
+              PROJECT_FILE_PATH: src/Husky/Husky.csproj
+              INCLUDE_SYMBOLS: true
+              NUGET_KEY: ${{secrets.NUGET_API_KEY}}

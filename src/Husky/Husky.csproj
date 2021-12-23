@@ -6,6 +6,7 @@
       <ImplicitUsings>enable</ImplicitUsings>
       <Nullable>enable</Nullable>
       <LangVersion>latest</LangVersion>
+      <PackageId>Husky</PackageId>
       <PackageVersion>0.0.2</PackageVersion>
       <Title>Husky</Title>
       <Authors>AliReza Sabouri</Authors>
@@ -18,6 +19,15 @@
       <PackAsTool>true</PackAsTool>
       <ToolCommandName>husky</ToolCommandName>
       <PackageOutputPath>./nupkg</PackageOutputPath>
+      <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+      <PackageLicenseExpression>MIT</PackageLicenseExpression>
+      <PackageDescription>Easy to use git hook manager with a powerfull task runner! 🐶 </PackageDescription>
+      <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+      <PublishRepositoryUrl>true</PublishRepositoryUrl>
+      <EmbedUntrackedSources>true</EmbedUntrackedSources>
+      <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+      <IncludeSymbols>true</IncludeSymbols>
+      <PackageReadmeFile>README.md</PackageReadmeFile>
    </PropertyGroup>
 
    <ItemGroup>
