@@ -103,3 +103,9 @@ make sure to read the comments before removing them until we complete the docume
 - Don't forget to give a ⭐ on [GitHub](https://github.com/alirezanet/husky.net)
 
 - This library inspired and is a combination of [husky](https://github.com/typicode/husky) & [lint-staged](https://github.com/okonet/lint-staged) & VsCode Task runner!, for **DotNet**, so make sure to support them too!
+
+## Known issues
+- On Linux/Mac you can only use the full path for the task runner command e.g. `/bin/touch` instead of `touch`.
+- CLI Colors disappears when executed from hooks.
+- husky run `--name` and `--group` not working.
+
