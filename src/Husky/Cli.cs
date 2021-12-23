@@ -21,7 +21,7 @@ public static class Cli
       }
 
       // high priority options
-      HandleHighPriorityArgs(args);
+      HandleHighPriorityArgs(ref args);
 
       var cmd = args[0].ToLower();
       try
@@ -39,7 +39,7 @@ public static class Cli
    }
 
 
-   private static void HandleHighPriorityArgs(string[] args)
+   private static void HandleHighPriorityArgs(ref string[] args)
    {
       if (args.Contains("--no-color"))
       {
@@ -47,6 +47,7 @@ public static class Cli
          Logger.Colors = false;
       }
 
+      // ReSharper disable once InvertIf
       if (args.Contains("--verbose") || args.Contains("-v"))
       {
          args = args.Where(x => x != "--verbose" && x != "-v").ToArray();

@@ -5,12 +5,33 @@ namespace Husky;
 
 public static class TaskRunner
 {
-   public static async Task<int> Run()
+   public static async Task<int> Run(IDictionary<string, string>? config = null)
    {
       "🚀 Preparing tasks ...".Husky();
       var git = new Git();
       // read tasks
       var tasks = await GetHuskyTasksAsync(git);
+
+      // handle run arguments
+      if (config != null)
+      {
+         if (config.ContainsKey("name"))
+         {
+            $"🔍 Using task name '{config["name"]}'".Husky();
+            tasks = tasks.Where(q=>q.Name == config["name"]).ToList();
+         }
+
+         if (config.ContainsKey("group"))
+         {
+            $"🔍 Using task group '{config["group"]}'".Husky();
+            tasks = tasks.Where(q => q.Group == config["group"]).ToList();
+         }
+      }
+
+      if (tasks.Count == 0) {
+         "💤 Skipped, no task found".Husky();
+         return 0;
+      }
 
       foreach (var task in tasks)
       {
@@ -77,31 +98,31 @@ public static class TaskRunner
          switch (arg.ToLower().Trim())
          {
             case "${staged}":
-               {
-                  var stagedFiles = (await git.StagedFiles).Where(q => !string.IsNullOrWhiteSpace(q)).ToArray();
-                  // continue if nothing is staged
-                  if (!stagedFiles.Any()) continue;
+            {
+               var stagedFiles = (await git.StagedFiles).Where(q => !string.IsNullOrWhiteSpace(q)).ToArray();
+               // continue if nothing is staged
+               if (!stagedFiles.Any()) continue;
 
-                  // get match staged files with glob
-                  var matches = matcher.Match(stagedFiles);
-                  AddMatchFiles(task.PathMode, matches, args, await git.GitPath);
-                  continue;
-               }
+               // get match staged files with glob
+               var matches = matcher.Match(stagedFiles);
+               AddMatchFiles(task.PathMode, matches, args, await git.GitPath);
+               continue;
+            }
             case "${lastCommit}":
-               {
-                  var lastCommitFiles = (await git.LastCommitFiles).Where(q => !string.IsNullOrWhiteSpace(q)).ToArray();
-                  if (lastCommitFiles.Length < 1) continue;
-                  var matches = matcher.Match(lastCommitFiles);
-                  AddMatchFiles(task.PathMode, matches, args, await git.GitPath);
-                  continue;
-               }
+            {
+               var lastCommitFiles = (await git.LastCommitFiles).Where(q => !string.IsNullOrWhiteSpace(q)).ToArray();
+               if (lastCommitFiles.Length < 1) continue;
+               var matches = matcher.Match(lastCommitFiles);
+               AddMatchFiles(task.PathMode, matches, args, await git.GitPath);
+               continue;
+            }
             case "${matched}":
-               {
-                  var files = Directory.GetFiles(await git.GitPath, "*", SearchOption.AllDirectories);
-                  var matches = matcher.Match(files);
-                  AddMatchFiles(task.PathMode, matches, args, await git.GitPath);
-                  continue;
-               }
+            {
+               var files = Directory.GetFiles(await git.GitPath, "*", SearchOption.AllDirectories);
+               var matches = matcher.Match(files);
+               AddMatchFiles(task.PathMode, matches, args, await git.GitPath);
+               continue;
+            }
             default:
                args.Add(arg);
                break;

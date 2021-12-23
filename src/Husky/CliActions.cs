@@ -148,9 +148,22 @@ public static class CliActions
       return 0;
    }
 
-   public static async Task<int> Run(string[]? runArguments = default)
+   public static async Task<int> Run(string[]? args = default)
    {
-      // TODO : support group and name options
-      return await TaskRunner.Run();
+      if (args is null || args.Length == 0)
+         return await TaskRunner.Run();
+
+      var dic = Utility.ParseArgs(args);
+
+      // ReSharper disable once InvertIf
+      if (dic.Keys.Any(q=> q != "name" && q != "group"))
+      {
+         "invalid arguments.".LogErr();
+         return 1;
+      }
+      return await TaskRunner.Run(dic);
    }
+
+
+
 }
