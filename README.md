@@ -98,6 +98,8 @@ Husky.Net supports the standard dotnet `FileSystemGlobbing` patterns for include
 I've added two sample task to the `task-runner.json` file,
 make sure to read the comments before removing them until we complete the documentation. **any help appreciated!**
 
+Consider all bellow 1.x versions as beta.
+
 Don't forget to give a ⭐ on [GitHub](https://github.com/alirezanet/husky.net)
 
 This library inspired and is a combination of [husky](https://github.com/typicode/husky) & [lint-staged](https://github.com/okonet/lint-staged) & VsCode Task runner!, for **DotNet**, so make sure to support them too!
