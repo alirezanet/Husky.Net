@@ -98,7 +98,7 @@ Husky.Net supports the standard dotnet `FileSystemGlobbing` patterns for include
 - I've added two sample task to the `task-runner.json` file,
 make sure to read the comments before removing them until we complete the documentation. **any help appreciated!**
 
-- Consider all bellow 1.x versions as beta.
+- Consider all bellow 1.x versions as beta. ( we need a lot of tests before major release )
 
 - Don't forget to give a ⭐ on [GitHub](https://github.com/alirezanet/husky.net)
 
