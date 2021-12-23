@@ -29,6 +29,7 @@ _next_
 
 -  ⌛ Task for specific branch or tags (soon)
 -  ⌛ User-defined file states (soon)
+-  ⌛ Run task using group and name options (soon)
 
 If you already know what is the lint-staged or Husky (npm packages),
 this is very similar but you can use Husky.Net without having node, yarn, etc.. installed, with a lot of more features! 🚀🚀
