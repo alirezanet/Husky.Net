@@ -25,7 +25,7 @@ public class Git
 
    public static async Task<CommandResult> ExecAsync(string args)
    {
-      return await Utility.ExecAsync("git", args);
+      return await Utility.ExecDirectAsync("git", args);
    }
 
    public static async Task<BufferedCommandResult> ExecBufferedAsync(string args)
@@ -45,7 +45,7 @@ public class Git
       }
       catch (Exception e)
       {
-         e.Message.logVerbose(ConsoleColor.DarkRed);
+         e.Message.LogVerbose(ConsoleColor.DarkRed);
          "Could not find Husky path".LogErr();
          throw;
       }
@@ -63,7 +63,7 @@ public class Git
       }
       catch (Exception e)
       {
-         e.Message.logVerbose(ConsoleColor.DarkRed);
+         e.Message.LogVerbose(ConsoleColor.DarkRed);
          "Could not find git path".LogErr();
          throw;
       }
@@ -81,7 +81,7 @@ public class Git
       }
       catch (Exception e)
       {
-         e.Message.logVerbose(ConsoleColor.DarkRed);
+         e.Message.LogVerbose(ConsoleColor.DarkRed);
          "Could not find the last commit files".LogErr();
          throw;
       }
@@ -99,7 +99,7 @@ public class Git
       }
       catch (Exception e)
       {
-         e.Message.logVerbose(ConsoleColor.DarkRed);
+         e.Message.LogVerbose(ConsoleColor.DarkRed);
          "Could not find the staged files".LogErr();
          throw;
       }

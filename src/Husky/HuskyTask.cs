@@ -1,11 +1,12 @@
 namespace Husky;
 
-public class HuskyTask
+public partial class HuskyTask
 {
    public string? Command { get; set; }
    public string[]? Args { get; set; }
    public string? Name { get; set; }
-   public Outputs Output { get; set; }
+   public OutputTypes Output { get; set; } = OutputTypes.Error;
+   public PathModes PathMode { get; set; } = PathModes.Relative;
    public string? Cwd { get; set; }
    public string? Group { get; set; }
 
@@ -15,10 +16,5 @@ public class HuskyTask
    }
    public string[]? Exclude { get; set; }
 
-   public enum Outputs
-   {
-      Verbose,
-      Never,
-      Always,
-   }
+
 }

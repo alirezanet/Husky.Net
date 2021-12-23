@@ -9,7 +9,7 @@ public static class Logger
    {
       if (Colors)
          Console.ForegroundColor = ConsoleColor.Cyan;
-      Console.Write("[Husky] - ");
+      Console.Write("[Husky] ");
       Console.ResetColor();
 
       if (Colors && color != null)
@@ -27,7 +27,7 @@ public static class Logger
       Console.ResetColor();
    }
 
-   public static void logVerbose(this string message, ConsoleColor color = ConsoleColor.DarkGray)
+   public static void LogVerbose(this string message, ConsoleColor color = ConsoleColor.DarkGray)
    {
       if (!Verbose) return;
       if (Colors)

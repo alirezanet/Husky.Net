@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using CliWrap;
 using CliWrap.Buffered;
 
@@ -21,7 +22,7 @@ public static class Utility
       }
    }
 
-   public static async Task<CommandResult> ExecAsync(string fileName, string args)
+   public static async Task<CommandResult> ExecDirectAsync(string fileName, string args)
    {
       try
       {
@@ -39,60 +40,82 @@ public static class Utility
       }
    }
 
-   public static async Task<CommandResult> ExecAsync(string fileName, IEnumerable<string> args, string? cwd = null,
-      HuskyTask.Outputs output = HuskyTask.Outputs.Verbose)
+   public static async Task<BufferedCommandResult> RunCommandAsync(string fileName, IEnumerable<string> args, string cwd,
+      OutputTypes output = OutputTypes.Verbose)
    {
-      try
+      var cmd = Path.IsPathFullyQualified(fileName) ? fileName : GetDefaultOsTerminal(fileName, ref args);
+      var ps = CliWrap.Cli.Wrap(cmd)
+         .WithWorkingDirectory(cwd)
+         .WithArguments(args)
+         .WithValidation(CommandResultValidation.None);
+
+      if (!string.IsNullOrEmpty(cwd))
+         ps = ps.WithWorkingDirectory(cwd);
+
+      var result = await ps.ExecuteBufferedAsync();
+      LogOutputs(output, result);
+      return result;
+   }
+
+   private static void LogOutputs(OutputTypes output, BufferedCommandResult result)
+   {
+      if (result.ExitCode == 0)
       {
-         var ps = CliWrap.Cli.Wrap(fileName)
-            .WithArguments(args)
-            .WithStandardOutputPipe(PipeTarget.ToDelegate(q =>
-            {
-               switch (output)
-               {
-                  case HuskyTask.Outputs.Verbose:
-                     q.logVerbose();
-                     break;
-                  case HuskyTask.Outputs.Always:
-                     q.Log();
-                     break;
-                  case HuskyTask.Outputs.Never:
-                     break;
-                  default:
-                     throw new ArgumentOutOfRangeException(nameof(output), output, "Supported (always, never, verbose)");
-               }
-            }))
-            .WithStandardErrorPipe(PipeTarget.ToDelegate(q =>
-            {
-               switch (output)
-               {
-                  case HuskyTask.Outputs.Verbose:
-                     q.logVerbose(ConsoleColor.DarkRed);
-                     break;
-                  case HuskyTask.Outputs.Always:
-                     q.LogErr();
-                     break;
-                  case HuskyTask.Outputs.Never:
-                     break;
-                  default:
-                     throw new ArgumentOutOfRangeException(nameof(output), output, "Supported (always, never, verbose)");
-               }
-            }));
-
-         if (!string.IsNullOrEmpty(cwd))
-            ps.WithWorkingDirectory(cwd);
-
-         return await ps.ExecuteAsync();
+         switch (output)
+         {
+            case OutputTypes.Always:
+               result.StandardOutput.Log();
+               break;
+            case OutputTypes.Error:
+            case OutputTypes.Verbose:
+               result.StandardOutput.LogVerbose();
+               break;
+            case OutputTypes.Never:
+               break;
+            default:
+               throw new ArgumentOutOfRangeException(nameof(output), output, "Supported (always, error, never, verbose)");
+         }
       }
-      catch (Exception)
+      else
       {
-         $"failed to execute command '{fileName}'".LogErr();
-         throw;
+         switch (output)
+         {
+            case OutputTypes.Always:
+            case OutputTypes.Error:
+               if (result.StandardOutput.Length > 0)
+                  result.StandardOutput.LogErr();
+               if (result.StandardError.Length > 0)
+                  result.StandardError.LogErr();
+               break;
+            case OutputTypes.Verbose:
+               if (result.StandardOutput.Length > 0)
+                  result.StandardOutput.LogVerbose(ConsoleColor.DarkRed);
+               if (result.StandardError.Length > 0)
+                  result.StandardError.LogVerbose(ConsoleColor.DarkRed);
+               break;
+            case OutputTypes.Never:
+               break;
+            default:
+               throw new ArgumentOutOfRangeException(nameof(output), output, "Supported (always, error, never, verbose)");
+         }
       }
    }
 
-   public static bool IsValidateCwd(string cwd)
+   private static string GetDefaultOsTerminal(string fileName, ref IEnumerable<string> args)
    {
-      return Directory.Exists(Path.Combine(cwd, ".git"));
+      if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+      {
+         args = new[] { "/c", fileName }.Concat(args);
+         return "cmd";
+      }
+
+      // ReSharper disable once InvertIf
+      if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+      {
+         args = new[] { "-c", fileName }.Concat(args);
+         return "bash";
+      }
+
+      return fileName;
    }
 }

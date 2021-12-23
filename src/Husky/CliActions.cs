@@ -35,7 +35,7 @@ public static class CliActions
       }
 
       // Ensure that cwd is git top level
-      if (!Utility.IsValidateCwd(cwd))
+      if (!Directory.Exists(Path.Combine(cwd, ".git")))
       {
          $".git can't be found (see {DOCS_URL})".LogErr();
          return 1;
@@ -77,7 +77,7 @@ public static class CliActions
       }
       catch (Exception e)
       {
-         e.Message.logVerbose(ConsoleColor.DarkRed);
+         e.Message.LogVerbose(ConsoleColor.DarkRed);
          "Git hooks installation failed".LogErr();
          return 1;
       }
