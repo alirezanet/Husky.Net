@@ -7,11 +7,9 @@ Husky improves your commits and more 🐶 woof!
 You can use it to lint your commit messages, run tests, lint code, etc... when you commit or push. Husky supports all Git hooks.
 
 **Features**
+
+*v0.0.1*
 - Supports all Git hooks
-- Supports (Staged, UnStaged, LastCommitFiles) file states (NEW)
-- Internal task runner! (NEW)
-- Compatible with [dotnet-format](https://github.com/dotnet/format) (NEW)
-- Custom State for files (soon)
 - Powered by modern new Git feature (core.hooksPath)
 - User-friendly messages
 - Supports macOS, Linux and Windows
@@ -19,7 +17,18 @@ You can use it to lint your commit messages, run tests, lint code, etc... when y
 - Custom directories
 - Monorepo
 
-If you already know what is the Husky (npm library), this is very similar but you can use Husky.Net without having node, yarn, etc.. installed with a lot of more features! 🚀🚀
+*v0.0.2*
+- 🔥 Internal task runner! 🆕
+- 🔥 Multiple file states (staged, lastCommit, glob)  🆕
+- 🔥 Compatible with [dotnet-format](https://github.com/dotnet/format) 🆕
+- 🔥 Customizable tasks 🆕
+
+*next*
+- ⌛  Task for specific branch or tags (soon)
+- ⌛  User-defined file states (soon)
+
+If you already know what is the Husky or lint-staged (npm packages),
+this is very similar but you can use Husky.Net without having node, yarn, etc.. installed, with a lot of more features! 🚀🚀
 
 ## Installation
 
