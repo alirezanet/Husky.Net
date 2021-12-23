@@ -105,15 +105,18 @@ public static class Utility
    {
       if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
       {
-         args = new[] { "/c", fileName }.Concat(args);
-         return "cmd";
+         args = new[] { "/c", fileName }.Concat(args).ToArray();
+         return "cmd.exe";
       }
 
       // ReSharper disable once InvertIf
       if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
       {
-         args = new[] { "-c", fileName }.Concat(args);
-         return "bash";
+         // according to: https://stackoverflow.com/a/15262019/637142
+         // thanks to this we will pass everything as one command
+         var command = $"{fileName} {string.Join(" ", args)}".Replace("\"", "\"\"");
+         args = new[] { "-c \"" + command + "\"" };
+         return "/bin/bash";
       }
 
       return fileName;
