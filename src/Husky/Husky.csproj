@@ -38,6 +38,10 @@
    </ItemGroup>
 
    <ItemGroup>
+      <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+   </ItemGroup>
+
+   <ItemGroup>
       <PackageReference Include="CliWrap" Version="3.3.3" />
       <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
       <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />
