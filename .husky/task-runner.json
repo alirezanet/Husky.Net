@@ -1,0 +1,31 @@
+// variables
+// ${staged} -> staged files
+// ${LastCommit} -> last commit files
+// ${matched} -> matched files using glob (include/exclude)
+{
+   "tasks": [
+      {
+         "name": "format staged files", // optional (recommended)
+         "command": "dotnet-format",    // required (path to the executable or script)
+         "args": [                      // optional
+            "--include",
+            "${staged}"
+         ],
+         "include": [                   // optional (include|exclude) (default: **)
+            "**/*.cs"
+         ],
+//       "pathMode": "relative",        // optional (relative|absolute) (default: relative)
+//       "output": "never",             // optional [always,error,verbose,never] (default: error)
+//       "group": "group-name",         // optional
+//       "cwd": "src",                  // optional (default: project root directory)
+//       "exclude": [                   // optional (default: is disabled)
+//            "**/*.js"
+//        ]
+      },
+      {
+         "command": "cmd",
+         "output": "always",
+         "args": [ "/c", "echo Husky.Net is awesome!"]
+      }
+   ]
+}

@@ -6,23 +6,47 @@
       <ImplicitUsings>enable</ImplicitUsings>
       <Nullable>enable</Nullable>
       <LangVersion>latest</LangVersion>
-      <PackageVersion>0.0.1</PackageVersion>
+      <PackageId>Husky</PackageId>
+      <PackageVersion>0.0.2</PackageVersion>
       <Title>Husky</Title>
       <Authors>AliReza Sabouri</Authors>
       <Description>Git hooks made easy, woof!</Description>
       <Copyright>2021</Copyright>
       <RepositoryUrl>https://github.com/alirezanet/husky.net</RepositoryUrl>
       <Company>TuxTeam</Company>
-      <AssemblyVersion>0.0.1</AssemblyVersion>
-      <FileVersion>0.0.1</FileVersion>
+      <AssemblyVersion>0.0.2</AssemblyVersion>
+      <FileVersion>0.0.2</FileVersion>
       <PackAsTool>true</PackAsTool>
       <ToolCommandName>husky</ToolCommandName>
       <PackageOutputPath>./nupkg</PackageOutputPath>
+      <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+      <PackageLicenseExpression>MIT</PackageLicenseExpression>
+      <PackageDescription>Easy to use git hook manager with a powerfull task runner! 🐶 </PackageDescription>
+      <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+      <PublishRepositoryUrl>true</PublishRepositoryUrl>
+      <EmbedUntrackedSources>true</EmbedUntrackedSources>
+      <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+      <IncludeSymbols>true</IncludeSymbols>
+      <PackageReadmeFile>README.md</PackageReadmeFile>
    </PropertyGroup>
 
    <ItemGroup>
-      <None Remove="husky.sh"/>
-      <EmbeddedResource Include="husky.sh"/>
+      <EmbeddedResource Include="templates\husky.sh" />
+      <EmbeddedResource Include="templates\task-runner.json" />
+      <None Remove="husky.sh" />
+      <None Remove="task-runner.json" />
+   </ItemGroup>
+
+   <ItemGroup>
+      <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+   </ItemGroup>
+
+   <ItemGroup>
+      <PackageReference Include="CliWrap" Version="3.3.3" />
+      <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
+      <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="6.0.0" />
    </ItemGroup>
 
 </Project>
