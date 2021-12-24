@@ -13,21 +13,20 @@ public static class Cli
 
    public static async ValueTask Start(string[] args)
    {
-      var ln = args.Length;
-      if (ln < 1)
+      if (!args.Any())
       {
          Help();
          Exit(0);
       }
 
-      // high priority options
-      HandleHighPriorityArgs(ref args);
+      // remove high priority options
+      args = HandleHighPriorityArgs(args);
 
       var cmd = args[0];
       try
       {
          // Run command
-         var exitCode = await RunCommand(cmd, ln, args);
+         var exitCode = await RunCommand(cmd, args);
          Exit(exitCode);
       }
       catch (Exception e)
@@ -39,36 +38,32 @@ public static class Cli
    }
 
 
-   private static void HandleHighPriorityArgs(ref string[] args)
+   private static string[] HandleHighPriorityArgs(string[] args)
    {
       if (args.Contains("--no-color"))
-      {
-         args = args.Where(x => x != "--no-color").ToArray();
          Logger.Colors = false;
-      }
 
-      // ReSharper disable once InvertIf
       if (args.Contains("--verbose") || args.Contains("-v"))
-      {
-         args = args.Where(x => x != "--verbose" && x != "-v").ToArray();
          Logger.Verbose = true;
-      }
+
+      return args.Where(x => x != "--verbose" && x != "-v" && x != "--no-color").ToArray();
    }
 
-   private static async ValueTask<int> RunCommand(string cmd, int ln, IReadOnlyList<string> args)
+   private static async ValueTask<int> RunCommand(string cmd, IReadOnlyList<string> args)
    {
-      return (cmd, ln) switch
+      var ac = args.Count;
+      return cmd switch
       {
-         ("--no-color" or "-v" or "--verbose", _) => 0,
-         ("--help" or "-h" or "-?", _) => Help(),
-         ("--version" or "-V", _) => CliActions.Version(),
-         ("install", 1) => await CliActions.Install(),
-         ("install", 2) => await CliActions.Install(args[1]),
-         ("uninstall", 1) => await CliActions.Uninstall(),
-         ("set", 3) => await CliActions.Set(args[1], args[2]),
-         ("add", 3) => await CliActions.Add(args[1], args[2]),
-         ("run", 1) => await CliActions.Run(),
-         ("run", _) => await CliActions.Run(args.Skip(1).ToArray()),
+         "--no-color" or "-v" or "--verbose" => 0,
+         "--help" or "-h" or "-?" => Help(),
+         "--version" or "-V" => CliActions.Version(),
+         "install" when !args[1].StartsWith("-") => await CliActions.Install(args[1]),
+         "install" => await CliActions.Install(),
+         "uninstall" => await CliActions.Uninstall(),
+         "set" when ac >= 3 => await CliActions.Set(args[1], args[2]),
+         "add" when ac >= 3 => await CliActions.Add(args[1], args[2]),
+         "run" when ac is 1 => await CliActions.Run(),
+         "run" => await CliActions.Run(args.Skip(1).ToArray()),
          _ => InvalidCommand()
       };
    }

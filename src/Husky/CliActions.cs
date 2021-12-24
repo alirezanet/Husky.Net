@@ -50,13 +50,24 @@ public static class CliActions
          await File.WriteAllTextAsync(Path.Combine(path, "_/.gitignore"), "*");
 
          // Copy husky.sh to .husky/_/husky.sh
+         var husky_shPath = Path.Combine(path, "_/husky.sh");
          {
             await using var stream = Assembly.GetAssembly(typeof(Program))!.GetManifestResourceStream("Husky.templates.husky.sh")!;
             var husky_sh = Path.Combine(path, "_/husky.sh");
             using var sr = new StreamReader(stream);
+<<<<<<< HEAD
             await using var sw = new StreamWriter(husky_sh);
             await sr.BaseStream.CopyToAsync(sw.BaseStream);
+=======
+            var content = await sr.ReadToEndAsync();
+            await File.WriteAllTextAsync(husky_shPath, content);
+>>>>>>> f229d01b69742886cddd2696697e82185087c339
          }
+
+         // find all hooks (if exists) from .husky/ and add executable flag (except json files)
+         var files = Directory.GetFiles(path).Where(f => !f.EndsWith(".json")).ToList();
+         files.Add(husky_shPath);
+         await Utility.SetExecutablePermission(files.ToArray());
 
          // Created task-runner.json file
          // We don't want to override this file
@@ -107,6 +118,7 @@ public static class CliActions
       return 0;
    }
 
+
    public static async Task<int> Set(string file, string cmd)
    {
       var dir = Path.GetDirectoryName(file);
@@ -116,15 +128,15 @@ public static class CliActions
          return 1;
       }
 
-      // we need linux executable file,
-      // this code first copies hook then adds command to it
       {
          await using var stream = Assembly.GetAssembly(typeof(Program))!.GetManifestResourceStream("Husky.templates.hook")!;
          using var sr = new StreamReader(stream);
-         await using var sw = new StreamWriter(file);
-         await sr.BaseStream.CopyToAsync(sw.BaseStream);
+         var content = await sr.ReadToEndAsync();
+         await File.WriteAllTextAsync(file, $"{content}\n{cmd}");
       }
-      await File.AppendAllTextAsync(file, $"{cmd}\n");
+
+      // needed for linux
+      await Utility.SetExecutablePermission(file);
 
       $"created {file}".Log(ConsoleColor.Green);
       return 0;
