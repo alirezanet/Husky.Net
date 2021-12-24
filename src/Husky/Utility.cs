@@ -26,11 +26,15 @@ public static class Utility
    public static async ValueTask<int> SetExecutablePermission(params string[] files)
    {
       if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return 0;
-      var ps = CliWrap.Cli.Wrap(await GetFullyQualifiedPath("chmod"))
-         .WithArguments(q => q.Add("+x"))
-         .WithArguments(files)
+      var chmod = await GetFullyQualifiedPath("chmod");
+      var args = new[] { "+x" }.Concat(files);
+      var ps = CliWrap.Cli.Wrap(chmod)
+         .WithArguments(args)
+         .WithStandardErrorPipe(PipeTarget.ToDelegate(q => q.LogVerbose(ConsoleColor.DarkRed)))
          .WithValidation(CommandResultValidation.None);
       var result = await ps.ExecuteAsync();
+      if (result.ExitCode != 0)
+         "failed to add executable permissions".LogErr();
       return result.ExitCode;
    }
 
