@@ -100,6 +100,4 @@ make sure to read the comments before removing them until we complete the docume
 - This library inspired and is a combination of [husky](https://github.com/typicode/husky) & [lint-staged](https://github.com/okonet/lint-staged) & VsCode Task runner!, for **DotNet**, so make sure to support them too!
 
 ## Known issues
-- Husky run colors disappears when executed from hooks.
-
-
+- `husky run` command doesn't have color when executed from hooks.
