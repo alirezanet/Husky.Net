@@ -33,10 +33,12 @@
       <EmbeddedResource Include="templates\task-runner.json" />
       <None Remove="husky.sh" />
       <None Remove="task-runner.json" />
+      <None Remove="templates\hook" />
+      <EmbeddedResource Include="templates\hook" />
    </ItemGroup>
 
    <ItemGroup>
-      <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+      <None Include="..\..\README.md" Pack="true" PackagePath="\" />
    </ItemGroup>
 
    <ItemGroup>

@@ -52,9 +52,10 @@ public static class CliActions
          // Copy husky.sh to .husky/_/husky.sh
          {
             await using var stream = Assembly.GetAssembly(typeof(Program))!.GetManifestResourceStream("Husky.templates.husky.sh")!;
+            var husky_sh = Path.Combine(path, "_/husky.sh");
             using var sr = new StreamReader(stream);
-            var content = await sr.ReadToEndAsync();
-            await File.WriteAllTextAsync(Path.Combine(path, "_/husky.sh"), content);
+            await using var sw = new StreamWriter(husky_sh);
+            await sr.BaseStream.CopyToAsync(sw.BaseStream);
          }
 
          // Created task-runner.json file
@@ -115,25 +116,15 @@ public static class CliActions
          return 1;
       }
 
-      var content = @$"#!/bin/sh
-. ""$(dirname ""$0"")/_/husky.sh""
-## husky task runner examples -------------------
-## note : for local installation use 'dotnet husky'
-
-## run all tasks
-#husky run
-
-### run all tasks with group: 'group-name'
-#husky run --group group-name
-
-## run task with name: 'task-name'
-#husky run --name task-name
-
-## or put your custom commands -------------------
-#echo 'Husky.Net is awesome!'
-{cmd}
-";
-      await File.WriteAllTextAsync(file, content);
+      // we need linux executable file,
+      // this code first copies hook then adds command to it
+      {
+         await using var stream = Assembly.GetAssembly(typeof(Program))!.GetManifestResourceStream("Husky.templates.hook")!;
+         using var sr = new StreamReader(stream);
+         await using var sw = new StreamWriter(file);
+         await sr.BaseStream.CopyToAsync(sw.BaseStream);
+      }
+      await File.AppendAllTextAsync(file, $"{cmd}\n");
 
       $"created {file}".Log(ConsoleColor.Green);
       return 0;
@@ -156,14 +147,12 @@ public static class CliActions
       var dic = Utility.ParseArgs(args);
 
       // ReSharper disable once InvertIf
-      if (dic.Keys.Any(q=> q != "name" && q != "group"))
+      if (dic.Keys.Any(q => q != "name" && q != "group"))
       {
          "invalid arguments.".LogErr();
          return 1;
       }
+
       return await TaskRunner.Run(dic);
    }
-
-
-
 }
