@@ -8,8 +8,6 @@ You can use it to lint your commit messages, run tests, lint code, etc... when y
 
 **Features**
 
-_v0.0.1_
-
 -  Supports all Git hooks
 -  Powered by modern new Git feature (core.hooksPath)
 -  User-friendly messages
@@ -17,9 +15,6 @@ _v0.0.1_
 -  Git GUIs
 -  Custom directories
 -  Monorepo
-
-_v0.0.2_
-
 -  🔥 Internal task runner! 🆕
 -  🔥 Multiple file states (staged, lastCommit, glob) 🆕
 -  🔥 Compatible with [dotnet-format](https://github.com/dotnet/format) 🆕
@@ -29,7 +24,6 @@ _next_
 
 -  ⌛ Task for specific branch or tags (soon)
 -  ⌛ User-defined file states (soon)
--  ⌛ Run task using group and name options (soon)
 -  ⌛ Internal commit-msg linter (soon)
 
 If you already know what is the lint-staged or Husky (npm packages),
@@ -106,8 +100,4 @@ make sure to read the comments before removing them until we complete the docume
 - This library inspired and is a combination of [husky](https://github.com/typicode/husky) & [lint-staged](https://github.com/okonet/lint-staged) & VsCode Task runner!, for **DotNet**, so make sure to support them too!
 
 ## Known issues
-- On Linux/Mac, you can only use the full path for the task runner command e.g. `/bin/touch` instead of `touch`. (fixed next)
-- On Windows, CLI Colors disappears when executed from hooks.
-- husky run `--name` and `--group` not working. (fixed next)
-- On Linux hooks isn't executable.
-
+- `husky run` command doesn't have color when executed from hooks.

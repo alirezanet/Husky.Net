@@ -17,15 +17,27 @@
          //       "pathMode": "relative",        // optional (relative|absolute) (default: relative)
          //       "output": "never",             // optional [always,error,verbose,never] (default: error)
          //       "group": "group-name",         // optional
+         //       "windows": {},                 // optional-overrides windows specific settings (default: null)
          //       "cwd": "src",                  // optional (default: project root directory)
          //       "exclude": [                   // optional (default: is disabled)
          //            "**/*.js"
          //        ]
       },
       {
-         "command": "cmd",
+         "name": "Welcome",
          "output": "always",
-         "args": [ "/c", "echo Husky.Net is awesome!"]
-      },
+         "command": "bash",
+         "args": [
+            "-c",
+            "echo Husky.Net is awesome!"
+         ],
+         "windows": {
+            "command": "cmd",
+            "args": [
+               "/c",
+               "echo Husky.Net is awesome!"
+            ]
+         }
+      }
    ]
 }
