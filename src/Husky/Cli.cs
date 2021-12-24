@@ -57,7 +57,7 @@ public static class Cli
          "--no-color" or "-v" or "--verbose" => 0,
          "--help" or "-h" or "-?" => Help(),
          "--version" or "-V" => CliActions.Version(),
-         "install" when !args[1].StartsWith("-") => await CliActions.Install(args[1]),
+         "install" when ac > 1 && !args[1].StartsWith("-") => await CliActions.Install(args[1]),
          "install" => await CliActions.Install(),
          "uninstall" => await CliActions.Uninstall(),
          "set" when ac >= 3 => await CliActions.Set(args[1], args[2]),
