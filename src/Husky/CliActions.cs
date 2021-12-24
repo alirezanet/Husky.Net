@@ -53,15 +53,9 @@ public static class CliActions
          var husky_shPath = Path.Combine(path, "_/husky.sh");
          {
             await using var stream = Assembly.GetAssembly(typeof(Program))!.GetManifestResourceStream("Husky.templates.husky.sh")!;
-            var husky_sh = Path.Combine(path, "_/husky.sh");
             using var sr = new StreamReader(stream);
-<<<<<<< HEAD
-            await using var sw = new StreamWriter(husky_sh);
-            await sr.BaseStream.CopyToAsync(sw.BaseStream);
-=======
             var content = await sr.ReadToEndAsync();
             await File.WriteAllTextAsync(husky_shPath, content);
->>>>>>> f229d01b69742886cddd2696697e82185087c339
          }
 
          // find all hooks (if exists) from .husky/ and add executable flag (except json files)
