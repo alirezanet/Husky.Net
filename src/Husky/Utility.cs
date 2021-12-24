@@ -23,6 +23,17 @@ public static class Utility
       }
    }
 
+   public static async ValueTask<int> SetExecutablePermission(params string[] files)
+   {
+      if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return 0;
+      var ps = CliWrap.Cli.Wrap(await GetFullyQualifiedPath("chmod"))
+         .WithArguments(q => q.Add("+x"))
+         .WithArguments(files)
+         .WithValidation(CommandResultValidation.None);
+      var result = await ps.ExecuteAsync();
+      return result.ExitCode;
+   }
+
    public static async Task<CommandResult> ExecDirectAsync(string fileName, string args)
    {
       try

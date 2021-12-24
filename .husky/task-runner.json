@@ -14,13 +14,14 @@
          "include": [                   // optional (include|exclude) (default: **)
             "**/*.cs"
          ],
-//       "pathMode": "relative",        // optional (relative|absolute) (default: relative)
-//       "output": "never",             // optional [always,error,verbose,never] (default: error)
-//       "group": "group-name",         // optional
-//       "cwd": "src",                  // optional (default: project root directory)
-//       "exclude": [                   // optional (default: is disabled)
-//            "**/*.js"
-//        ]
+         //       "pathMode": "relative",        // optional (relative|absolute) (default: relative)
+         //       "output": "never",             // optional [always,error,verbose,never] (default: error)
+         //       "group": "group-name",         // optional
+         //       "windows": {},                 // optional-overrides windows specific settings (default: null)
+         //       "cwd": "src",                  // optional (default: project root directory)
+         //       "exclude": [                   // optional (default: is disabled)
+         //            "**/*.js"
+         //        ]
       },
       {
          "name": "Welcome",

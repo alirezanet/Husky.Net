@@ -5,7 +5,7 @@
 ## note : for local installation use 'dotnet husky'
 
 ## run all tasks
-husky run
+#husky run
 
 ### run all tasks with group: 'group-name'
 #husky run --group group-name
@@ -15,3 +15,5 @@ husky run
 
 ## or put your custom commands -------------------
 #echo 'Husky.Net is awesome!'
+
+husky run -v

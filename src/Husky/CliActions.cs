@@ -50,12 +50,18 @@ public static class CliActions
          await File.WriteAllTextAsync(Path.Combine(path, "_/.gitignore"), "*");
 
          // Copy husky.sh to .husky/_/husky.sh
+         var husky_shPath = Path.Combine(path, "_/husky.sh");
          {
             await using var stream = Assembly.GetAssembly(typeof(Program))!.GetManifestResourceStream("Husky.templates.husky.sh")!;
             using var sr = new StreamReader(stream);
             var content = await sr.ReadToEndAsync();
-            await File.WriteAllTextAsync(Path.Combine(path, "_/husky.sh"), content);
+            await File.WriteAllTextAsync(husky_shPath, content);
          }
+
+         // find all hooks (if exists) from .husky/ and add executable flag (except json files)
+         var files = Directory.GetFiles(path).Where(f => !f.EndsWith(".json")).ToList();
+         files.Add(husky_shPath);
+         await Utility.SetExecutablePermission(files.ToArray());
 
          // Created task-runner.json file
          // We don't want to override this file
@@ -106,6 +112,7 @@ public static class CliActions
       return 0;
    }
 
+
    public static async Task<int> Set(string file, string cmd)
    {
       var dir = Path.GetDirectoryName(file);
@@ -115,25 +122,15 @@ public static class CliActions
          return 1;
       }
 
-      var content = @$"#!/bin/sh
-. ""$(dirname ""$0"")/_/husky.sh""
-## husky task runner examples -------------------
-## note : for local installation use 'dotnet husky'
+      {
+         await using var stream = Assembly.GetAssembly(typeof(Program))!.GetManifestResourceStream("Husky.templates.hook")!;
+         using var sr = new StreamReader(stream);
+         var content = await sr.ReadToEndAsync();
+         await File.WriteAllTextAsync(file, $"{content}\n{cmd}");
+      }
 
-## run all tasks
-#husky run
-
-### run all tasks with group: 'group-name'
-#husky run --group group-name
-
-## run task with name: 'task-name'
-#husky run --name task-name
-
-## or put your custom commands -------------------
-#echo 'Husky.Net is awesome!'
-{cmd}
-";
-      await File.WriteAllTextAsync(file, content);
+      // needed for linux
+      await Utility.SetExecutablePermission(file);
 
       $"created {file}".Log(ConsoleColor.Green);
       return 0;
@@ -156,14 +153,12 @@ public static class CliActions
       var dic = Utility.ParseArgs(args);
 
       // ReSharper disable once InvertIf
-      if (dic.Keys.Any(q=> q != "name" && q != "group"))
+      if (dic.Keys.Any(q => q != "name" && q != "group"))
       {
          "invalid arguments.".LogErr();
          return 1;
       }
+
       return await TaskRunner.Run(dic);
    }
-
-
-
 }

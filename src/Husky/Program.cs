@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Husky;
 
 #if DEBUG
@@ -9,7 +10,8 @@ while (true)
 
    "\nEnter your husky commands: ".Log();
    var cmd = Console.ReadLine();
-   args = cmd!.Split(' ').ToArray();
+   // simulating args
+   args = Regex.Matches(cmd!, @"[\""].+?[\""]|[^ ]+").Select(m => m.Value.StartsWith("\"") ? m.Value.Replace("\"", "") : m.Value).ToArray();
 #endif
 
    // this is the real entry point
