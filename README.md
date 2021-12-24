@@ -109,4 +109,5 @@ make sure to read the comments before removing them until we complete the docume
 - On Linux/Mac, you can only use the full path for the task runner command e.g. `/bin/touch` instead of `touch`. (fixed next)
 - On Windows, CLI Colors disappears when executed from hooks.
 - husky run `--name` and `--group` not working. (fixed next)
+- On Linux hooks isn't executable.
 
