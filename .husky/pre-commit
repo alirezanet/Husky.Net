@@ -16,4 +16,4 @@
 ## or put your custom commands -------------------
 #echo 'Husky.Net is awesome!'
 
-husky run -v
+dotnet husky run -v
