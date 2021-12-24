@@ -23,7 +23,7 @@ public static class Cli
       // high priority options
       HandleHighPriorityArgs(ref args);
 
-      var cmd = args[0].ToLower();
+      var cmd = args[0];
       try
       {
          // Run command
