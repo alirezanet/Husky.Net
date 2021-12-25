@@ -101,6 +101,63 @@ e.g.
 ```shell
 dotnet husky add .husky/pre-commit "husky run"
 ```
+<details>
+<summary>A simple real-world example <code>task-runner.json</code></summary>
+<p>
+
+```json
+{
+   {
+   "tasks": [
+      {
+         "command": "dotnet-format",
+         "group": "backend",
+         "args": ["--include", "${staged}"],
+         "include": ["**/*.cs", "**/*.vb"]
+      },
+      {
+         "name": "eslint",
+         "group": "frontend",
+         "command": "npm",
+         "pathMode": "absolute",
+         "cwd": "Client",
+         "args": ["run", "lint", "${staged}"],
+         "include": ["**/*.ts", "**/*.vue", "**/*.js"]
+      },
+      {
+         "name": "prettier",
+         "group": "frontend",
+         "command": "npx",
+         "pathMode": "absolute",
+         "cwd": "Client",
+         "args": ["prettier", "--write", "--ignore-unknown", "${staged}"],
+         "include": [
+            "**/*.ts",
+            "**/*.vue",
+            "**/*.js",
+            "**/*.json",
+            "**/*.yml",
+            "**/*.css",
+            "**/*.scss"
+         ]
+      },
+      {
+         "name": "Welcome",
+         "output": "always",
+         "command": "bash",
+         "args": ["-c", "echo  🌈 Nice work! 🥂"],
+         "windows": {
+            "command": "cmd",
+            "args": ["/c", "echo  🌈 Nice work! 🥂"]
+         }
+      }
+   ]
+}
+ 
+```
+
+</p>
+</details>  
 
 ## Glob patterns
 
