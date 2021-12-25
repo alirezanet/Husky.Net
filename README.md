@@ -80,6 +80,12 @@ If you installed husky locally, just add the below code to **one** of your proje
 </Target>
 ```
 
+
+If you have only one multiple target project (`TargetFrameworks`) add the bellow condition `IsCrossTargetingBuild` to the target tag to prevent multiple execution
+```xml
+<Target Name="husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(IsCrossTargetingBuild)' == 'true'"> 
+   ...
+```
 ---
 
 ## Task runner
