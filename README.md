@@ -104,7 +104,7 @@ you can run and test your tasks with `husky run` command. Once you are sure that
 e.g.
 
 ```shell
-dotnet husky add .husky/pre-commit "husky run"
+dotnet husky add .husky/pre-commit "dotnet husky run"
 ```
 <details>
 <summary>A simple real-world example <code>task-runner.json</code></summary>
