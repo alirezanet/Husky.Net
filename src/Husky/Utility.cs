@@ -38,7 +38,7 @@ public static class Utility
       return result.ExitCode;
    }
 
-   public static async Task<CommandResult> ExecDirectAsync(string fileName, string args)
+   public static async Task<CommandResult> ExecDirectAsync(string fileName, params string[] args)
    {
       try
       {
@@ -72,6 +72,15 @@ public static class Utility
       if (!string.IsNullOrEmpty(cwd))
          ps = ps.WithWorkingDirectory(cwd);
 
+      return await ps.ExecuteAsync();
+   }
+
+   public static async Task<CommandResult> ExecAsync(string fileName, IEnumerable<string> args)
+   {
+      var fullPath = await GetFullyQualifiedPath(fileName);
+      var ps = CliWrap.Cli.Wrap(fullPath)
+         .WithArguments(args)
+         .WithValidation(CommandResultValidation.None);
       return await ps.ExecuteAsync();
    }
 
