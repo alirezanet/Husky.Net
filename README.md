@@ -92,9 +92,7 @@ If you have only one multiple target project (`TargetFrameworks`) add the bellow
 
 After installation, you must have `task-runner.json` file in your `.husky` directory that you can use to define your tasks.
 
-you can run and test your tasks with `husky run` command.
-
-to use tasks in your git hooks, you can use `husky run` command.
+you can run and test your tasks with `husky run` command. Once you are sure that your tasks are working properly, you can add it to the hook.
 
 e.g.
 
