@@ -62,7 +62,7 @@ public static class TaskRunner
 
          "⌛ Executing ...".Husky();
          // execute task in order
-         var result = await Utility.RunCommandAsync(task.Command, args, cwd, task.Output ?? OutputTypes.Verbose);
+         var result = await Utility.RunCommandAsync(task.Command, args.Select(q => q.arg), cwd, task.Output ?? OutputTypes.Verbose);
          if (result.ExitCode != 0)
          {
             Console.WriteLine();
@@ -70,6 +70,12 @@ public static class TaskRunner
             Console.WriteLine();
             return result.ExitCode;
          }
+
+         // we must add the changed files to git
+         var reAdd = await Utility.ExecAsync("git", new[] { "add" }.Concat(args.Where(q => q.isFile).Select(q => q.arg)));
+         if (reAdd.ExitCode != 0)
+            "Can not update git index".LogVerbose(ConsoleColor.DarkRed);
+
 
          " ✔ Successfully executed".Husky(ConsoleColor.DarkGreen);
       }
@@ -116,13 +122,13 @@ public static class TaskRunner
       return tasks;
    }
 
-   private static async Task<IList<string>> GetArgStringFromTask(HuskyTask task, Git git)
+   private static async Task<IList<(string arg, bool isFile)>> GetArgStringFromTask(HuskyTask task, Git git)
    {
-      if (task.Args == null) return new string[] { };
+      var args = new List<(string arg, bool isFile)>();
+      if (task.Args == null) return args;
 
       // this is not lazy, because each task can have different patterns
       var matcher = GetPatternMatcher(task);
-      var args = new List<string>();
 
       // set default pathMode value
       var pathMode = task.PathMode ?? PathModes.Relative;
@@ -157,14 +163,14 @@ public static class TaskRunner
                continue;
             }
             default:
-               args.Add(arg);
+               args.Add((arg, false));
                break;
          }
 
       return args;
    }
 
-   private static void AddMatchFiles(PathModes pathMode, PatternMatchingResult matches, ICollection<string> args, string rootPath)
+   private static void AddMatchFiles(PathModes pathMode, PatternMatchingResult matches, ICollection<(string, bool)> args, string rootPath)
    {
       if (!matches.HasMatches) return;
       var matchFiles = matches.Files.Select(q => $"{q.Path}").ToArray();
@@ -173,10 +179,10 @@ public static class TaskRunner
          switch (pathMode)
          {
             case PathModes.Relative:
-               args.Add(f);
+               args.Add((f, true));
                break;
             case PathModes.Absolute:
-               args.Add(Path.GetFullPath(f, rootPath));
+               args.Add((Path.GetFullPath(f, rootPath), true));
                break;
             default:
                throw new ArgumentOutOfRangeException(nameof(HuskyTask.PathMode), pathMode,
