@@ -73,7 +73,7 @@ If you installed husky locally, just add the below code to **one** of your proje
 **Important:** Just make sure to update the **working directory** depending on your folder structure.
 
 ```xml
-<Target Name="husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(IsCrossTargetingBuild)' == 'true'">
+<Target Name="husky" BeforeTargets="Restore;CollectPackageReferences">
    <Exec Command="dotnet tool restore"  StandardOutputImportance="Low" StandardErrorImportance="High"/>
    <Exec Command="dotnet husky install" StandardOutputImportance="Low" StandardErrorImportance="High" 
          WorkingDirectory="../../" />  <!--Update this to the releative path to your project root dir --> 
