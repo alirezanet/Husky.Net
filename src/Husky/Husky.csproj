@@ -28,6 +28,12 @@
       <PackageReadmeFile>README.md</PackageReadmeFile>
    </PropertyGroup>
 
+   <Target Name="husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(IsCrossTargetingBuild)' == 'true'">
+      <Exec Command="dotnet tool restore"  StandardOutputImportance="Low" StandardErrorImportance="High"/>
+      <Exec Command="dotnet husky install" StandardOutputImportance="Low" StandardErrorImportance="High" 
+            WorkingDirectory="../../" />  <!--Update this to the releative path to your root project dir --> 
+   </Target>
+
    <ItemGroup>
       <EmbeddedResource Include="templates\husky.sh" />
       <EmbeddedResource Include="templates\task-runner.json" />
