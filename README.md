@@ -107,7 +107,6 @@ dotnet husky add .husky/pre-commit "husky run"
 
 ```json
 {
-   {
    "tasks": [
       {
          "command": "dotnet-format",
