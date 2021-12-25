@@ -114,9 +114,10 @@ dotnet husky add .husky/pre-commit "husky run"
 {
    "tasks": [
       {
-         "command": "dotnet-format",
+         "command": "dotnet",
          "group": "backend",
-         "args": ["--include", "${staged}"],
+         "output": "verbose",
+         "args": ["dotnet-format", "--include", "${staged}"],
          "include": ["**/*.cs", "**/*.vb"]
       },
       {
