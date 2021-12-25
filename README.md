@@ -34,7 +34,7 @@ this is very similar but you can use Husky.Net without having node, yarn, etc.. 
 ## Installation
 
 ```shell
-# local installation
+# local installation (recommended)
 cd <Your project root directory>
 dotnet new tool-manifest
 dotnet tool install Husky
