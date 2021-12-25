@@ -34,28 +34,28 @@ this is very similar but you can use Husky.Net without having node, yarn, etc.. 
 ## Installation
 
 ```shell
-# global installation
-dotnet tool install --global Husky
-
 # local installation
 cd <Your project root directory>
 dotnet new tool-manifest
 dotnet tool install Husky
-```
 
-**_Note: With the local installation, you have to add the `dotnet` prefix to the commands. e.g `dotnet husky`_**
+# global installation
+dotnet tool install --global Husky
+
+```
+_**Note**: With the global installation, you don't need to add the `dotnet` prefix to the commands._
 
 ### Setup husky for your project
 
 ```shell
 cd <Your project root directory>
-husky install
+dotnet husky install
 ```
 
 ### Add your first hook
 
 ```shell
-husky add .husky/pre-commit "echo 'Husky is awesome!'"
+dotnet husky add .husky/pre-commit "echo 'Husky is awesome!'"
 git add .husky/pre-commit
 ```
 
@@ -64,6 +64,20 @@ git add .husky/pre-commit
 ```shell
 git commit -m "Keep calm and commit"
 # `echo 'Husky is awesome!'` will run every time you commit
+```
+
+## Automate husky installation for other contributors
+
+If you installed husky locally, just add the below code to **one** of your projects (*.csproj *.vbproj).
+
+**Important:** Just make sure to update the **working directory** depending on your folder structure.
+
+```xml
+<Target Name="husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(IsCrossTargetingBuild)' == 'true'">
+   <Exec Command="dotnet tool restore"  StandardOutputImportance="Low" StandardErrorImportance="High"/>
+   <Exec Command="dotnet husky install" StandardOutputImportance="Low" StandardErrorImportance="High" 
+         WorkingDirectory="../../" />  <!--Update this to the releative path to your project root dir --> 
+</Target>
 ```
 
 ---
@@ -79,7 +93,7 @@ to use tasks in your git hooks, you can use `husky run` command.
 e.g.
 
 ```shell
-husky add .husky/pre-commit "husky run"
+dotnet husky add .husky/pre-commit "husky run"
 ```
 
 ## Glob patterns
@@ -87,6 +101,7 @@ husky add .husky/pre-commit "husky run"
 Husky.Net supports the standard dotnet `FileSystemGlobbing` patterns for include or exclude task configurations. read more [here](https://docs.microsoft.com/en-us/dotnet/core/extensions/file-globbing#pattern-formats)
 
 ---
+
 
 ## Notes
 
