@@ -38,7 +38,7 @@ public static class Utility
       return result.ExitCode;
    }
 
-   public static async Task<CommandResult> ExecDirectAsync(string fileName, params string[] args)
+   public static async Task<CommandResult> ExecDirectAsync(string fileName, string args)
    {
       try
       {
