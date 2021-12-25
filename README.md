@@ -75,15 +75,15 @@ If you installed husky locally, just add the below code to **one** of your proje
 ```xml
 <Target Name="husky" BeforeTargets="Restore;CollectPackageReferences">
    <Exec Command="dotnet tool restore"  StandardOutputImportance="Low" StandardErrorImportance="High"/>
-   <Exec Command="dotnet husky install" StandardOutputImportance="Low" StandardErrorImportance="High" 
-         WorkingDirectory="../../" />  <!--Update this to the releative path to your project root dir --> 
+   <Exec Command="dotnet husky install" StandardOutputImportance="Low" StandardErrorImportance="High"
+         WorkingDirectory="../../" />  <!--Update this to the releative path to your project root dir -->
 </Target>
 ```
 
 
 If you have only one multiple target project (`TargetFrameworks`) add the bellow condition `IsCrossTargetingBuild` to the target tag to prevent multiple execution
 ```xml
-<Target Name="husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(IsCrossTargetingBuild)' == 'true'"> 
+<Target Name="husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(IsCrossTargetingBuild)' == 'true'">
    ...
 ```
 ---
@@ -150,11 +150,34 @@ dotnet husky add .husky/pre-commit "husky run"
       }
    ]
 }
- 
+
 ```
 
 </p>
-</details>  
+</details>
+
+<br>
+
+### Task supported configurations
+
+Using bellow configuration you can define your task with a lot of options.
+
+---
+
+| name      | optional |       type                | default  | description |
+|---------- | -------- | ------                    | -------  | ----------- |
+| command   |  false   | string                    |    -     | path to the executable file or script or executable name |
+| args      |  true    | [string array]            |    -     | command arguments |
+| include   |  true    | [array of glob]           |    **    | glob pattern to select files |
+| name      |  true    | string                    |    -     | name of the task (recomended) |
+| group     |  true    | string                    |    -     | group of the task |
+| pathMode  |  true    | [absolute, relative]      | relative | file path style (releative or absolute) |
+| cwd       |  true    | string                    | project root directory | current working directory for the command, can be relative or absolute
+| output    |  true    | [always, error, verbose, never] | error | output log level |
+| exclude   |  true    | [array of glob]           |    -     | glob pattern to exclude files |
+| windows   |  true    | object                    |    -     | ovverides all the above settings for windows |
+
+---
 
 ## Glob patterns
 
