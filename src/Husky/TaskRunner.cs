@@ -73,14 +73,14 @@ public static class TaskRunner
             var chunks = GetChunks(totalCommandLength, args);
             for (var i = 1; i <= chunks.Count; i++)
             {
-               var result = await ExecuteTask($"chunk [{i}]", task, chunks.Dequeue(), cwd);
+               var result = await ExecuteHuskyTask($"chunk [{i}]", task, chunks.Dequeue(), cwd);
                if (result.ExitCode != 0) return result.ExitCode;
                executionTime += result.RunTime.TotalMilliseconds;
             }
          }
          else // normal execution
          {
-            var result = await ExecuteTask("", task, args, cwd);
+            var result = await ExecuteHuskyTask("", task, args, cwd);
             if (result.ExitCode != 0) return result.ExitCode;
             executionTime = result.RunTime.TotalMilliseconds;
          }
@@ -140,7 +140,7 @@ public static class TaskRunner
       return chunks;
    }
 
-   private static async Task<CommandResult> ExecuteTask(string chunk, HuskyTask task, IList<(string arg, bool isFile)> args, string cwd)
+   private static async Task<CommandResult> ExecuteHuskyTask(string chunk, HuskyTask task, IList<(string arg, bool isFile)> args, string cwd)
    {
       $"⌛ Executing task '{task.Name}' {chunk}...".Husky();
       // execute task in order
@@ -153,11 +153,15 @@ public static class TaskRunner
          return result;
       }
 
-      // we must add the changed files to git
+      // in staged mode, we must add the changed files to git
+      if (args.All(q => q.arg.Trim().ToLower() != "${staged}")) return result;
+
       var reAdd = await Utility.ExecAsync("git", new[] { "add" }.Concat(args.Where(q => q.isFile).Select(q => q.arg)));
       if (reAdd.ExitCode != 0)
+      {
+         // Silently ignore the error if happens, we don't want to break the execution
          "Can not update git index".Husky(ConsoleColor.Yellow);
-      // Silently ignore the error if happens, we don't want to break the execution
+      }
 
       return result;
    }
