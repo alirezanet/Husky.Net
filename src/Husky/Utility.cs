@@ -123,14 +123,13 @@ public static class Utility
          case OutputTypes.Always:
             stdout.Log();
             break;
-         case OutputTypes.Error:
          case OutputTypes.Verbose:
             stdout.LogVerbose();
             break;
          case OutputTypes.Never:
             break;
          default:
-            throw new ArgumentOutOfRangeException(nameof(output), output, "Supported (always, error, never, verbose)");
+            throw new ArgumentOutOfRangeException(nameof(output), output, "Supported (always, never, verbose)");
       }
    }
 
@@ -139,7 +138,6 @@ public static class Utility
       switch (output)
       {
          case OutputTypes.Always:
-         case OutputTypes.Error:
             stdout.LogErr();
             break;
          case OutputTypes.Verbose:
@@ -148,7 +146,7 @@ public static class Utility
          case OutputTypes.Never:
             break;
          default:
-            throw new ArgumentOutOfRangeException(nameof(output), output, "Supported (always, error, never, verbose)");
+            throw new ArgumentOutOfRangeException(nameof(output), output, "Supported (always, never, verbose)");
       }
    }
 

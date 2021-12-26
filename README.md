@@ -116,7 +116,6 @@ dotnet husky add .husky/pre-commit "dotnet husky run"
       {
          "command": "dotnet",
          "group": "backend",
-         "output": "verbose",
          "args": ["dotnet-format", "--include", "${staged}"],
          "include": ["**/*.cs", "**/*.vb"]
       },
@@ -172,18 +171,18 @@ Using bellow configuration you can define your task with a lot of options.
 
 ---
 
-| name      | optional |       type                | default  | description |
-|---------- | -------- | ------                    | -------  | ----------- |
-| command   |  false   | string                    |    -     | path to the executable file or script or executable name |
-| args      |  true    | [string array]            |    -     | command arguments |
-| include   |  true    | [array of glob]           |    **    | glob pattern to select files |
-| name      |  true    | string                    |    -     | name of the task (recomended) |
-| group     |  true    | string                    |    -     | group of the task |
-| pathMode  |  true    | [absolute, relative]      | relative | file path style (releative or absolute) |
-| cwd       |  true    | string                    | project root directory | current working directory for the command, can be relative or absolute
-| output    |  true    | [always, error, verbose, never] | error | output log level |
-| exclude   |  true    | [array of glob]           |    -     | glob pattern to exclude files |
-| windows   |  true    | object                    |    -     | ovverides all the above settings for windows |
+| name     | optional | type                     | default                | description                                                            |
+|----------|----------|--------------------------|------------------------|------------------------------------------------------------------------|
+| command  | false    | string                   | -                      | path to the executable file or script or executable name               |
+| args     | true     | [string array]           | -                      | command arguments                                                      |
+| include  | true     | [array of glob]          | **                     | glob pattern to select files                                           |
+| name     | true     | string                   | -                      | name of the task (recommended)                                         |
+| group    | true     | string                   | -                      | group of the task                                                      |
+| pathMode | true     | [absolute, relative]     | relative               | file path style (relative or absolute)                                 |
+| cwd      | true     | string                   | project root directory | current working directory for the command, can be relative or absolute |
+| output   | true     | [always, verbose, never] | always                 | output log level                                                       |
+| exclude  | true     | [array of glob]          | -                      | glob pattern to exclude files                                          |
+| windows  | true     | object                   | -                      | overrides all the above settings for windows                           |
 
 ---
 
