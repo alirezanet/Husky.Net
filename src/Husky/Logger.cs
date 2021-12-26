@@ -26,6 +26,14 @@ public static class Logger
       Console.WriteLine(message);
       Console.ResetColor();
    }
+   public static void Hr(int count = 50, ConsoleColor? color = ConsoleColor.DarkGray)
+   {
+      if (Colors && color != null)
+         Console.ForegroundColor = color.Value;
+
+      Console.WriteLine(new string('-', count));
+      Console.ResetColor();
+   }
 
    public static void LogVerbose(this string message, ConsoleColor color = ConsoleColor.DarkGray)
    {

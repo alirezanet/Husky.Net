@@ -37,6 +37,7 @@ public static class TaskRunner
 
       foreach (var task in tasks)
       {
+         Logger.Hr();
          OverrideWindowsSpecifics(task);
 
          // use command for task name
@@ -66,7 +67,7 @@ public static class TaskRunner
          if (result.ExitCode != 0)
          {
             Console.WriteLine();
-            $"❌ Task '{task.Name}' failed".Husky(ConsoleColor.Red);
+            $"❌ Task '{task.Name}' failed in {result.RunTime.TotalMilliseconds:n0}ms".Husky(ConsoleColor.Red);
             Console.WriteLine();
             return result.ExitCode;
          }
@@ -79,8 +80,9 @@ public static class TaskRunner
 
          $" ✔ Successfully executed in {result.RunTime.TotalMilliseconds:n0}ms".Husky(ConsoleColor.DarkGreen);
       }
-
+      Logger.Hr();
       "Execution completed 🐶".Husky(ConsoleColor.DarkGreen);
+      Console.WriteLine();
       return 0;
    }
 
