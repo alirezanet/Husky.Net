@@ -62,7 +62,7 @@ public static class TaskRunner
 
          "⌛ Executing ...".Husky();
          // execute task in order
-         var result = await Utility.RunCommandAsync(task.Command, args.Select(q => q.arg), cwd, task.Output ?? OutputTypes.Verbose);
+         var result = await Utility.RunCommandAsync(task.Command, args.Select(q => q.arg), cwd, task.Output ?? OutputTypes.Error);
          if (result.ExitCode != 0)
          {
             Console.WriteLine();
