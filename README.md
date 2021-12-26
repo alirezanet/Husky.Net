@@ -134,7 +134,7 @@ dotnet husky add .husky/pre-commit "dotnet husky run"
          "command": "npx",
          "pathMode": "absolute",
          "cwd": "Client",
-         "args": ["prettier", "--write", "--ignore-unknown", "${staged}"],
+         "args": ["prettier", "--write", "${staged}"],
          "include": [
             "**/*.ts",
             "**/*.vue",
@@ -176,7 +176,7 @@ Using bellow configuration you can define your task with a lot of options.
 | command  | false    | string                   | -                      | path to the executable file or script or executable name               |
 | args     | true     | [string array]           | -                      | command arguments                                                      |
 | include  | true     | [array of glob]          | **                     | glob pattern to select files                                           |
-| name     | true     | string                   | -                      | name of the task (recommended)                                         |
+| name     | true     | string                   | command                | name of the task (recommended)                                         |
 | group    | true     | string                   | -                      | group of the task                                                      |
 | pathMode | true     | [absolute, relative]     | relative               | file path style (relative or absolute)                                 |
 | cwd      | true     | string                   | project root directory | current working directory for the command, can be relative or absolute |
@@ -185,6 +185,19 @@ Using bellow configuration you can define your task with a lot of options.
 | windows  | true     | object                   | -                      | overrides all the above settings for windows                           |
 
 ---
+
+### Arg Variables
+
+There are some variables that you can use in your task arguments.
+
+- **${staged}**
+  - returns the list of currently staged files
+- **${LastCommit}**
+  - returns last commit changed files
+- **${matched}**
+  - returns the list of matched files using include and exclude, be careful with this variable, it will return all the files if you don't specify include or exclude
+
+e.g.`"args": ["format", "${staged}"]`]
 
 ## Glob patterns
 
