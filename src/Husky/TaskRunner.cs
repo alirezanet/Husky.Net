@@ -77,7 +77,7 @@ public static class TaskRunner
             "Can not update git index".LogVerbose(ConsoleColor.DarkRed);
 
 
-         " ✔ Successfully executed".Husky(ConsoleColor.DarkGreen);
+         $" ✔ Successfully executed in {result.RunTime.TotalMilliseconds:n0}ms".Husky(ConsoleColor.DarkGreen);
       }
 
       "Execution completed 🐶".Husky(ConsoleColor.DarkGreen);
