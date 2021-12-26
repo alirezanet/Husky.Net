@@ -207,4 +207,4 @@ make sure to read the comments before removing them until we complete the docume
 
 ## Known issues
 - `husky run` command doesn't have color when executed from hooks.
-- Task `output` not showing errors correctly with default values. workarount -> setting output to `always`
+- Task `output` not showing errors correctly with default values. workaround -> setting output to `always`
