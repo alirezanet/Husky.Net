@@ -23,8 +23,8 @@ You can use it to lint your commit messages, run tests, lint code, etc... when y
 _next_
 
 -  ⌛ Task for specific branch or tags (soon)
--  ⌛ User-defined file states (soon)
--  ⌛ Internal commit-msg linter (soon)
+-  ⌛ User-defined args variable (soon)
+
 
 If you already know what is the lint-staged or Husky (npm packages),
 this is very similar but you can use Husky.Net without having node, yarn, etc.. installed, with a lot of more features! 🚀🚀
