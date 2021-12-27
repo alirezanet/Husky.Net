@@ -171,7 +171,7 @@ Using bellow configuration you can define your task with a lot of options.
 |----------|----------|--------------------------|------------------------|------------------------------------------------------------------------|
 | command  | false    | string                   | -                      | path to the executable file or script or executable name               |
 | args     | true     | [string array]           | -                      | command arguments                                                      |
-| include  | true     | [array of glob]          | **/*                   | glob pattern to select files                                           |
+| include  | true     | [array of glob]          | `**/*`                 | glob pattern to select files                                           |
 | name     | true     | string                   | command                | name of the task (recommended)                                         |
 | group    | true     | string                   | -                      | group of the task                                                      |
 | branch   | true     | string (regex)           | -                      | run task on specific branches only                                     |
