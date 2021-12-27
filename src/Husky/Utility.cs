@@ -10,7 +10,7 @@ public static class Utility
    {
       try
       {
-         var fullPath = await GetFullyQualifiedPath(fileName);
+         var fullPath = GetFullyQualifiedPath(fileName);
          var result = await CliWrap.Cli.Wrap(fullPath)
             .WithArguments(args)
             .ExecuteBufferedAsync();
@@ -26,7 +26,7 @@ public static class Utility
    public static async ValueTask<int> SetExecutablePermission(params string[] files)
    {
       if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return 0;
-      var chmod = await GetFullyQualifiedPath("chmod");
+      var chmod = GetFullyQualifiedPath("chmod");
       var args = new[] { "+x" }.Concat(files);
       var ps = CliWrap.Cli.Wrap(chmod)
          .WithArguments(args)
@@ -42,7 +42,7 @@ public static class Utility
    {
       try
       {
-         var fullPath = await GetFullyQualifiedPath(fileName);
+         var fullPath = GetFullyQualifiedPath(fileName);
          var result = await CliWrap.Cli.Wrap(fullPath)
             .WithArguments(args)
             .WithStandardOutputPipe(PipeTarget.ToDelegate(q => q.Log()))
@@ -60,8 +60,7 @@ public static class Utility
    public static async Task<CommandResult> RunCommandAsync(string fileName, IEnumerable<string> args, string cwd,
       OutputTypes output = OutputTypes.Verbose)
    {
-      // TODO: lazy GetFullyQualifiedPath
-      var fullPath = await GetFullyQualifiedPath(fileName);
+      var fullPath = GetFullyQualifiedPath(fileName);
       var ps = CliWrap.Cli.Wrap(fullPath)
          .WithWorkingDirectory(cwd)
          .WithArguments(args)
@@ -77,52 +76,17 @@ public static class Utility
 
    public static async Task<CommandResult> ExecAsync(string fileName, IEnumerable<string> args)
    {
-      var fullPath = await GetFullyQualifiedPath(fileName);
+      var fullPath = GetFullyQualifiedPath(fileName);
       var ps = CliWrap.Cli.Wrap(fullPath)
          .WithArguments(args)
          .WithValidation(CommandResultValidation.None);
       return await ps.ExecuteAsync();
    }
 
-   private static async Task<string> GetFullyQualifiedPath(string fileName)
+   private static string GetFullyQualifiedPath(string fileName)
    {
-      $"🔍 Locating '{fileName}' in environment path".LogVerbose();
       var fullPath = GetFullPath(fileName);
-      if (fullPath != null) return fullPath;
-
-      $"🔍 Locating '{fileName}' with other os tools".LogVerbose();
-      var (shell, arg) = GetOsLocator(fileName);
-
-      // buffering found paths in queue
-      var paths = new Queue<string>();
-      var cmd = CliWrap.Cli.Wrap(shell)
-         .WithValidation(CommandResultValidation.None)
-         .WithArguments(arg) | paths.Enqueue;
-      var result = await cmd.ExecuteAsync();
-      if (result.ExitCode == 0 && paths.Count > 0)
-         foreach (var path in paths)
-            // we should look for .exe and .cmd files on windows
-            if (!path.EndsWith(".exe") && !path.EndsWith(".cmd") && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-               if (File.Exists(path + ".exe"))
-                  return path + ".exe";
-               if (File.Exists(path + ".cmd"))
-                  return path + ".cmd";
-            }
-            else if (File.Exists(path))
-            {
-               return path;
-            }
-
-      $"🔍 locating '{fileName}' full path, failed. reverting to the original fileName".LogVerbose(ConsoleColor.DarkRed);
-      return fileName;
-   }
-
-   private static (string, IList<string>) GetOsLocator(string fileName)
-   {
-      return RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-         ? ("cmd", new[] { "/c", "where", fileName })
-         : ("bash", new[] { "-c", "which", fileName });
+      return fullPath ?? fileName;
    }
 
    public static string? GetFullPath(string fileName)
@@ -159,14 +123,13 @@ public static class Utility
          case OutputTypes.Always:
             stdout.Log();
             break;
-         case OutputTypes.Error:
          case OutputTypes.Verbose:
             stdout.LogVerbose();
             break;
          case OutputTypes.Never:
             break;
          default:
-            throw new ArgumentOutOfRangeException(nameof(output), output, "Supported (always, error, never, verbose)");
+            throw new ArgumentOutOfRangeException(nameof(output), output, "Supported (always, never, verbose)");
       }
    }
 
@@ -175,7 +138,6 @@ public static class Utility
       switch (output)
       {
          case OutputTypes.Always:
-         case OutputTypes.Error:
             stdout.LogErr();
             break;
          case OutputTypes.Verbose:
@@ -184,7 +146,7 @@ public static class Utility
          case OutputTypes.Never:
             break;
          default:
-            throw new ArgumentOutOfRangeException(nameof(output), output, "Supported (always, error, never, verbose)");
+            throw new ArgumentOutOfRangeException(nameof(output), output, "Supported (always, never, verbose)");
       }
    }
 

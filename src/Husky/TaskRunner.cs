@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using CliWrap;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileSystemGlobbing;
 
@@ -37,6 +38,7 @@ public static class TaskRunner
 
       foreach (var task in tasks)
       {
+         Logger.Hr();
          OverrideWindowsSpecifics(task);
 
          // use command for task name
@@ -56,32 +58,112 @@ public static class TaskRunner
 
          if (task.Args != null && task.Args.Length > args.Count)
          {
-            "💤 Skipped, no matched files".Husky(ConsoleColor.Yellow);
+            "💤 Skipped, no matched files".Husky(ConsoleColor.Blue);
             continue;
          }
 
-         "⌛ Executing ...".Husky();
-         // execute task in order
-         var result = await Utility.RunCommandAsync(task.Command, args.Select(q => q.arg), cwd, task.Output ?? OutputTypes.Verbose);
-         if (result.ExitCode != 0)
+         double executionTime = 0;
+
+         // on windows, there is a max command line length of 8191
+         var totalCommandLength = args.Sum(q => q.arg.Length) + task.Command.Length;
+
+         // chunk execution
+         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && totalCommandLength > 8000)
          {
-            Console.WriteLine();
-            $"❌ Task '{task.Name}' failed".Husky(ConsoleColor.Red);
-            Console.WriteLine();
-            return result.ExitCode;
+            var chunks = GetChunks(totalCommandLength, args);
+            for (var i = 1; i <= chunks.Count; i++)
+            {
+               var result = await ExecuteHuskyTask($"chunk [{i}]", task, chunks.Dequeue(), cwd);
+               if (result.ExitCode != 0) return result.ExitCode;
+               executionTime += result.RunTime.TotalMilliseconds;
+            }
+         }
+         else // normal execution
+         {
+            var result = await ExecuteHuskyTask("", task, args, cwd);
+            if (result.ExitCode != 0) return result.ExitCode;
+            executionTime = result.RunTime.TotalMilliseconds;
          }
 
-         // we must add the changed files to git
-         var reAdd = await Utility.ExecAsync("git", new[] { "add" }.Concat(args.Where(q => q.isFile).Select(q => q.arg)));
-         if (reAdd.ExitCode != 0)
-            "Can not update git index".LogVerbose(ConsoleColor.DarkRed);
 
-
-         " ✔ Successfully executed".Husky(ConsoleColor.DarkGreen);
+         $" ✔ Successfully executed in {executionTime:n0}ms".Husky(ConsoleColor.DarkGreen);
       }
 
+      Logger.Hr();
       "Execution completed 🐶".Husky(ConsoleColor.DarkGreen);
+      Console.WriteLine();
       return 0;
+   }
+
+   private static Queue<List<(string arg, bool isFile)>> GetChunks(int totalCommandLength, IList<(string arg, bool isFile)> args)
+   {
+      var chunkSize = Math.Ceiling(totalCommandLength / 4096.0);
+      $"The Maximum argument length '8192' reached, splitting matched files into {chunkSize} chunks".Husky(ConsoleColor.Yellow);
+
+      var totalFiles = args.Count(a => a.isFile);
+      var totalFilePerChunk = (int)Math.Ceiling(totalFiles / chunkSize);
+
+      var chunks = new Queue<List<(string arg, bool isFile)>>((int)chunkSize);
+      for (var i = 0; i < chunkSize; i++)
+      {
+         var chunk = new List<(string arg, bool isFile)>();
+         var fileCounter = 0;
+         var skipSize = i == 0 ? 0 : i * totalFilePerChunk;
+         foreach (var arg in args)
+         {
+            // add normal arguments
+            if (!arg.isFile)
+            {
+               chunk.Add(arg);
+               continue;
+            }
+
+            // if file already added to the chunk, skip it
+            if (skipSize > 0)
+            {
+               skipSize -= 1;
+               continue;
+            }
+
+            // add file to the chunk,
+            // we should continue to the end
+            // to support normal arguments after our file list if exists
+            if (fileCounter >= totalFilePerChunk) continue;
+
+            chunk.Add(arg);
+            fileCounter += 1;
+         }
+
+         chunks.Enqueue(chunk);
+      }
+
+      return chunks;
+   }
+
+   private static async Task<CommandResult> ExecuteHuskyTask(string chunk, HuskyTask task, IList<(string arg, bool isFile)> args, string cwd)
+   {
+      $"⌛ Executing task '{task.Name}' {chunk}...".Husky();
+      // execute task in order
+      var result = await Utility.RunCommandAsync(task.Command!, args.Select(q => q.arg), cwd, task.Output ?? OutputTypes.Always);
+      if (result.ExitCode != 0)
+      {
+         Console.WriteLine();
+         $"❌ Task '{task.Name}' failed in {result.RunTime.TotalMilliseconds:n0}ms".Husky(ConsoleColor.Red);
+         Console.WriteLine();
+         return result;
+      }
+
+      // in staged mode, we must add the changed files to git
+      if (args.All(q => q.arg.Trim().ToLower() != "${staged}")) return result;
+
+      var reAdd = await Utility.ExecAsync("git", new[] { "add" }.Concat(args.Where(q => q.isFile).Select(q => q.arg)));
+      if (reAdd.ExitCode != 0)
+      {
+         // Silently ignore the error if happens, we don't want to break the execution
+         "Can not update git index".Husky(ConsoleColor.Yellow);
+      }
+
+      return result;
    }
 
    private static void OverrideWindowsSpecifics(HuskyTask task)

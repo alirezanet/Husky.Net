@@ -2,7 +2,7 @@
 . "$(dirname "$0")/_/husky.sh"
 
 ## husky task runner examples -------------------
-## note : for local installation use 'dotnet husky'
+## Note : for local installation use 'dotnet' prefix. e.g. 'dotnet husky'
 
 ## run all tasks
 #husky run
