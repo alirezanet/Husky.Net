@@ -74,15 +74,6 @@ public static class Utility
       return await ps.ExecuteAsync();
    }
 
-   public static async Task<CommandResult> ExecAsync(string fileName, IEnumerable<string> args)
-   {
-      var fullPath = GetFullyQualifiedPath(fileName);
-      var ps = CliWrap.Cli.Wrap(fullPath)
-         .WithArguments(args)
-         .WithValidation(CommandResultValidation.None);
-      return await ps.ExecuteAsync();
-   }
-
    private static string GetFullyQualifiedPath(string fileName)
    {
       var fullPath = GetFullPath(fileName);
