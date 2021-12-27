@@ -7,6 +7,8 @@ namespace Husky;
 
 public static class TaskRunner
 {
+   private static bool _needGitIndexUpdate = false;
+
    public static async Task<int> Run(IDictionary<string, string>? config = null)
    {
       "🚀 Preparing tasks ...".Husky();
@@ -153,11 +155,14 @@ public static class TaskRunner
          return result;
       }
 
-      // in staged mode, we must add the changed files to git
-      if (args.All(q => q.arg.Trim().ToLower() != "${staged}")) return result;
-
-      var reAdd = await Utility.ExecAsync("git", new[] { "add" }.Concat(args.Where(q => q.isFile).Select(q => q.arg)));
-      if (reAdd.ExitCode != 0)
+      // in staged mode, we should update the git index
+      if (!_needGitIndexUpdate) return result;
+      try
+      {
+         await Git.ExecAsync("update-index -g");
+         _needGitIndexUpdate = false;
+      }
+      catch (Exception)
       {
          // Silently ignore the error if happens, we don't want to break the execution
          "Can not update git index".Husky(ConsoleColor.Yellow);
@@ -227,6 +232,7 @@ public static class TaskRunner
                // get match staged files with glob
                var matches = matcher.Match(stagedFiles);
                AddMatchFiles(pathMode, matches, args, await git.GitPath);
+               _needGitIndexUpdate = true;
                continue;
             }
             case "${lastCommit}":
