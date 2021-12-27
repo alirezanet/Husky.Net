@@ -147,8 +147,9 @@ public static class CliActions
 
    public static async Task<int> Run(string[]? args = default)
    {
+      var taskRunner = new TaskRunner();
       if (args is null || args.Length == 0)
-         return await TaskRunner.Run();
+         return await taskRunner.Run();
 
       var dic = Utility.ParseArgs(args);
 
@@ -159,6 +160,6 @@ public static class CliActions
          return 1;
       }
 
-      return await TaskRunner.Run(dic);
+      return await taskRunner.Run(dic);
    }
 }

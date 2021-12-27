@@ -29,9 +29,8 @@
    </PropertyGroup>
 
    <Target Name="husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(IsCrossTargetingBuild)' == 'true'">
-      <Exec Command="dotnet tool restore"  StandardOutputImportance="Low" StandardErrorImportance="High"/>
-      <Exec Command="dotnet husky install" StandardOutputImportance="Low" StandardErrorImportance="High"
-            WorkingDirectory="../../" />  <!--Update this to the releative path to your root project dir -->
+      <Exec Command="dotnet tool restore" StandardOutputImportance="Low" StandardErrorImportance="High" />
+      <Exec Command="dotnet husky install" StandardOutputImportance="Low" StandardErrorImportance="High" WorkingDirectory="../../" />
    </Target>
 
    <ItemGroup>
