@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using CliWrap;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileSystemGlobbing;
@@ -7,14 +8,20 @@ namespace Husky;
 
 public static class TaskRunner
 {
-   private static bool _needGitIndexUpdate = false;
+   private static bool _needGitIndexUpdate;
 
    public static async Task<int> Run(IDictionary<string, string>? config = null)
    {
       "🚀 Preparing tasks ...".Husky();
       var git = new Git();
+
       // read tasks
       var tasks = await GetHuskyTasksAsync(git);
+
+      // override windows specifics if we are on windows
+      if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+         foreach (var task in tasks.Where(q => q.Windows != null))
+            OverrideWindowsSpecifics(task);
 
       // handle run arguments
       if (config != null)
@@ -32,6 +39,13 @@ public static class TaskRunner
          }
       }
 
+      // filter tasks by branch
+      if (tasks.Any(q => !string.IsNullOrEmpty(q.Branch)))
+      {
+         var branch = await git.CurrentBranch;
+         tasks = tasks.Where(q => string.IsNullOrEmpty(q.Branch) || Regex.IsMatch(branch, q.Branch)).ToList();
+      }
+
       if (tasks.Count == 0)
       {
          "💤 Skipped, no task found".Husky();
@@ -41,7 +55,6 @@ public static class TaskRunner
       foreach (var task in tasks)
       {
          Logger.Hr();
-         OverrideWindowsSpecifics(task);
 
          // use command for task name
          if (string.IsNullOrEmpty(task.Name))
@@ -174,8 +187,6 @@ public static class TaskRunner
    private static void OverrideWindowsSpecifics(HuskyTask task)
    {
       if (task.Windows == null) return;
-      if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
-
       if (task.Windows.Cwd != null)
          task.Cwd = task.Windows.Cwd;
       if (task.Windows.Args != null)
@@ -192,6 +203,8 @@ public static class TaskRunner
          task.Include = task.Windows.Include;
       if (task.Windows.Output != null)
          task.Output = task.Windows.Output;
+      if (task.Branch != null)
+         task.Branch = task.Windows.Branch;
       if (task.Windows.PathMode != null)
          task.PathMode = task.Windows.PathMode;
    }

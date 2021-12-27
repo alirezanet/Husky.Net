@@ -9,9 +9,8 @@ public class HuskyTask
    public PathModes? PathMode { get; set; }
    public string? Cwd { get; set; }
    public string? Group { get; set; }
-
+   public string? Branch { get; set; }
    public HuskyTask? Windows { get; set; }
    public string[]? Include { get; set; }
    public string[]? Exclude { get; set; }
 }
-
