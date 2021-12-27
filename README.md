@@ -8,22 +8,18 @@ You can use it to lint your commit messages, run tests, lint code, etc... when y
 
 **Features**
 
--  Supports all Git hooks
--  Powered by modern new Git feature (core.hooksPath)
--  User-friendly messages
--  Supports macOS, Linux and Windows
--  Git GUIs
--  Custom directories
--  Monorepo
--  🔥 Internal task runner! 🆕
--  🔥 Multiple file states (staged, lastCommit, glob) 🆕
--  🔥 Compatible with [dotnet-format](https://github.com/dotnet/format) 🆕
--  🔥 Customizable tasks 🆕
-
-_next_
-
--  ⌛ Task for specific branch or tags (soon)
--  ⌛ User-defined args variable (soon)
+- Supports all Git hooks
+- Powered by modern new Git feature (core.hooksPath)
+- User-friendly messages
+- Supports macOS, Linux and Windows
+- Git GUIs
+- Custom directories
+- Monorepo
+- 🔥 Internal task runner!
+- 🔥 Multiple file states (staged, lastCommit, glob)
+- 🔥 Compatible with [dotnet-format](https://github.com/dotnet/format)
+- 🔥 Customizable tasks
+- 🔥 Support task for specific branches 🆕
 
 
 If you already know what is the lint-staged or Husky (npm packages),
@@ -178,6 +174,7 @@ Using bellow configuration you can define your task with a lot of options.
 | include  | true     | [array of glob]          | **                     | glob pattern to select files                                           |
 | name     | true     | string                   | command                | name of the task (recommended)                                         |
 | group    | true     | string                   | -                      | group of the task                                                      |
+| branch   | true     | string (regex)           | -                      | run task on specific branches only                                     |
 | pathMode | true     | [absolute, relative]     | relative               | file path style (relative or absolute)                                 |
 | cwd      | true     | string                   | project root directory | current working directory for the command, can be relative or absolute |
 | output   | true     | [always, verbose, never] | always                 | output log level                                                       |

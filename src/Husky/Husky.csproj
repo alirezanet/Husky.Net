@@ -7,7 +7,7 @@
       <Nullable>enable</Nullable>
       <LangVersion>latest</LangVersion>
       <PackageId>Husky</PackageId>
-      <Version>0.0.7</Version>
+      <Version>0.0.8</Version>
       <Title>Husky</Title>
       <Authors>AliReza Sabouri</Authors>
       <Description>Git hooks made easy, woof!</Description>
@@ -29,9 +29,8 @@
    </PropertyGroup>
 
    <Target Name="husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(IsCrossTargetingBuild)' == 'true'">
-      <Exec Command="dotnet tool restore"  StandardOutputImportance="Low" StandardErrorImportance="High"/>
-      <Exec Command="dotnet husky install" StandardOutputImportance="Low" StandardErrorImportance="High"
-            WorkingDirectory="../../" />  <!--Update this to the releative path to your root project dir -->
+      <Exec Command="dotnet tool restore" StandardOutputImportance="Low" StandardErrorImportance="High" />
+      <Exec Command="dotnet husky install" StandardOutputImportance="Low" StandardErrorImportance="High" WorkingDirectory="../../" />
    </Target>
 
    <ItemGroup>

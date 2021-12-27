@@ -1,20 +1,34 @@
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using CliWrap;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileSystemGlobbing;
 
 namespace Husky;
 
-public static class TaskRunner
+public class TaskRunner
 {
-   private static bool _needGitIndexUpdate = false;
+   private const double MAX_ARG_LENGTH = 8191;
+   private readonly bool _isWindows;
+   private bool _needGitIndexUpdate;
 
-   public static async Task<int> Run(IDictionary<string, string>? config = null)
+   public TaskRunner()
+   {
+      _isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+   }
+
+   public async Task<int> Run(IDictionary<string, string>? config = null)
    {
       "🚀 Preparing tasks ...".Husky();
       var git = new Git();
+
       // read tasks
-      var tasks = await GetHuskyTasksAsync(git);
+      var tasks = await GetTasks(git);
+
+      // override windows specifics if we are on windows
+      if (_isWindows)
+         foreach (var task in tasks.Where(q => q.Windows != null))
+            OverrideWindowsSpecifics(task);
 
       // handle run arguments
       if (config != null)
@@ -32,6 +46,13 @@ public static class TaskRunner
          }
       }
 
+      // filter tasks by branch
+      if (tasks.Any(q => !string.IsNullOrEmpty(q.Branch)))
+      {
+         var branch = await git.CurrentBranch;
+         tasks = tasks.Where(q => string.IsNullOrEmpty(q.Branch) || Regex.IsMatch(branch, q.Branch)).ToList();
+      }
+
       if (tasks.Count == 0)
       {
          "💤 Skipped, no task found".Husky();
@@ -41,7 +62,6 @@ public static class TaskRunner
       foreach (var task in tasks)
       {
          Logger.Hr();
-         OverrideWindowsSpecifics(task);
 
          // use command for task name
          if (string.IsNullOrEmpty(task.Name))
@@ -56,7 +76,7 @@ public static class TaskRunner
 
          $"⚡ Preparing task '{task.Name}'".Husky();
          if (task.Command == null) continue; // skip if no command is defined
-         var args = await GetArgStringFromTask(task, git);
+         var args = await ParseArguments(task, git);
 
          if (task.Args != null && task.Args.Length > args.Count)
          {
@@ -70,7 +90,7 @@ public static class TaskRunner
          var totalCommandLength = args.Sum(q => q.arg.Length) + task.Command.Length;
 
          // chunk execution
-         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && totalCommandLength > 8000)
+         if (_isWindows && totalCommandLength > MAX_ARG_LENGTH)
          {
             var chunks = GetChunks(totalCommandLength, args);
             for (var i = 1; i <= chunks.Count; i++)
@@ -99,8 +119,8 @@ public static class TaskRunner
 
    private static Queue<List<(string arg, bool isFile)>> GetChunks(int totalCommandLength, IList<(string arg, bool isFile)> args)
    {
-      var chunkSize = Math.Ceiling(totalCommandLength / 4096.0);
-      $"The Maximum argument length '8192' reached, splitting matched files into {chunkSize} chunks".Husky(ConsoleColor.Yellow);
+      var chunkSize = Math.Ceiling(totalCommandLength / (MAX_ARG_LENGTH / 2));
+      $"The Maximum argument length '{MAX_ARG_LENGTH}' reached, splitting matched files into {chunkSize} chunks".Husky(ConsoleColor.Yellow);
 
       var totalFiles = args.Count(a => a.isFile);
       var totalFilePerChunk = (int)Math.Ceiling(totalFiles / chunkSize);
@@ -142,7 +162,7 @@ public static class TaskRunner
       return chunks;
    }
 
-   private static async Task<CommandResult> ExecuteHuskyTask(string chunk, HuskyTask task, IList<(string arg, bool isFile)> args, string cwd)
+   private async Task<CommandResult> ExecuteHuskyTask(string chunk, HuskyTask task, IList<(string arg, bool isFile)> args, string cwd)
    {
       $"⌛ Executing task '{task.Name}' {chunk}...".Husky();
       // execute task in order
@@ -174,8 +194,6 @@ public static class TaskRunner
    private static void OverrideWindowsSpecifics(HuskyTask task)
    {
       if (task.Windows == null) return;
-      if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
-
       if (task.Windows.Cwd != null)
          task.Cwd = task.Windows.Cwd;
       if (task.Windows.Args != null)
@@ -192,11 +210,13 @@ public static class TaskRunner
          task.Include = task.Windows.Include;
       if (task.Windows.Output != null)
          task.Output = task.Windows.Output;
+      if (task.Branch != null)
+         task.Branch = task.Windows.Branch;
       if (task.Windows.PathMode != null)
          task.PathMode = task.Windows.PathMode;
    }
 
-   private static async Task<List<HuskyTask>> GetHuskyTasksAsync(Git git)
+   private static async Task<List<HuskyTask>> GetTasks(Git git)
    {
       var gitPath = await git.GitPath;
       var huskyPath = await git.HuskyPath;
@@ -209,7 +229,7 @@ public static class TaskRunner
       return tasks;
    }
 
-   private static async Task<IList<(string arg, bool isFile)>> GetArgStringFromTask(HuskyTask task, Git git)
+   private async Task<IList<(string arg, bool isFile)>> ParseArguments(HuskyTask task, Git git)
    {
       var args = new List<(string arg, bool isFile)>();
       if (task.Args == null) return args;
@@ -231,7 +251,7 @@ public static class TaskRunner
 
                // get match staged files with glob
                var matches = matcher.Match(stagedFiles);
-               AddMatchFiles(pathMode, matches, args, await git.GitPath);
+               AddMatchedFiles(pathMode, matches, args, await git.GitPath);
                _needGitIndexUpdate = true;
                continue;
             }
@@ -240,14 +260,14 @@ public static class TaskRunner
                var lastCommitFiles = (await git.LastCommitFiles).Where(q => !string.IsNullOrWhiteSpace(q)).ToArray();
                if (lastCommitFiles.Length < 1) continue;
                var matches = matcher.Match(lastCommitFiles);
-               AddMatchFiles(pathMode, matches, args, await git.GitPath);
+               AddMatchedFiles(pathMode, matches, args, await git.GitPath);
                continue;
             }
             case "${matched}":
             {
                var files = Directory.GetFiles(await git.GitPath, "*", SearchOption.AllDirectories);
                var matches = matcher.Match(files);
-               AddMatchFiles(pathMode, matches, args, await git.GitPath);
+               AddMatchedFiles(pathMode, matches, args, await git.GitPath);
                continue;
             }
             default:
@@ -258,11 +278,11 @@ public static class TaskRunner
       return args;
    }
 
-   private static void AddMatchFiles(PathModes pathMode, PatternMatchingResult matches, ICollection<(string, bool)> args, string rootPath)
+   private static void AddMatchedFiles(PathModes pathMode, PatternMatchingResult matches, ICollection<(string, bool)> args, string rootPath)
    {
       if (!matches.HasMatches) return;
       var matchFiles = matches.Files.Select(q => $"{q.Path}").ToArray();
-      LogMatchFiles(matchFiles);
+      LogMatchedFiles(matchFiles);
       foreach (var f in matchFiles)
          switch (pathMode)
          {
@@ -278,7 +298,7 @@ public static class TaskRunner
          }
    }
 
-   private static void LogMatchFiles(IEnumerable<string> files)
+   private static void LogMatchedFiles(IEnumerable<string> files)
    {
       // show matched files in verbose mode
       if (!Logger.Verbose) return;
