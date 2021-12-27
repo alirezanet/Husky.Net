@@ -73,7 +73,7 @@ public class Git
    {
       try
       {
-         var result = await ExecBufferedAsync("diff --name-only HEAD^");
+         var result = await ExecBufferedAsync("diff --diff-filter=d --name-only HEAD^");
          if (result.ExitCode != 0)
             throw new Exception($"Exit code: {result.ExitCode}"); // break execution
 
@@ -91,7 +91,7 @@ public class Git
    {
       try
       {
-         var result = await ExecBufferedAsync("diff --name-only --staged");
+         var result = await ExecBufferedAsync("diff --diff-filter=d --name-only --staged");
          if (result.ExitCode != 0)
             throw new Exception($"Exit code: {result.ExitCode}"); // break execution
 
