@@ -194,7 +194,7 @@ There are some variables that you can use in your task arguments.
 - **${matched}**
   - returns the list of matched files using include and exclude, be careful with this variable, it will return all the files if you don't specify include or exclude
 
-e.g.`"args": ["format", "${staged}"]`]
+e.g.`"args": [ "${staged}" ]` 
 
 ## Glob patterns
 
