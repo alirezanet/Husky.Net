@@ -1,4 +1,6 @@
+using System.Collections.Immutable;
 using System.Reflection;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using U = Husky.Utility;
@@ -167,9 +169,28 @@ public static class CliActions
 
    public static async Task<int> Exec(string path)
    {
+      if (!File.Exists(path))
+      {
+         $"can not find script file on '{path}'".LogErr();
+         return 1;
+      }
+
       var code = await File.ReadAllTextAsync(path);
-      var scriptState = await CSharpScript.RunAsync(code,
-           ScriptOptions.Default.AddImports("System"));
+      var workingDirectory = Path.GetDirectoryName(Path.GetFullPath(path));
+      var opts = ScriptOptions.Default
+         .AddImports("System")
+         .WithSourceResolver(new SourceFileResolver(ImmutableArray<string>.Empty, workingDirectory));
+      var script = CSharpScript.Create(code, opts);
+      var compilation = script.GetCompilation();
+      var diagnostics = compilation.GetDiagnostics();
+      if (diagnostics.Any())
+      {
+         foreach (var diagnostic in diagnostics)
+            diagnostic.GetMessage().LogErr();
+         return 1;
+      }
+
+      var _ = await script.RunAsync();
       return 0;
    }
 }
