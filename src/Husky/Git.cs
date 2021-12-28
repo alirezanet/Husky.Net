@@ -99,7 +99,6 @@ public class Git
             throw new Exception($"Exit code: {result.ExitCode}"); // break execution
 
          return result.StandardOutput.Trim().Split('\n');
-         ;
       }
       catch (Exception e)
       {
@@ -118,7 +117,6 @@ public class Git
             throw new Exception($"Exit code: {result.ExitCode}"); // break execution
 
          return result.StandardOutput.Trim().Split('\n');
-         ;
       }
       catch (Exception e)
       {
