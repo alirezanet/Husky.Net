@@ -64,7 +64,8 @@ public static class Cli
          "add" when ac >= 3 => await CliActions.Add(args[1], args[2]),
          "run" when ac is 1 => await CliActions.Run(),
          "run" => await CliActions.Run(args.Skip(1).ToArray()),
-         "exec" when ac >= 2 => await CliActions.Exec(args[1]),
+         "exec" when ac == 2 => await CliActions.Exec(args[1], Array.Empty<string>()),
+         "exec" when ac > 2 => await CliActions.Exec(args[1], args.Skip(2).ToArray()),
          _ => InvalidCommand()
       };
    }
