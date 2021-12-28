@@ -88,6 +88,18 @@ public static class CliActions
             "Failed to configure git".LogErr();
             return 1;
          }
+
+         // Configure gitflow repo
+         var local = await Git.ExecBufferedAsync("git config --local --list");
+         if (local.ExitCode == 0 && local.StandardOutput.Contains("gitflow"))
+         {
+            var gf = await Git.ExecAsync($"config gitflow.path.hooks {dir}");
+            if (gf.ExitCode != 0)
+            {
+               "Failed to configure gitflow".LogErr();
+               return 1;
+            }
+         }
       }
       catch (Exception e)
       {
