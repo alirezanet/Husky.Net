@@ -163,7 +163,7 @@ dotnet husky add .husky/pre-commit "dotnet husky run"
 </p>
 </details>
 
-<br>0
+<br>
 
 ### Task supported configurations
 
