@@ -1,4 +1,6 @@
 using System.Reflection;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.Scripting;
 using U = Husky.Utility;
 
 namespace Husky;
@@ -161,5 +163,13 @@ public static class CliActions
       }
 
       return await taskRunner.Run(dic);
+   }
+
+   public static async Task<int> Exec(string path)
+   {
+      var code = await File.ReadAllTextAsync(path);
+      var scriptState = await CSharpScript.RunAsync(code,
+           ScriptOptions.Default.AddImports("System"));
+      return 0;
    }
 }

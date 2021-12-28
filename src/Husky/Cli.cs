@@ -64,6 +64,7 @@ public static class Cli
          "add" when ac >= 3 => await CliActions.Add(args[1], args[2]),
          "run" when ac is 1 => await CliActions.Run(),
          "run" => await CliActions.Run(args.Skip(1).ToArray()),
+         "exec" when ac >= 2 => await CliActions.Exec(args[1]),
          _ => InvalidCommand()
       };
    }
@@ -90,6 +91,7 @@ Commands:
    husky set <.husky/file> [cmd]           Set Husky hook (.husky/pre-push ""dotnet test"")
    husky add <.husky/file> [cmd]           Add Husky hook (.husky/pre-commit ""husky run"")
    husky run [--name] [--group]            Run task-runner.json tasks
+   husky exec <.husky/csx/file.csx>        Execute a csharp script (.csx) file
 
 -- learn more: {CliActions.DOCS_URL}
 ".Log();
