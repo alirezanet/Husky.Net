@@ -1,12 +1,8 @@
 using System.Collections.Immutable;
-using System.Diagnostics;
-using System.Dynamic;
 using System.Reflection;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
-using Microsoft.CodeAnalysis.Scripting.Hosting;
 using U = Husky.Utility;
 
 namespace Husky;
@@ -90,7 +86,7 @@ public static class CliActions
          }
 
          // Configure gitflow repo
-         var local = await Git.ExecBufferedAsync("git config --local --list");
+         var local = await Git.ExecBufferedAsync("config --local --list");
          if (local.ExitCode == 0 && local.StandardOutput.Contains("gitflow"))
          {
             var gf = await Git.ExecAsync($"config gitflow.path.hooks {dir}");
