@@ -1,8 +1,12 @@
 using System.Collections.Immutable;
+using System.Diagnostics;
+using System.Dynamic;
 using System.Reflection;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.CodeAnalysis.Scripting.Hosting;
 using U = Husky.Utility;
 
 namespace Husky;
@@ -167,7 +171,8 @@ public static class CliActions
       return await taskRunner.Run(dic);
    }
 
-   public static async Task<int> Exec(string path)
+
+   public static async Task<int> Exec(string path, string[] args)
    {
       if (!File.Exists(path))
       {
@@ -178,19 +183,39 @@ public static class CliActions
       var code = await File.ReadAllTextAsync(path);
       var workingDirectory = Path.GetDirectoryName(Path.GetFullPath(path));
       var opts = ScriptOptions.Default
-         .AddImports("System")
-         .WithSourceResolver(new SourceFileResolver(ImmutableArray<string>.Empty, workingDirectory));
-      var script = CSharpScript.Create(code, opts);
+         .WithSourceResolver(new SourceFileResolver(ImmutableArray<string>.Empty, workingDirectory))
+         .WithImports("System", "System.IO", "System.Collections.Generic", "System.Text", "System.Threading.Tasks");
+      var script = CSharpScript.Create(code, opts, typeof(Globals));
       var compilation = script.GetCompilation();
       var diagnostics = compilation.GetDiagnostics();
+
+      //check for warnings and errors
       if (diagnostics.Any())
       {
          foreach (var diagnostic in diagnostics)
-            diagnostic.GetMessage().LogErr();
-         return 1;
+         {
+            switch (diagnostic.Severity)
+            {
+               case DiagnosticSeverity.Hidden:
+                  diagnostic.GetMessage().LogVerbose();
+                  break;
+               case DiagnosticSeverity.Info:
+                  diagnostic.GetMessage().Log(ConsoleColor.DarkBlue);
+                  break;
+               case DiagnosticSeverity.Warning:
+                  diagnostic.GetMessage().Log(ConsoleColor.Yellow);
+                  break;
+               case DiagnosticSeverity.Error:
+                  diagnostic.GetMessage().LogErr();
+                  "script compilation failed".LogErr();
+                  return 1;
+               default:
+                  throw new ArgumentOutOfRangeException();
+            }
+         }
       }
 
-      var _ = await script.RunAsync();
+      var _ = await script.RunAsync(new Globals() { Args = args });
       return 0;
    }
 }
