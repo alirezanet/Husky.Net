@@ -95,6 +95,8 @@ Or If you are using the `npm`, add the below code to your `package.json` file to
 
 ## Task runner
 
+Linting makes more sense when run before committing your code. By doing so you can ensure no errors go into the repository and enforce code style. But running a lint process on a whole project is slow, and linting results can be irrelevant. Ultimately you only want to lint files that will be committed.
+
 After installation, you must have `task-runner.json` file in your `.husky` directory that you can use to define your tasks.
 
 you can run and test your tasks with `husky run` command. Once you are sure that your tasks are working properly, you can add it to the hook.
@@ -161,7 +163,7 @@ dotnet husky add .husky/pre-commit "dotnet husky run"
 </p>
 </details>
 
-<br>
+<br>0
 
 ### Task supported configurations
 
