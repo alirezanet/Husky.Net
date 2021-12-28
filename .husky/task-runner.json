@@ -25,6 +25,12 @@
                "echo Husky.Net is awesome!"
             ]
          }
+      },
+      {
+         "name": "CSharp Script!",
+         "command": "dotnet",
+         "args": ["husky","exec",".husky/csx/hello.csx"]
       }
+
    ]
 }
