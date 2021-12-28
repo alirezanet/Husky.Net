@@ -60,6 +60,8 @@ public static class Cli
          "install" when ac > 1 && !args[1].StartsWith("-") => await CliActions.Install(args[1]),
          "install" => await CliActions.Install(),
          "uninstall" => await CliActions.Uninstall(),
+         "set" when ac == 2 => await CliActions.Set(args[1], "dotnet husky run"),
+         "add" when ac == 2 => await CliActions.Add(args[1], "dotnet husky run"),
          "set" when ac >= 3 => await CliActions.Set(args[1], args[2]),
          "add" when ac >= 3 => await CliActions.Add(args[1], args[2]),
          "run" when ac is 1 => await CliActions.Run(),
@@ -90,7 +92,7 @@ Commands:
    husky install [dir] (default: .husky)   Install Husky hooks
    husky uninstall                         Uninstall Husky hooks
    husky set <.husky/file> [cmd]           Set Husky hook (.husky/pre-push ""dotnet test"")
-   husky add <.husky/file> [cmd]           Add Husky hook (.husky/pre-commit ""husky run"")
+   husky add <.husky/file> [cmd]           Add Husky hook (.husky/pre-commit ""dotnet husky run"")
    husky run [--name] [--group]            Run task-runner.json tasks
    husky exec <.husky/csx/file.csx>        Execute a csharp script (.csx) file
 
