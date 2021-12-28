@@ -12,8 +12,9 @@ You can use it to lint your commit messages, run tests, lint code, etc... when y
 - 🔥 Multiple file states (staged, lastCommit, glob)
 - 🔥 Compatible with [dotnet-format](https://github.com/dotnet/format)
 - 🔥 Customizable tasks
-- 🔥 Support task for specific branches
+- 🔥 Supports task for specific branches
 - 🔥 CSharp scripts (csx)! 🆕
+- 🔥 Supports gitflow hooks 🆕
 - Supports all Git hooks
 - Powered by modern new Git feature (core.hooksPath)
 - User-friendly messages
