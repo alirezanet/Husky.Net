@@ -202,7 +202,7 @@ public static class Utility
             if (keyStartIndex == 1) throw new ArgumentException(currentArg);
             // Otherwise, use the switch name directly as a key
 
-            key = currentArg.Substring(keyStartIndex, separator - keyStartIndex);
+            key = currentArg[keyStartIndex..separator];
 
             value = currentArg[(separator + 1)..];
          }
