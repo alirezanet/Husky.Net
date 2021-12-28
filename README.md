@@ -8,6 +8,12 @@ You can use it to lint your commit messages, run tests, lint code, etc... when y
 
 **Features**
 
+- 🔥 Internal task runner!
+- 🔥 Multiple file states (staged, lastCommit, glob)
+- 🔥 Compatible with [dotnet-format](https://github.com/dotnet/format)
+- 🔥 Customizable tasks
+- 🔥 Support task for specific branches
+- 🔥 CSharp scripts (csx)! 🆕
 - Supports all Git hooks
 - Powered by modern new Git feature (core.hooksPath)
 - User-friendly messages
@@ -15,11 +21,7 @@ You can use it to lint your commit messages, run tests, lint code, etc... when y
 - Git GUIs
 - Custom directories
 - Monorepo
-- 🔥 Internal task runner!
-- 🔥 Multiple file states (staged, lastCommit, glob)
-- 🔥 Compatible with [dotnet-format](https://github.com/dotnet/format)
-- 🔥 Customizable tasks
-- 🔥 Support task for specific branches 🆕
+
 
 
 If you already know what is the lint-staged or Husky (npm packages),
@@ -194,7 +196,7 @@ There are some variables that you can use in your task arguments.
 - **${matched}**
   - returns the list of matched files using include and exclude, be careful with this variable, it will return all the files if you don't specify include or exclude
 
-e.g.`"args": [ "${staged}" ]` 
+e.g.`"args": [ "${staged}" ]`
 
 ## Glob patterns
 
@@ -202,6 +204,27 @@ Husky.Net supports the standard dotnet `FileSystemGlobbing` patterns for include
 
 ---
 
+## CSharp Scripts
+
+You can use the `exec` command to execute a C# script.
+
+e.g.
+```shell
+dotnet husky exec .husky/csx/hello.csx
+```
+
+Also, you can use your csx scripts in your tasks.
+
+e.g task
+```json
+{
+   "command": "dotnet",
+   "args": [ "husky", "exec", ".husky/csx/hello.csx"  ],
+}
+
+```
+
+---
 
 ## Notes
 
