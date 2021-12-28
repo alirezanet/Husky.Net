@@ -10,6 +10,7 @@ while (true)
 
    "\nEnter your husky commands: ".Log();
    var cmd = Console.ReadLine();
+   if (string.IsNullOrEmpty(cmd)) continue;
    // simulating args
    args = Regex.Matches(cmd!, @"[\""].+?[\""]|[^ ]+").Select(m => m.Value.StartsWith("\"") ? m.Value.Replace("\"", "") : m.Value).ToArray();
 #endif
