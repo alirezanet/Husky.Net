@@ -66,8 +66,8 @@ public static class CliActions
             await File.WriteAllTextAsync(husky_shPath, content);
          }
 
-         // find all hooks (if exists) from .husky/ and add executable flag (except json files)
-         var files = Directory.GetFiles(path).Where(f => !f.EndsWith(".json")).ToList();
+         // find all hooks (if exists) from .husky/ and add executable flag
+         var files = Directory.GetFiles(path).Where(f => !f.Contains(".")).ToList();
          files.Add(husky_shPath);
          await Utility.SetExecutablePermission(files.ToArray());
 
