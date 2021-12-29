@@ -265,9 +265,10 @@ public class TaskRunner
             }
             case "${matched}":
             {
-               var files = Directory.GetFiles(await git.GitPath, "*", SearchOption.AllDirectories);
-               var matches = matcher.Match(files);
-               AddMatchedFiles(pathMode, matches, args, await git.GitPath);
+               var gitPath = await git.GitPath;
+               var files = Directory.GetFiles(gitPath, "*", SearchOption.AllDirectories);
+               var matches = matcher.Match(gitPath, files);
+               AddMatchedFiles(pathMode, matches, args, gitPath);
                continue;
             }
             default:
