@@ -1,5 +1,6 @@
 # Husky.Net
 
+![Husky.Net WorkFlow](workflow.jpg)
 ## Introduction
 
 Husky improves your commits and more 🐶 woof!
