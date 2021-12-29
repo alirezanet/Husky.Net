@@ -142,7 +142,7 @@ public static class CliActions
          await using var stream = Assembly.GetAssembly(typeof(Program))!.GetManifestResourceStream("Husky.templates.hook")!;
          using var sr = new StreamReader(stream);
          var content = await sr.ReadToEndAsync();
-         await File.WriteAllTextAsync(file, $"{content}\n{cmd}");
+         await File.WriteAllTextAsync(file, $"{content}\n{cmd}\n");
       }
 
       // needed for linux
