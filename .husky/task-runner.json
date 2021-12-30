@@ -8,10 +8,6 @@
    ],
    "tasks": [
       {
-         "command": "cmd",
-         "args": [ "/c", "echo", "${root-dir}" ],
-      },
-      {
          "command": "dotnet-format",
          "args": [
             "--include",
