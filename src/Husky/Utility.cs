@@ -87,7 +87,7 @@ public static class Utility
 
       var envValues = Environment.GetEnvironmentVariable("PATH");
       if (envValues == null) return null;
-      foreach (var path in envValues.Split(Path.PathSeparator))
+      foreach (var path in envValues.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries))
       {
          var fullPath = Path.Combine(path, fileName);
          // we should look for .exe and .cmd files on windows
