@@ -74,7 +74,7 @@ public static class Utility
       return await ps.ExecuteAsync();
    }
 
-   private static string GetFullyQualifiedPath(string fileName)
+   public static string GetFullyQualifiedPath(string fileName)
    {
       var fullPath = GetFullPath(fileName);
       return fullPath ?? fileName;
