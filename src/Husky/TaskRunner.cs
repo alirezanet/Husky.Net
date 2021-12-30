@@ -268,9 +268,9 @@ public class TaskRunner
                var gitPath = await git.GitPath;
                var files = Directory.GetFiles(gitPath, "*", SearchOption.AllDirectories);
 
-               // exclude .git directory by default
-               if (task.Exclude is null)
-                  matcher.AddExclude(".git/**");
+               // exclude .git directory (absolute path)
+               var gitDir = await git.GitDirRelativePath;
+               matcher.AddExclude($"{gitDir}/**");
 
                var matches = matcher.Match(gitPath, files);
                AddMatchedFiles(pathMode, matches, args, gitPath);
