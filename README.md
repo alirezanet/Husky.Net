@@ -14,8 +14,9 @@ You can use it to lint your commit messages, run tests, lint code, etc... when y
 - 🔥 Compatible with [dotnet-format](https://github.com/dotnet/format)
 - 🔥 Customizable tasks
 - 🔥 Supports task for specific branches
-- 🔥 CSharp scripts (csx)! 🆕
-- 🔥 Supports gitflow hooks 🆕
+- 🔥 CSharp scripts (csx)!
+- 🔥 Supports gitflow hooks
+- 🔥 User-define arg variables 🆕
 - Supports all Git hooks
 - Powered by modern new Git feature (core.hooksPath)
 - User-friendly messages
@@ -193,24 +194,50 @@ Using bellow configuration you can define your task with a lot of options.
 
 ---
 
-### Arg Variables
+## Glob patterns
+
+Husky.Net supports the standard dotnet `FileSystemGlobbing` patterns for include or exclude task configurations. read more [here](https://docs.microsoft.com/en-us/dotnet/core/extensions/file-globbing#pattern-formats)
+
+---
+
+## Arg Variables
 
 There are some variables that you can use in your task arguments.
 
 - **${staged}**
   - returns the list of currently staged files
-- **${LastCommit}**
+- **${last-commit}**
   - returns last commit changed files
-- **${committed}**
-  - returns the list of committed files (git ls-files)
-- **${matched}**
+- **${git-files}**
+  - returns the output of (git ls-files)
+- **${all-files}**
   - returns the list of matched files using include/exclude, be careful with this variable, it will return all the files if you don't specify include or exclude
 
 e.g.`"args": [ "${staged}" ]`
 
-## Glob patterns
+### user-defined variables
 
-Husky.Net supports the standard dotnet `FileSystemGlobbing` patterns for include or exclude task configurations. read more [here](https://docs.microsoft.com/en-us/dotnet/core/extensions/file-globbing#pattern-formats)
+You can define your own variables by adding a task to the `variables` section in `task-runner.json`.
+
+e.g: defining custom `${root-dir}` variable to access root directory files
+
+```json
+{
+   "variables": [
+      {
+         "name": "root-dir",
+         "command": "cmd",
+         "args": ["/c", "dir", "/b"]
+      }
+   ],
+   "tasks": [
+      {
+         "command": "cmd",
+         "args": ["/c", "echo", "${root-dir}"]
+      }
+   ]
+}
+```
 
 ---
 

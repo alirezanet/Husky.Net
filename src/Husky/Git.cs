@@ -11,10 +11,10 @@ public class Git
    private Lazy<Task<string>> _huskyPath { get; set; }
    private Lazy<Task<string[]>> _stagedFiles { get; set; }
    private Lazy<Task<string[]>> _lastCommitFiles { get; set; }
-   private Lazy<Task<string[]>> _committedFiles { get; set; }
+   private Lazy<Task<string[]>> _GitFiles { get; set; }
 
    public Task<string[]> StagedFiles => _stagedFiles.Value;
-   public Task<string[]> CommittedFiles => _committedFiles.Value;
+   public Task<string[]> GitFiles => _GitFiles.Value;
    public Task<string[]> LastCommitFiles => _lastCommitFiles.Value;
    public Task<string> GitPath => _gitPath.Value;
    public Task<string> GitDirRelativePath => _gitDirRelativePath.Value;
@@ -26,7 +26,7 @@ public class Git
       _gitPath = new Lazy<Task<string>>(GetGitPath);
       _huskyPath = new Lazy<Task<string>>(GetHuskyPath);
       _stagedFiles = new Lazy<Task<string[]>>(GetStagedFiles);
-      _committedFiles = new Lazy<Task<string[]>>(GetCommittedFiles);
+      _GitFiles = new Lazy<Task<string[]>>(GetGitFiles);
       _lastCommitFiles = new Lazy<Task<string[]>>(GetLastCommitFiles);
       _currentBranch = new Lazy<Task<string>>(GetCurrentBranch);
       _gitDirRelativePath = new Lazy<Task<string>>(GetGitDirRelativePath);
@@ -122,7 +122,7 @@ public class Git
          if (result.ExitCode != 0)
             throw new Exception($"Exit code: {result.ExitCode}"); // break execution
 
-         return result.StandardOutput.Trim().Split('\n');
+         return result.StandardOutput.Trim().Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
       }
       catch (Exception e)
       {
@@ -150,7 +150,7 @@ public class Git
       }
    }
 
-   private static async Task<string[]> GetCommittedFiles()
+   private static async Task<string[]> GetGitFiles()
    {
       try
       {

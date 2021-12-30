@@ -1,5 +1,16 @@
 {
+   "variables": [
+      {
+         "name": "root-dir",
+         "command": "cmd",
+         "args": ["/c", "dir", "/b" ]
+      }
+   ],
    "tasks": [
+      {
+         "command": "cmd",
+         "args": [ "/c", "echo", "${root-dir}" ],
+      },
       {
          "command": "dotnet-format",
          "args": [
