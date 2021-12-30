@@ -10,7 +10,7 @@ You can use it to lint your commit messages, run tests, lint code, etc... when y
 **Features**
 
 - 🔥 Internal task runner!
-- 🔥 Multiple file states (staged, lastCommit, glob)
+- 🔥 Multiple file states (staged, committed, lastCommit, glob)
 - 🔥 Compatible with [dotnet-format](https://github.com/dotnet/format)
 - 🔥 Customizable tasks
 - 🔥 Supports task for specific branches
@@ -201,8 +201,10 @@ There are some variables that you can use in your task arguments.
   - returns the list of currently staged files
 - **${LastCommit}**
   - returns last commit changed files
+- **${committed}**
+  - returns the list of committed files (git ls-files)
 - **${matched}**
-  - returns the list of matched files using include and exclude, be careful with this variable, it will return all the files if you don't specify include or exclude
+  - returns the list of matched files using include/exclude, be careful with this variable, it will return all the files if you don't specify include or exclude
 
 e.g.`"args": [ "${staged}" ]`
 

@@ -263,6 +263,14 @@ public class TaskRunner
                AddMatchedFiles(pathMode, matches, args, await git.GitPath);
                continue;
             }
+            case "${committed}":
+            {
+               var committedFiles = await git.CommittedFiles;
+               if (committedFiles.Length < 1) continue;
+               var matches = matcher.Match(committedFiles);
+               AddMatchedFiles(pathMode, matches, args, await git.GitPath);
+               continue;
+            }
             case "${matched}":
             {
                var gitPath = await git.GitPath;
