@@ -13,5 +13,8 @@
 ## run task with name: 'task-name'
 #husky run --name task-name
 
+## pass hook arguments to task
+#husky run --args "$1" "$2"
+
 ## or put your custom commands -------------------
 #echo 'Husky.Net is awesome!'
