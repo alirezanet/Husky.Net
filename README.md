@@ -123,26 +123,27 @@ dotnet husky add .husky/pre-commit "dotnet husky run"
 {
    "tasks": [
       {
+         "name": "dotnet-format",
+         "group": "pre-commit",
          "command": "dotnet",
-         "group": "backend",
          "args": ["dotnet-format", "--include", "${staged}"],
          "include": ["**/*.cs", "**/*.vb"]
       },
       {
          "name": "eslint",
-         "group": "frontend",
-         "command": "npm",
+         "group": "pre-commit",
          "pathMode": "absolute",
          "cwd": "Client",
+         "command": "npm",
          "args": ["run", "lint", "${staged}"],
          "include": ["**/*.ts", "**/*.vue", "**/*.js"]
       },
       {
          "name": "prettier",
-         "group": "frontend",
-         "command": "npx",
+         "group": "pre-commit",
          "pathMode": "absolute",
          "cwd": "Client",
+         "command": "npx",
          "args": ["prettier", "--write", "${staged}"],
          "include": [
             "**/*.ts",
@@ -158,10 +159,10 @@ dotnet husky add .husky/pre-commit "dotnet husky run"
          "name": "Welcome",
          "output": "always",
          "command": "bash",
-         "args": ["-c", "echo  🌈 Nice work! 🥂"],
+         "args": ["-c", "echo Nice work! 🥂"],
          "windows": {
             "command": "cmd",
-            "args": ["/c", "echo  🌈 Nice work! 🥂"]
+            "args": ["/c", "echo Nice work! 🥂"]
          }
       }
    ]
