@@ -122,7 +122,7 @@ public class Git
          if (result.ExitCode != 0)
             throw new Exception($"Exit code: {result.ExitCode}"); // break execution
 
-         return result.StandardOutput.Trim().Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+         return result.StandardOutput.Trim().Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
       }
       catch (Exception e)
       {
@@ -140,7 +140,7 @@ public class Git
          if (result.ExitCode != 0)
             throw new Exception($"Exit code: {result.ExitCode}"); // break execution
 
-         return result.StandardOutput.Trim().Split('\n');
+         return result.StandardOutput.Trim().Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
       }
       catch (Exception e)
       {
@@ -158,7 +158,7 @@ public class Git
          if (result.ExitCode != 0)
             throw new Exception($"Exit code: {result.ExitCode}"); // break execution
 
-         return result.StandardOutput.Trim().Split('\n');
+         return result.StandardOutput.Trim().Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
       }
       catch (Exception e)
       {

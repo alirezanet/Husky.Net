@@ -170,9 +170,9 @@ public static class CliActions
       var dic = Utility.ParseArgs(args);
 
       // ReSharper disable once InvertIf
-      if (dic.Keys.Any(q => q != "name" && q != "group"))
+      if (dic.Keys.Any(q => q != "name" && q != "group" && q != "args"))
       {
-         "invalid arguments.".LogErr();
+         "invalid arguments (try: [--name, --group, --args])".LogErr();
          return 1;
       }
 
@@ -223,7 +223,13 @@ public static class CliActions
          }
       }
 
-      var _ = await script.RunAsync(new Globals() { Args = args });
-      return 0;
+      var result = await script.RunAsync(new Globals() { Args = args });
+      if (result.Exception is null && result.ReturnValue is null or 0)
+         return 0;
+
+      if (result.ReturnValue is int i)
+         return i;
+
+      return 1;
    }
 }

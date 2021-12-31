@@ -212,6 +212,8 @@ There are some variables that you can use in your task arguments.
   - returns the output of (git ls-files)
 - **${all-files}**
   - returns the list of matched files using include/exclude, be careful with this variable, it will return all the files if you don't specify include or exclude
+- **${args}**
+  - returns the arguments passed directly to the `husky run` command using `--args` option
 
 e.g.`"args": [ "${staged}" ]`
 

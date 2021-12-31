@@ -3,41 +3,31 @@
       {
          "name": "root-dir",
          "command": "cmd",
-         "args": ["/c", "dir", "/b" ]
+         "args": ["/c", "dir", "/b"]
       }
    ],
    "tasks": [
       {
+         "name": "commit-message-linter",
+         "command": "dotnet",
+         "args": ["husky", "exec", ".husky/csx/commit-lint.csx", "${args}"]
+      },
+      {
          "command": "dotnet-format",
-         "args": [
-            "--include",
-            "${staged}"
-         ],
-         "include": [
-            "**/*.cs"
-         ],
+         "group": "pre-commit",
+         "args": ["--include", "${staged}"],
+         "include": ["**/*.cs"]
       },
       {
          "name": "Welcome",
+         "group": "pre-commit",
          "output": "always",
          "command": "bash",
-         "args": [
-            "-c",
-            "echo Husky.Net is awesome!"
-         ],
+         "args": ["-c", "echo Husky.Net is awesome!"],
          "windows": {
             "command": "cmd",
-            "args": [
-               "/c",
-               "echo Husky.Net is awesome!"
-            ]
+            "args": ["/c", "echo Husky.Net is awesome!"]
          }
-      },
-      {
-         "name": "CSharp Script!",
-         "command": "dotnet",
-         "args": ["husky","exec",".husky/csx/hello.csx"]
       }
-
    ]
 }
