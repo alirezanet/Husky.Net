@@ -184,7 +184,7 @@ Using bellow configuration you can define your task with a lot of options.
 | args     | true     | [string array]           | -                      | command arguments                                                      |
 | include  | true     | [array of glob]          | `**/*`                 | glob pattern to select files                                           |
 | name     | true     | string                   | command                | name of the task (recommended)                                         |
-| group    | true     | string                   | -                      | group of the task                                                      |
+| group    | true     | string                   | -                      | group of the task (usually it should be the hook name)                 |
 | branch   | true     | string (regex)           | -                      | run task on specific branches only                                     |
 | pathMode | true     | [absolute, relative]     | relative               | file path style (relative or absolute)                                 |
 | cwd      | true     | string                   | project root directory | current working directory for the command, can be relative or absolute |
