@@ -81,7 +81,9 @@ public class TaskRunner
             continue;
          }
 
-         var args = await ParseArguments(task);
+         string? configArgs = null;
+         config?.TryGetValue("args", out configArgs);
+         var args = await ParseArguments(task, configArgs);
 
          if (task.Args != null && task.Args.Length > args.Count)
          {
@@ -113,13 +115,10 @@ public class TaskRunner
             executionTime = result.RunTime.TotalMilliseconds;
          }
 
-
          $" ✔ Successfully executed in {executionTime:n0}ms".Husky(ConsoleColor.DarkGreen);
       }
 
       Logger.Hr();
-      "Execution completed 🐶".Husky(ConsoleColor.DarkGreen);
-      Console.WriteLine();
       return 0;
    }
 
@@ -245,7 +244,7 @@ public class TaskRunner
       return tasks;
    }
 
-   private async Task<IList<(string arg, bool isFile)>> ParseArguments(HuskyTask task)
+   private async Task<IList<(string arg, bool isFile)>> ParseArguments(HuskyTask task, string? configArgs = null)
    {
       var args = new List<(string arg, bool isFile)>();
       if (task.Args == null) return args;
@@ -259,6 +258,12 @@ public class TaskRunner
       foreach (var arg in task.Args)
          switch (arg.ToLower().Trim())
          {
+            case "${args}":
+               if (configArgs != null)
+                  args.Add((configArgs, false));
+               else
+                  "No arguments passed to the run command".Husky(ConsoleColor.Yellow);
+               continue;
             case "${staged}":
             {
                var stagedFiles = (await _git.StagedFiles).Where(q => !string.IsNullOrWhiteSpace(q)).ToArray();

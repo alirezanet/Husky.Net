@@ -93,7 +93,7 @@ Commands:
    husky uninstall                          Uninstall Husky hooks
    husky set <.husky/file> [cmd]            Set Husky hook (.husky/pre-push ""dotnet test"")
    husky add <.husky/file> [cmd]            Add Husky hook (.husky/pre-commit ""dotnet husky run"")
-   husky run [--name] [--group]             Run task-runner.json tasks
+   husky run [--name] [--group] [--args]    Run task-runner.json tasks
    husky exec <.husky/csx/file.csx> [args]  Execute a csharp script (.csx) file
 
 -- learn more: {CliActions.DOCS_URL}
