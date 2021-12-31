@@ -1,6 +1,8 @@
 # Husky.Net
+![GitHub](https://img.shields.io/github/license/alirezanet/husky.net) ![Nuget](https://img.shields.io/nuget/dt/husky?color=%239100ff) ![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/husky?label=latest) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/alirezanet/husky.net/Publish%20Packages?label=checks)
 
 ![Husky.Net WorkFlow](workflow.jpg)
+
 ## Introduction
 
 Husky improves your commits and more 🐶 woof!
@@ -184,7 +186,7 @@ Using bellow configuration you can define your task with a lot of options.
 | args     | true     | [string array]           | -                      | command arguments                                                      |
 | include  | true     | [array of glob]          | `**/*`                 | glob pattern to select files                                           |
 | name     | true     | string                   | command                | name of the task (recommended)                                         |
-| group    | true     | string                   | -                      | group of the task                                                      |
+| group    | true     | string                   | -                      | group of the task (usually it should be the hook name)                 |
 | branch   | true     | string (regex)           | -                      | run task on specific branches only                                     |
 | pathMode | true     | [absolute, relative]     | relative               | file path style (relative or absolute)                                 |
 | cwd      | true     | string                   | project root directory | current working directory for the command, can be relative or absolute |
