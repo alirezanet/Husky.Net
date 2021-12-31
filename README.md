@@ -12,7 +12,7 @@ You can use it to lint your commit messages, run tests, lint code, etc... when y
 **Features**
 
 - 🔥 Internal task runner!
-- 🔥 Multiple file states (staged, committed, lastCommit, glob)
+- 🔥 Multiple file states (staged, git-files, last-commit, all-files)
 - 🔥 Compatible with [dotnet-format](https://github.com/dotnet/format)
 - 🔥 Customizable tasks
 - 🔥 Supports task for specific branches
@@ -34,7 +34,8 @@ this is very similar but you can use Husky.Net without having node, yarn, etc.. 
 
 ## Why use Hooks and Husky.Net?
 
-We, as developers, love platforms like GitHub, GitLab, Atlassian, Azure DevOps etc., as our managed git system and collaboration platform. We also love clean code and keep inventing new linters and rules to enforce it. In my opinion, every commit should allow the codebase to deploy to production. There is nothing worse than commits like “fixed style errors” or “fixed build”. These are often small mistakes you want to know as early as possible in your development cycle. You don’t want to break the build for the next developer because he pulled your ‘mistake’ or waste precious build minutes of your CI server. Say you have asked your teammate to review your code; in the meantime, the build server rejects your code. That means you have to go back and fix this, and your teammate has to come back and possibly review again after the changes (i.e., approvals reset on new commit). Doing so would waste a lot of time and effort. Husky.Net offers a very simple way to start using git hooks or running certain tasks, write custom scripts using c# and more ...
+We, as developers, love platforms like GitHub, GitLab, Atlassian, Azure DevOps etc., as our managed git system and collaboration platform. We also love clean code and keep inventing new linters and rules to enforce it. In my opinion, every commit should allow the codebase to deploy to production. There is nothing worse than commits like “fixed style errors” or “fixed build”. These are often small mistakes you want to know as early as possible in your development cycle. You don’t want to break the build for the next developer because he pulled your ‘mistake’ or waste precious build minutes of your CI server. Say you have asked your teammate to review your code; in the meantime, the build server rejects your code. That means you have to go back and fix this, and your teammate has to come back and possibly review again after the changes (i.e., approvals reset on new commit). Doing so would waste a lot of time and effort. Husky.Net offers a very simple way to start using git hooks or running certain tasks, write custom scripts using c# and more ... 
+
 
 ### A lot of features are coming soon, stay tuned! 👁️‍🗨️👀
 
@@ -274,7 +275,11 @@ e.g task
 
 - Don't forget to give a ⭐ on [GitHub](https://github.com/alirezanet/husky.net)
 
+## Credits
+
 - This library inspired of [husky](https://github.com/typicode/husky) & [lint-staged](https://github.com/okonet/lint-staged) and a few other tools, for **DotNet**, so make sure to support them too!
+
+- I'd also like to thank [kaylumah](https://github.com/kaylumah) for his [article](https://kaylumah.nl/2019/09/07/using-csharp-code-your-git-hooks.html) that gave me the csharp scripting support idea.
 
 ## Known issues
 - `husky run` command doesn't have color when executed from hooks.
