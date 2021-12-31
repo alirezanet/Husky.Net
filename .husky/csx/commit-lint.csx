@@ -1,6 +1,7 @@
 /// <summary>
 /// a simple regex commit linter example
 /// https://www.conventionalcommits.org/en/v1.0.0/
+/// https://github.com/angular/angular/blob/22b96b9/CONTRIBUTING.md#type
 /// </summary>
 
 using System.Text.RegularExpressions;
