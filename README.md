@@ -267,7 +267,7 @@ e.g task
 
 ```
 
-This repo also using a csharp script to lint the commit messages, you can check it here ( [commit-list.csx](.husky/csx/commit-lint.csx) and [commit-msg hook](.husky/commit-msg) )
+This repo also using a csharp script to lint the commit messages, you can check it here ( [commit-lint.csx](.husky/csx/commit-lint.csx) / [commit-msg hook](.husky/commit-msg) / [task-runner.json](.husky/task-runner.json) )
 
 ---
 
