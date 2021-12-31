@@ -1,5 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Husky", "src\Husky\Husky.csproj", "{12AB4B33-47A6-49D5-872A-5BA6DD634E9C}"
 EndProject
 Global

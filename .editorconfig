@@ -1,3 +1,6 @@
+# formatting rules docs
+# https://docs.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/formatting-rules
+
 root = true
 
 [*]
@@ -7,9 +10,6 @@ charset = utf-8
 tab_width = 3
 trim_trailing_whitespace = true
 insert_final_newline = true
-
-# formatting rules docs
-# https://docs.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/formatting-rules
 
 # Microsoft .NET properties
 dotnet_style_parentheses_in_arithmetic_binary_operators = never_if_unnecessary:none
