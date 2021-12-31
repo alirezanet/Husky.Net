@@ -223,7 +223,10 @@ public static class CliActions
          }
       }
 
-      var _ = await script.RunAsync(new Globals() { Args = args });
-      return 0;
+      var result = await script.RunAsync(new Globals() { Args = args });
+      if (result.Exception is null && result.ReturnValue is null or 0)
+         return 0;
+
+      return 1;
    }
 }
