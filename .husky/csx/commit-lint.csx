@@ -5,7 +5,7 @@
 /// </summary>
 
 using System.Text.RegularExpressions;
-var pattern = @"^(?=.{1,90}$)(?<type>build|feat|ci|chore|docs|fix|perf|refactor|revert|style|test)(?<scope>\([a-z]+\))*(?<colon>:)(?<subject>[-a-zA-Z0-9._ ])+(?<![\.\s])$";
+var pattern = @"^(?=.{1,90}$)(build|feat|ci|chore|docs|fix|perf|refactor|revert|style|test)(\([a-z]+\))*(:)([-a-zA-Z0-9._ ])+(#\d+)*(?<![\.\s])$";
 
 var msg = File.ReadAllLines(Args[0])[0];
 
