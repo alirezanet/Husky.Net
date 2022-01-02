@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using Husky.Logger;
 
 namespace Husky;
 
@@ -51,7 +52,7 @@ public static class Cli
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                Win32Console.Initialize();
-               Logger.Vt100Colors = true;
+               Logger.Logger.Vt100Colors = true;
             }
          }
          catch (Exception e)
@@ -61,7 +62,7 @@ public static class Cli
       }
       if (Environment.GetEnvironmentVariable("HUSKY_DEBUG") == "1")
       {
-         Logger.Verbose = true;
+         Logger.Logger.Verbose = true;
       }
    }
 
@@ -69,10 +70,10 @@ public static class Cli
    private static string[] HandleHighPriorityArgs(string[] args)
    {
       if (args.Contains("--no-color"))
-         Logger.Colors = false;
+         Logger.Logger.Colors = false;
 
       if (args.Contains("--verbose") || args.Contains("-v"))
-         Logger.Verbose = true;
+         Logger.Logger.Verbose = true;
 
       return args.Where(x => x != "--verbose" && x != "-v" && x != "--no-color").ToArray();
    }

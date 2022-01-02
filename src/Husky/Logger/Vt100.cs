@@ -1,4 +1,4 @@
-using System;
+namespace Husky.Logger;
 
 internal static class Vt100
 {

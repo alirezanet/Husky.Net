@@ -1,35 +1,37 @@
 using CliWrap;
 using CliWrap.Buffered;
+using Husky.Helpers;
+using Husky.Logger;
 
 namespace Husky;
 
 public class Git
 {
-   private Lazy<Task<string>> _gitDirRelativePath { get; set; }
-   private Lazy<Task<string>> _gitPath { get; set; }
-   private Lazy<Task<string>> _currentBranch { get; set; }
-   private Lazy<Task<string>> _huskyPath { get; set; }
-   private Lazy<Task<string[]>> _stagedFiles { get; set; }
-   private Lazy<Task<string[]>> _lastCommitFiles { get; set; }
-   private Lazy<Task<string[]>> _GitFiles { get; set; }
+   private readonly AsyncLazy<string> _gitDirRelativePath;
+   private readonly AsyncLazy<string> _gitPath;
+   private readonly AsyncLazy<string> _currentBranch;
+   private readonly AsyncLazy<string> _huskyPath;
+   private readonly AsyncLazy<string[]> _stagedFiles;
+   private readonly AsyncLazy<string[]> _lastCommitFiles;
+   private readonly AsyncLazy<string[]> _GitFiles;
 
-   public Task<string[]> StagedFiles => _stagedFiles.Value;
-   public Task<string[]> GitFiles => _GitFiles.Value;
-   public Task<string[]> LastCommitFiles => _lastCommitFiles.Value;
-   public Task<string> GitPath => _gitPath.Value;
-   public Task<string> GitDirRelativePath => _gitDirRelativePath.Value;
-   public Task<string> CurrentBranch => _currentBranch.Value;
-   public Task<string> HuskyPath => _huskyPath.Value;
+   public async Task<string[]> GetStagedFilesAsync() => await _stagedFiles;
+   public async Task<string[]> GitFilesAsync() => await _GitFiles;
+   public async Task<string[]> GetLastCommitFilesAsync() => await _lastCommitFiles;
+   public async Task<string> GetGitPathAsync() => await _gitPath;
+   public async Task<string> GetGitDirRelativePathAsync() => await _gitDirRelativePath;
+   public async Task<string> GetCurrentBranchAsync() => await _currentBranch;
+   public async Task<string> GetHuskyPathAync() => await _huskyPath;
 
    public Git()
    {
-      _gitPath = new Lazy<Task<string>>(GetGitPath);
-      _huskyPath = new Lazy<Task<string>>(GetHuskyPath);
-      _stagedFiles = new Lazy<Task<string[]>>(GetStagedFiles);
-      _GitFiles = new Lazy<Task<string[]>>(GetGitFiles);
-      _lastCommitFiles = new Lazy<Task<string[]>>(GetLastCommitFiles);
-      _currentBranch = new Lazy<Task<string>>(GetCurrentBranch);
-      _gitDirRelativePath = new Lazy<Task<string>>(GetGitDirRelativePath);
+      _gitPath = new AsyncLazy<string>(GetGitPath);
+      _huskyPath = new AsyncLazy<string>(GetHuskyPath);
+      _stagedFiles = new AsyncLazy<string[]>(GetStagedFiles);
+      _GitFiles = new AsyncLazy<string[]>(GetGitFiles);
+      _lastCommitFiles = new AsyncLazy<string[]>(GetLastCommitFiles);
+      _currentBranch = new AsyncLazy<string>(GetCurrentBranch);
+      _gitDirRelativePath = new AsyncLazy<string>(GetGitDirRelativePath);
    }
 
    private static async Task<string> GetGitDirRelativePath()

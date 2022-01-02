@@ -1,4 +1,4 @@
-namespace Husky;
+namespace Husky.TaskRunner;
 
 /// <summary>
 /// Special class to pass variables to the csx files.

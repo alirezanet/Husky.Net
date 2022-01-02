@@ -2,10 +2,12 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using CliWrap;
 using CliWrap.Buffered;
+using Husky.Helpers;
+using Husky.Logger;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileSystemGlobbing;
 
-namespace Husky;
+namespace Husky.TaskRunner;
 
 public class TaskRunner
 {
@@ -53,7 +55,7 @@ public class TaskRunner
       // filter tasks by branch
       if (tasks.Any(q => !string.IsNullOrEmpty(q.Branch)))
       {
-         var branch = await _git.CurrentBranch;
+         var branch = await _git.GetCurrentBranchAsync();
          tasks = tasks.Where(q => string.IsNullOrEmpty(q.Branch) || Regex.IsMatch(branch, q.Branch)).ToList();
       }
 
@@ -65,7 +67,7 @@ public class TaskRunner
 
       foreach (var task in tasks)
       {
-         Logger.Hr();
+         Logger.Logger.Hr();
 
          // use command for task name
          if (string.IsNullOrEmpty(task.Name))
@@ -118,7 +120,7 @@ public class TaskRunner
          $" ✔ Successfully executed in {executionTime:n0}ms".Husky(ConsoleColor.DarkGreen);
       }
 
-      Logger.Hr();
+      Logger.Logger.Hr();
       return 0;
    }
 
@@ -126,7 +128,7 @@ public class TaskRunner
    {
       string cwd;
       if (string.IsNullOrEmpty(task.Cwd))
-         cwd = Path.GetFullPath(await _git.GitPath, Environment.CurrentDirectory);
+         cwd = Path.GetFullPath(await _git.GetGitPathAsync(), Environment.CurrentDirectory);
       else
          cwd = Path.IsPathFullyQualified(task.Cwd) ? task.Cwd : Path.GetFullPath(task.Cwd, Environment.CurrentDirectory);
       return cwd;
@@ -233,8 +235,8 @@ public class TaskRunner
 
    private async Task<List<HuskyTask>> GetTasks()
    {
-      var gitPath = await _git.GitPath;
-      var huskyPath = await _git.HuskyPath;
+      var gitPath = await _git.GetGitPathAsync();
+      var huskyPath = await _git.GetHuskyPathAync();
       var tasks = new List<HuskyTask>();
       var dir = Path.Combine(gitPath, huskyPath, "task-runner.json");
       var config = new ConfigurationBuilder()
@@ -266,39 +268,39 @@ public class TaskRunner
                continue;
             case "${staged}":
             {
-               var stagedFiles = (await _git.StagedFiles).Where(q => !string.IsNullOrWhiteSpace(q)).ToArray();
+               var stagedFiles = (await _git.GetStagedFilesAsync()).Where(q => !string.IsNullOrWhiteSpace(q)).ToArray();
                // continue if nothing is staged
                if (!stagedFiles.Any()) continue;
 
                // get match staged files with glob
                var matches = matcher.Match(stagedFiles);
-               AddMatchedFiles(pathMode, matches, args, (await _git.GitPath));
+               AddMatchedFiles(pathMode, matches, args, (await _git.GetGitPathAsync()));
                _needGitIndexUpdate = true;
                continue;
             }
             case "${last-commit}":
             {
-               var lastCommitFiles = (await _git.LastCommitFiles).Where(q => !string.IsNullOrWhiteSpace(q)).ToArray();
+               var lastCommitFiles = (await _git.GetLastCommitFilesAsync()).Where(q => !string.IsNullOrWhiteSpace(q)).ToArray();
                if (lastCommitFiles.Length < 1) continue;
                var matches = matcher.Match(lastCommitFiles);
-               AddMatchedFiles(pathMode, matches, args, await _git.GitPath);
+               AddMatchedFiles(pathMode, matches, args, await _git.GetGitPathAsync());
                continue;
             }
             case "${git-files}":
             {
-               var gitFiles = await _git.GitFiles;
+               var gitFiles = await _git.GitFilesAsync();
                if (gitFiles.Length < 1) continue;
                var matches = matcher.Match(gitFiles);
-               AddMatchedFiles(pathMode, matches, args, await _git.GitPath);
+               AddMatchedFiles(pathMode, matches, args, await _git.GetGitPathAsync());
                continue;
             }
             case "${all-files}":
             {
-               var gitPath = await _git.GitPath;
+               var gitPath = await _git.GetGitPathAsync();
                var files = Directory.GetFiles(gitPath, "*", SearchOption.AllDirectories);
 
                // exclude .git directory (absolute path)
-               var gitDir = await _git.GitDirRelativePath;
+               var gitDir = await _git.GetGitDirRelativePathAsync();
                matcher.AddExclude($"{gitDir}/**");
 
                var matches = matcher.Match(gitPath, files);
@@ -308,7 +310,7 @@ public class TaskRunner
             case { } x when x.StartsWith("${") && x.EndsWith("}"):
             {
                var customVariables = await _customVariableTasks.Value;
-               var variable = x.Substring(2, x.Length - 3);
+               var variable = x[2..^1];
 
                // check if variable is defined
                if (customVariables.All(q => q.Name != variable))
@@ -318,7 +320,7 @@ public class TaskRunner
                }
 
                var huskyVariableTask = customVariables.First(q => q.Name == variable);
-               var gitPath = await _git.GitPath;
+               var gitPath = await _git.GetGitPathAsync();
 
                // get relative paths for matcher
                var files = (await GetCustomVariableOutput(huskyVariableTask))
@@ -364,7 +366,7 @@ public class TaskRunner
 
    private async Task<IList<HuskyTask>> GetCustomVariableTasks()
    {
-      var dir = Path.Combine(await _git.GitPath, await _git.HuskyPath, "task-runner.json");
+      var dir = Path.Combine(await _git.GetGitPathAsync(), await _git.GetHuskyPathAync(), "task-runner.json");
       var tasks = new List<HuskyTask>();
       var config = new ConfigurationBuilder()
          .AddJsonFile(dir)
@@ -396,7 +398,7 @@ public class TaskRunner
    private static void LogMatchedFiles(IEnumerable<string> files)
    {
       // show matched files in verbose mode
-      if (!Logger.Verbose) return;
+      if (!Logger.Logger.Verbose) return;
       "Matches:".Husky(ConsoleColor.DarkGray);
       foreach (var file in files)
          $"  {file}".LogVerbose();

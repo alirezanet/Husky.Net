@@ -1,4 +1,4 @@
-namespace Husky;
+namespace Husky.TaskRunner;
 
 public enum OutputTypes
 {

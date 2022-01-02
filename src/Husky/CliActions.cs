@@ -1,9 +1,11 @@
 using System.Collections.Immutable;
 using System.Reflection;
+using Husky.Logger;
+using Husky.TaskRunner;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
-using U = Husky.Utility;
+using U = Husky.Helpers.Utility;
 
 namespace Husky;
 
@@ -65,7 +67,7 @@ public static class CliActions
          // find all hooks (if exists) from .husky/ and add executable flag
          var files = Directory.GetFiles(path).Where(f => !f.Contains(".")).ToList();
          files.Add(husky_shPath);
-         await Utility.SetExecutablePermission(files.ToArray());
+         await U.SetExecutablePermission(files.ToArray());
 
          // Created task-runner.json file
          // We don't want to override this file
@@ -146,7 +148,7 @@ public static class CliActions
       }
 
       // needed for linux
-      await Utility.SetExecutablePermission(file);
+      await U.SetExecutablePermission(file);
 
       $"created {file}".Log(ConsoleColor.Green);
       return 0;
@@ -163,11 +165,11 @@ public static class CliActions
 
    public static async Task<int> Run(string[]? args = default)
    {
-      var taskRunner = new TaskRunner();
+      var taskRunner = new TaskRunner.TaskRunner();
       if (args is null || args.Length == 0)
          return await taskRunner.Run();
 
-      var dic = Utility.ParseArgs(args);
+      var dic = U.ParseArgs(args);
 
       // ReSharper disable once InvertIf
       if (dic.Keys.Any(q => q != "name" && q != "group" && q != "args"))

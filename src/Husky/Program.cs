@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using Husky;
+using Husky.Logger;
 
 #if DEBUG
 "Starting development mode ... ".Log(ConsoleColor.DarkGray);

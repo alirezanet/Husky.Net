@@ -1,8 +1,10 @@
 using System.Runtime.InteropServices;
 using CliWrap;
 using CliWrap.Buffered;
+using Husky.Logger;
+using Husky.TaskRunner;
 
-namespace Husky;
+namespace Husky.Helpers;
 
 public static class Utility
 {

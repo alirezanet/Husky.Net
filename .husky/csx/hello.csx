@@ -4,7 +4,7 @@
 // example of using other csx files
 #load "foo.csx"
 
-var message = "Husky supports csharp scripting!";
+private var message = "Husky supports csharp scripting!";
 
 Console.ForegroundColor = ConsoleColor.Green;
 Console.WriteLine(message);
