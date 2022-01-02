@@ -20,6 +20,7 @@ if [ -z "$husky_skip_init" ]; then
   fi
 
   export readonly husky_skip_init=1
+  export vt100=1
   sh -e "$0" "$@"
   exitCode="$?"
 

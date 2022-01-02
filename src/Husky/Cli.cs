@@ -1,3 +1,5 @@
+using System.Runtime.InteropServices;
+
 namespace Husky;
 
 public static class Cli
@@ -13,6 +15,8 @@ public static class Cli
 
    public static async ValueTask Start(string[] args)
    {
+      HandleEvnArguments();
+
       if (!args.Any())
       {
          Help();
@@ -34,6 +38,30 @@ public static class Cli
          // unhandled exceptions
          e.Message.LogErr();
          Exit(1);
+      }
+   }
+
+   private static void HandleEvnArguments()
+   {
+      if (Environment.GetEnvironmentVariable("vt100") == "1")
+      {
+         try
+         {
+            // ENABLE_VIRTUAL_TERMINAL_PROCESSING
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+               Win32Console.Initialize();
+               Logger.Vt100Colors = true;
+            }
+         }
+         catch (Exception e)
+         {
+            e.Message.LogVerbose(ConsoleColor.Red);
+         }
+      }
+      if (Environment.GetEnvironmentVariable("HUSKY_DEBUG") == "1")
+      {
+         Logger.Verbose = true;
       }
    }
 
