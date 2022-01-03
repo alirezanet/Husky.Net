@@ -175,9 +175,9 @@ dotnet husky add .husky/pre-commit "dotnet husky run"
 
 <br>
 
-### Task supported configurations
+### Task configurations
 
-Using bellow configuration you can define your task with a lot of options.
+Each task in task-runner.json is a JSON object with the following properties:
 
 ---
 
