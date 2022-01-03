@@ -11,14 +11,6 @@ You can use it to lint your commit messages, run tests, lint code, etc... when y
 
 **Features**
 
-- 🔥 Internal task runner!
-- 🔥 Multiple file states (staged, git-files, last-commit, all-files)
-- 🔥 Compatible with [dotnet-format](https://github.com/dotnet/format)
-- 🔥 Customizable tasks
-- 🔥 Supports task for specific branches
-- 🔥 CSharp scripts (csx)!
-- 🔥 Supports gitflow hooks
-- 🔥 User-define arg variables 🆕
 - Supports all Git hooks
 - Powered by modern new Git feature (core.hooksPath)
 - User-friendly messages
@@ -26,6 +18,12 @@ You can use it to lint your commit messages, run tests, lint code, etc... when y
 - Git GUIs
 - Custom directories
 - Monorepo
+- 🔥 Internal task runner!
+- 🔥 Multiple file states (staged, last-commit, git-files, etc...)
+- 🔥 Compatible with [dotnet-format](https://github.com/dotnet/format)
+- 🔥 User-define arg variables
+- 🔥 CSharp scripts (csx)
+- 🔥 Supports gitflow hooks
 
 
 If you already know what is the lint-staged or Husky (npm packages),
@@ -95,6 +93,7 @@ If you have only one multiple target project (`TargetFrameworks`) add the bellow
 ```
 
 Or If you are using the `npm`, add the below code to your `package.json` file to automatically install husky after the installation process:
+
 ```json
  "scripts": {
     "prepare": "dotnet tool restore && dotnet husky install"
@@ -284,7 +283,3 @@ This repo also using a csharp script to lint the commit messages, you can check 
 - This tool inspired of [husky](https://github.com/typicode/husky) & [lint-staged](https://github.com/okonet/lint-staged) and a few other tools, for **DotNet**, so make sure to support them too!
 
 - I'd also like to thank [kaylumah](https://github.com/kaylumah) for his [article](https://kaylumah.nl/2019/09/07/using-csharp-code-your-git-hooks.html) that gave me the csharp scripting support idea.
-
-## Known issues
-
-- `husky run` command doesn't have color when executed from hooks.
