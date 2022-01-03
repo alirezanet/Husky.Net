@@ -5,6 +5,7 @@ public static class Logger
    public static bool Verbose = false;
    public static bool Colors = true;
    public static bool Vt100Colors = false;
+   public static bool Quiet = false;
 
    private static void Write(string message, ConsoleColor? color = null)
    {
@@ -33,6 +34,7 @@ public static class Logger
 
    public static void Husky(this string message, ConsoleColor? color = null)
    {
+      if (Quiet) return;
       Write("[Husky] ", ConsoleColor.Cyan);
       WriteLine($"{message}", color);
    }
@@ -44,6 +46,7 @@ public static class Logger
 
    public static void Hr(int count = 50, ConsoleColor? color = ConsoleColor.DarkGray)
    {
+      if (Quiet) return;
       WriteLine(new string('-', count), color);
    }
 

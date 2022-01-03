@@ -75,7 +75,11 @@ public static class Cli
       if (args.Contains("--verbose") || args.Contains("-v"))
          Logger.Logger.Verbose = true;
 
-      return args.Where(x => x != "--verbose" && x != "-v" && x != "--no-color").ToArray();
+      if (args.Contains("--quiet") || args.Contains("-q"))
+         Logger.Logger.Quiet = true;
+
+      var exclude = new[] { "--no-color", "--verbose", "--quiet", "-v", "-q" };
+      return args.Where(x => !exclude.Contains(x)).ToArray();
    }
 
    private static async ValueTask<int> RunCommand(string cmd, IReadOnlyList<string> args)
@@ -83,7 +87,6 @@ public static class Cli
       var ac = args.Count;
       return cmd switch
       {
-         "--no-color" or "-v" or "--verbose" => 0,
          "--help" or "-h" or "-?" => Help(),
          "--version" or "-V" => CliActions.Version(),
          "install" when ac > 1 && !args[1].StartsWith("-") => await CliActions.Install(args[1]),
@@ -114,8 +117,9 @@ public static class Cli
 Options:
    -h | --help|-?      Show help information
    -V | --version      Show version information
-   -v | --verbose      Show verbose output
-   -c | --no-color     Disable color output
+   -v | --verbose      Show verbose output (default: false)
+   -c | --no-color     Disable color output (default: false)
+   -q | --quiet        Disable [Husky] console output (default: false)
 
 Commands:
    husky install [dir] (default: .husky)    Install Husky hooks
