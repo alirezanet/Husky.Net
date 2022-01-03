@@ -13,9 +13,9 @@
          "args": ["husky", "exec", ".husky/csx/commit-lint.csx", "${args}"]
       },
       {
-         "command": "dotnet-format",
+         "command": "dotnet",
          "group": "pre-commit",
-         "args": ["--include", "${staged}"],
+         "args": ["dotnet-format", "--include", "${staged}"],
          "include": ["**/*.cs"]
       },
       {
