@@ -272,11 +272,12 @@ This repo also using a csharp script to lint the commit messages, you can check 
 
 ---
 
-## Notes
-
-- Consider all bellow 1.x versions as beta. ( we need a lot of tests before major release )
+## Support
 
 - Don't forget to give a ⭐ on [GitHub](https://github.com/alirezanet/husky.net)
+- Share your feedback and ideas to improve this tool
+- Share Husky.Net on your favorite social media and your friends
+- Write a blog post about Husky.Net
 
 ## Credits
 
