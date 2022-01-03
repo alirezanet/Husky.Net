@@ -278,6 +278,7 @@ This repo also using a csharp script to lint the commit messages, you can check 
 - Share your feedback and ideas to improve this tool
 - Share Husky.Net on your favorite social media and your friends
 - Write a blog post about Husky.Net
+- All contributions are welcome! Feel free to send pull requests
 
 ## Credits
 
