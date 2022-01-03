@@ -117,7 +117,7 @@ public class TaskRunner
             executionTime = result.RunTime.TotalMilliseconds;
          }
 
-         $"✔ Successfully executed in {executionTime:n0}ms".Husky(ConsoleColor.DarkGreen);
+         $" ✔ Successfully executed in {executionTime:n0}ms".Husky(ConsoleColor.DarkGreen);
       }
 
       Logger.Logger.Hr();
@@ -137,7 +137,7 @@ public class TaskRunner
    private static Queue<List<(string arg, bool isFile)>> GetChunks(int totalCommandLength, IList<(string arg, bool isFile)> args)
    {
       var chunkSize = Math.Ceiling(totalCommandLength / (MAX_ARG_LENGTH / 2));
-      $"⚠️  The Maximum argument length '{MAX_ARG_LENGTH}' reached, splitting matched files into {chunkSize} chunks".Husky(ConsoleColor.Yellow);
+      $"⚠️ The Maximum argument length '{MAX_ARG_LENGTH}' reached, splitting matched files into {chunkSize} chunks".Husky(ConsoleColor.Yellow);
 
       var totalFiles = args.Count(a => a.isFile);
       var totalFilePerChunk = (int)Math.Ceiling(totalFiles / chunkSize);
@@ -202,7 +202,7 @@ public class TaskRunner
       catch (Exception)
       {
          // Silently ignore the error if happens, we don't want to break the execution
-         "⚠️  Can not update git index".Husky(ConsoleColor.Yellow);
+         "⚠️ Can not update git index".Husky(ConsoleColor.Yellow);
       }
 
       return result;
@@ -264,7 +264,7 @@ public class TaskRunner
                if (configArgs != null)
                   args.Add((configArgs, false));
                else
-                  "⚠️  No arguments passed to the run command".Husky(ConsoleColor.Yellow);
+                  "⚠️ No arguments passed to the run command".Husky(ConsoleColor.Yellow);
                continue;
             case "${staged}":
             {
