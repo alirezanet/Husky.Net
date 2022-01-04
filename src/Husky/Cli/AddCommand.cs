@@ -15,7 +15,7 @@ public class AddCommand : CommandBase
 
    protected override async ValueTask SafeExecuteAsync(IConsole console)
    {
-      var setCommand = new SetCommand() { HookName = HookName, Command = cmd };
+      var setCommand = new SetCommand { HookName = HookName, Command = cmd };
       var huskyPath = await setCommand.GetHuskyPath();
       var hookPath = Path.Combine(huskyPath, HookName);
 

@@ -23,7 +23,9 @@ public static class Logger
          }
       }
       else
+      {
          Console.Write(message);
+      }
    }
 
    private static void WriteLine(string message, ConsoleColor? color = null)

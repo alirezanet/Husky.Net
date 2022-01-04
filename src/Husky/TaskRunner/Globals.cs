@@ -9,5 +9,4 @@ public class Globals
    // ReSharper disable once UnusedAutoPropertyAccessor.Global
    public IList<string> Args { get; set; }
 #pragma warning restore CS8618
-
 }

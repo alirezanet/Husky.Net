@@ -116,13 +116,13 @@ internal static class Vt100
          ConsoleColor.Magenta => (180, 0, 158),
          ConsoleColor.Yellow => (249, 241, 165),
          ConsoleColor.White => (242, 242, 242),
-         _ => throw new Exception($"Unexpected color: {color}"),
+         _ => throw new Exception($"Unexpected color: {color}")
       };
    }
 
    public static void ResetScrollMargins()
    {
-      Console.Write($"\x1b[r");
+      Console.Write("[r");
    }
 
    public static void SetScrollMargins(int top, int bottom)
@@ -142,7 +142,7 @@ internal static class Vt100
 
    public static void EraseRestOfCurrentLine()
    {
-      Console.Write($"\x1b[K");
+      Console.Write("[K");
    }
 
    public static void ResetColors()

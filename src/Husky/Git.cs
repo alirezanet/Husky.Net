@@ -8,21 +8,13 @@ namespace Husky;
 
 public class Git
 {
-   private readonly AsyncLazy<string> _gitDirRelativePath;
-   private readonly AsyncLazy<string> _gitPath;
    private readonly AsyncLazy<string> _currentBranch;
-   private readonly AsyncLazy<string> _huskyPath;
-   private readonly AsyncLazy<string[]> _stagedFiles;
-   private readonly AsyncLazy<string[]> _lastCommitFiles;
+   private readonly AsyncLazy<string> _gitDirRelativePath;
    private readonly AsyncLazy<string[]> _GitFiles;
-
-   public async Task<string[]> GetStagedFilesAsync() => await _stagedFiles;
-   public async Task<string[]> GitFilesAsync() => await _GitFiles;
-   public async Task<string[]> GetLastCommitFilesAsync() => await _lastCommitFiles;
-   public async Task<string> GetGitPathAsync() => await _gitPath;
-   public async Task<string> GetGitDirRelativePathAsync() => await _gitDirRelativePath;
-   public async Task<string> GetCurrentBranchAsync() => await _currentBranch;
-   public async Task<string> GetHuskyPathAsync() => await _huskyPath;
+   private readonly AsyncLazy<string> _gitPath;
+   private readonly AsyncLazy<string> _huskyPath;
+   private readonly AsyncLazy<string[]> _lastCommitFiles;
+   private readonly AsyncLazy<string[]> _stagedFiles;
 
    public Git()
    {
@@ -33,6 +25,41 @@ public class Git
       _lastCommitFiles = new AsyncLazy<string[]>(GetLastCommitFiles);
       _currentBranch = new AsyncLazy<string>(GetCurrentBranch);
       _gitDirRelativePath = new AsyncLazy<string>(GetGitDirRelativePath);
+   }
+
+   public async Task<string[]> GetStagedFilesAsync()
+   {
+      return await _stagedFiles;
+   }
+
+   public async Task<string[]> GitFilesAsync()
+   {
+      return await _GitFiles;
+   }
+
+   public async Task<string[]> GetLastCommitFilesAsync()
+   {
+      return await _lastCommitFiles;
+   }
+
+   public async Task<string> GetGitPathAsync()
+   {
+      return await _gitPath;
+   }
+
+   public async Task<string> GetGitDirRelativePathAsync()
+   {
+      return await _gitDirRelativePath;
+   }
+
+   public async Task<string> GetCurrentBranchAsync()
+   {
+      return await _currentBranch;
+   }
+
+   public async Task<string> GetHuskyPathAsync()
+   {
+      return await _huskyPath;
    }
 
    private static async Task<string> GetGitDirRelativePath()

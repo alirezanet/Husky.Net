@@ -14,10 +14,10 @@ namespace Husky.TaskRunner;
 public class TaskRunner
 {
    private const double MAX_ARG_LENGTH = 8191;
-   private readonly bool _isWindows;
-   private bool _needGitIndexUpdate;
    private readonly Lazy<Task<IList<HuskyTask>>> _customVariableTasks;
    private readonly Git _git;
+   private readonly bool _isWindows;
+   private bool _needGitIndexUpdate;
 
    public TaskRunner()
    {
@@ -279,7 +279,7 @@ public class TaskRunner
 
                // get match staged files with glob
                var matches = matcher.Match(stagedFiles);
-               AddMatchedFiles(pathMode, matches, args, (await _git.GetGitPathAsync()));
+               AddMatchedFiles(pathMode, matches, args, await _git.GetGitPathAsync());
                _needGitIndexUpdate = true;
                continue;
             }
