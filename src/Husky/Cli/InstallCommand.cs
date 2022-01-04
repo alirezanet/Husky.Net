@@ -10,7 +10,7 @@ namespace Husky.Cli;
 [Command("install", Description = "Install Husky hooks")]
 public class InstallCommand : CommandBase
 {
-   private const string failedMsg = "\nGit hooks installation failed";
+   private const string FailedMsg = "Git hooks installation failed";
 
    [CommandOption("dir", 'd', Description = "The custom directory to install Husky hooks.")]
    public string HuskyDirectory { get; set; } = Utility.HUSKY_FOLDER_NAME;
@@ -20,7 +20,7 @@ public class InstallCommand : CommandBase
       // Ensure that we're inside a git repository
       // If git command is not found, we should return exception.
       // That's why ExitCode needs to be checked explicitly.
-      if ((await Git.ExecAsync("rev-parse")).ExitCode != 0) throw new CommandException(failedMsg);
+      if ((await Git.ExecAsync("rev-parse")).ExitCode != 0) throw new CommandException(FailedMsg);
 
       var cwd = Environment.CurrentDirectory;
 
@@ -29,11 +29,11 @@ public class InstallCommand : CommandBase
 
       // Ensure that we're not trying to install outside of cwd
       if (!path.StartsWith(cwd))
-         throw new CommandException($"{path}\nNot allowed (see {Utility.DOCS_URL})" + failedMsg);
+         throw new CommandException($"{path}\nNot allowed (see {Utility.DOCS_URL})\n" + FailedMsg);
 
       // Ensure that cwd is git top level
       if (!Directory.Exists(Path.Combine(cwd, ".git")))
-         throw new CommandException($".git can't be found (see {Utility.DOCS_URL})" + failedMsg);
+         throw new CommandException($".git can't be found (see {Utility.DOCS_URL})\n" + FailedMsg);
 
       // Create .husky/_
       Directory.CreateDirectory(Path.Combine(path, "_"));
@@ -68,7 +68,7 @@ public class InstallCommand : CommandBase
       // Configure repo
       var p = await Git.ExecAsync($"config core.hooksPath {HuskyDirectory}");
       if (p.ExitCode != 0)
-         throw new CommandException("Failed to configure git" + failedMsg);
+         throw new CommandException("Failed to configure git\n" + FailedMsg);
 
       // Configure gitflow repo
       var local = await Git.ExecBufferedAsync("config --local --list");
@@ -76,7 +76,7 @@ public class InstallCommand : CommandBase
       {
          var gf = await Git.ExecAsync($"config gitflow.path.hooks {HuskyDirectory}");
          if (gf.ExitCode != 0)
-            throw new CommandException("Failed to configure gitflow" + failedMsg);
+            throw new CommandException("Failed to configure gitflow\n" + FailedMsg);
       }
 
       "Git hooks installed".Log(ConsoleColor.Green);
