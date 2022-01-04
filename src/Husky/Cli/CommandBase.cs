@@ -1,3 +1,4 @@
+using System.Runtime.ExceptionServices;
 using CliFx;
 using CliFx.Attributes;
 using CliFx.Exceptions;
@@ -16,13 +17,13 @@ public abstract class CommandBase : ICommand
 
    protected abstract ValueTask SafeExecuteAsync(IConsole console);
 
-   public ValueTask ExecuteAsync(IConsole console)
+   public async ValueTask ExecuteAsync(IConsole console)
    {
       // catch unhandled exceptions.
       try
       {
          Logger.Verbose = Verbose;
-         return SafeExecuteAsync(console);
+         await SafeExecuteAsync(console);
       }
       catch (CommandException)
       {
