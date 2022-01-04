@@ -236,7 +236,7 @@ public class TaskRunner
       try
       {
          var gitPath = await _git.GetGitPathAsync();
-         var huskyPath = await _git.GetHuskyPathAync();
+         var huskyPath = await _git.GetHuskyPathAsync();
          var tasks = new List<HuskyTask>();
          var dir = Path.Combine(gitPath, huskyPath, "task-runner.json");
          var config = new ConfigurationBuilder()
@@ -371,7 +371,7 @@ public class TaskRunner
 
    private async Task<IList<HuskyTask>> GetCustomVariableTasks()
    {
-      var dir = Path.Combine(await _git.GetGitPathAsync(), await _git.GetHuskyPathAync(), "task-runner.json");
+      var dir = Path.Combine(await _git.GetGitPathAsync(), await _git.GetHuskyPathAsync(), "task-runner.json");
       var tasks = new List<HuskyTask>();
       var config = new ConfigurationBuilder()
          .AddJsonFile(dir)

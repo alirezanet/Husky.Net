@@ -13,8 +13,8 @@ public class InstallCommand : CommandBase
 {
    private const string failedMsg = "\nGit hooks installation failed";
 
-   [CommandOption("dir", 'd', Description = "The custom directory to install Husky hooks. (default: .husky)")]
-   public string? HuskyDirectory { get; set; }
+   [CommandOption("dir", 'd', Description = "The custom directory to install Husky hooks.")]
+   public string HuskyDirectory { get; set; } = Utility.HUSKY_FOLDER_NAME;
 
    public override async ValueTask ExecuteAsync(IConsole console)
    {
@@ -29,7 +29,6 @@ public class InstallCommand : CommandBase
       var cwd = Environment.CurrentDirectory;
 
       // set default husky folder
-      HuskyDirectory ??= Utility.HUSKY_FOLDER_NAME;
       var path = Path.GetFullPath(Path.Combine(cwd, HuskyDirectory));
 
       // Ensure that we're not trying to install outside of cwd

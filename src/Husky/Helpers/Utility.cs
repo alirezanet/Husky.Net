@@ -12,6 +12,7 @@ public static class Utility
 
    // Custom dir help TODO: change this url to short version of docs
    internal const string DOCS_URL = "https://github.com/alirezanet/husky.net";
+
    public static async Task<BufferedCommandResult> ExecBufferedAsync(string fileName, string args)
    {
       try
@@ -29,9 +30,9 @@ public static class Utility
       }
    }
 
-   public static async ValueTask<int> SetExecutablePermission(params string[] files)
+   public static async ValueTask SetExecutablePermission(params string[] files)
    {
-      if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return 0;
+      if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
       var chmod = GetFullyQualifiedPath("chmod");
       var args = new[] { "+x" }.Concat(files);
       var ps = CliWrap.Cli.Wrap(chmod)
@@ -41,26 +42,18 @@ public static class Utility
       var result = await ps.ExecuteAsync();
       if (result.ExitCode != 0)
          "failed to add executable permissions".Log(ConsoleColor.Yellow);
-      return result.ExitCode;
    }
 
    public static async Task<CommandResult> ExecDirectAsync(string fileName, string args)
    {
-      try
-      {
-         var fullPath = GetFullyQualifiedPath(fileName);
-         var result = await CliWrap.Cli.Wrap(fullPath)
-            .WithArguments(args)
-            .WithStandardOutputPipe(PipeTarget.ToDelegate(q => q.Log()))
-            .WithStandardErrorPipe(PipeTarget.ToDelegate(q => q.LogErr()))
-            .ExecuteAsync();
-         return result;
-      }
-      catch (Exception)
-      {
-         $"failed to execute command '{fileName}'".LogErr();
-         throw;
-      }
+      var fullPath = GetFullyQualifiedPath(fileName);
+      var result = await CliWrap.Cli.Wrap(fullPath)
+         .WithArguments(args)
+         .WithValidation(CommandResultValidation.None)
+         .WithStandardOutputPipe(PipeTarget.ToDelegate(q => q.Log()))
+         .WithStandardErrorPipe(PipeTarget.ToDelegate(q => q.LogErr()))
+         .ExecuteAsync();
+      return result;
    }
 
    public static async Task<CommandResult> RunCommandAsync(string fileName, IEnumerable<string> args, string cwd,
