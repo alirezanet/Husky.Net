@@ -4,7 +4,7 @@ using Husky.Stdout;
 
 namespace Husky.Cli;
 
-[Command("add", Description = "Add husky hook (pre-commit -c \"echo husky.net is awesome\")")]
+[Command("add", Description = "Add husky hook (add pre-commit -c \"echo husky.net is awesome\")")]
 public class AddCommand : CommandBase
 {
    [CommandParameter(0, Name = "hook-name", Description = "Hook name (pre-commit, commit-msg, pre-push, etc.)")]
