@@ -1,4 +1,3 @@
-using System.Runtime.ExceptionServices;
 using CliFx;
 using CliFx.Attributes;
 using CliFx.Exceptions;
@@ -13,16 +12,17 @@ namespace Husky.Cli;
 public abstract class CommandBase : ICommand
 {
    [CommandOption("verbose", 'v', Description = "Enable verbose output")]
-   public bool Verbose { get; set; } = false;
-
-   protected abstract ValueTask SafeExecuteAsync(IConsole console);
+   public bool Verbose
+   {
+      get => Logger.Verbose;
+      set => Logger.Verbose = value;
+   }
 
    public async ValueTask ExecuteAsync(IConsole console)
    {
       // catch unhandled exceptions.
       try
       {
-         Logger.Verbose = Verbose;
          await SafeExecuteAsync(console);
       }
       catch (CommandException)
@@ -37,4 +37,6 @@ public abstract class CommandBase : ICommand
          throw new CommandException(ex.Message, innerException: ex);
       }
    }
+
+   protected abstract ValueTask SafeExecuteAsync(IConsole console);
 }
