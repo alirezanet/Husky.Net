@@ -20,7 +20,7 @@ public class InstallCommand : CommandBase
       // Ensure that we're inside a git repository
       // If git command is not found, we should return exception.
       // That's why ExitCode needs to be checked explicitly.
-      if ((await Git.ExecAsync("rev-parse")).ExitCode != 0) throw new CommandException("Not a git repository" + failedMsg);
+      if ((await Git.ExecAsync("rev-parse")).ExitCode != 0) throw new CommandException(failedMsg);
 
       var cwd = Environment.CurrentDirectory;
 
