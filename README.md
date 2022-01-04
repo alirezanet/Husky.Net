@@ -60,7 +60,7 @@ dotnet husky install
 ### Add your first hook
 
 ```shell
-dotnet husky add .husky/pre-commit "echo 'Husky is awesome!'"
+dotnet husky add pre-commit -c "echo 'Husky is awesome!'"
 git add .husky/pre-commit
 ```
 
@@ -113,7 +113,7 @@ you can run and test your tasks with `husky run` command. Once you are sure that
 e.g.
 
 ```shell
-dotnet husky add .husky/pre-commit "dotnet husky run"
+dotnet husky add pre-commit -c "dotnet husky run"
 ```
 <details>
 <summary>A simple real-world example <code>task-runner.json</code></summary>
@@ -253,7 +253,9 @@ You can use the `exec` command to execute a C# script.
 e.g.
 
 ```shell
-dotnet husky exec .husky/csx/hello.csx
+dotnet husky exec <csx-file-path>
+# e.g
+# dotnet husky exec .husky/csx/hello.csx
 ```
 
 Also, you can use your csx scripts in your tasks.
