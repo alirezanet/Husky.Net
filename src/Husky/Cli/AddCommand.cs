@@ -21,9 +21,12 @@ public class AddCommand : CommandBase
 
       // Set if not exists
       if (!File.Exists(hookPath))
+      {
          await setCommand.ExecuteAsync(console);
+         return;
+      }
 
       await File.AppendAllTextAsync(hookPath, $"{cmd}\n");
-      $"added to '${hookPath}' hook".Log(ConsoleColor.Green);
+      $"added to '{hookPath}' hook".Log(ConsoleColor.Green);
    }
 }
