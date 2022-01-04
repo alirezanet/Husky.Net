@@ -18,13 +18,6 @@ public abstract class CommandBase : ICommand
       set => Logger.Verbose = value;
    }
 
-   [CommandOption("vt100", Description = "Enable VT100 terminal colors", EnvironmentVariable = "vt100")]
-   public bool Vt100
-   {
-      get => Logger.Vt100Colors;
-      set => Logger.Vt100Colors = value;
-   }
-
    public async ValueTask ExecuteAsync(IConsole console)
    {
       // catch unhandled exceptions.

@@ -1,3 +1,5 @@
+using System.Runtime.InteropServices;
+
 namespace Husky.Stdout;
 
 public static class Logger
@@ -7,6 +9,20 @@ public static class Logger
    public static bool Vt100Colors = false;
    public static bool Quiet = false;
 
+   internal static void Init()
+   {
+      if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || Environment.GetEnvironmentVariable("vt100") is not "1") return;
+      try
+      {
+         // enabling vt100 colors for windows
+         Win32Console.Initialize();
+         Vt100Colors = true;
+      }
+      catch (Exception e)
+      {
+         e.Message.LogVerbose(ConsoleColor.DarkRed);
+      }
+   }
    private static void Write(string message, ConsoleColor? color = null)
    {
       if (Colors && color != null)
