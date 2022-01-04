@@ -34,8 +34,6 @@ public class RunCommand : CommandBase
    protected override async ValueTask SafeExecuteAsync(IConsole console)
    {
       var taskRunner = new TaskRunner.TaskRunner();
-      var exitCode = await taskRunner.Run(this);
-      if (exitCode != 0)
-         throw new CommandException("", exitCode);
+      await taskRunner.Run(this);
    }
 }

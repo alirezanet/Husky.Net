@@ -1,7 +1,6 @@
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using CliFx.Exceptions;
-using CliWrap;
 using CliWrap.Buffered;
 using Husky.Cli;
 using Husky.Helpers;
@@ -26,7 +25,7 @@ public class TaskRunner
       _customVariableTasks = new Lazy<Task<IList<HuskyTask>>>(GetCustomVariableTasks);
    }
 
-   public async Task<int> Run(RunCommand command)
+   public async ValueTask Run(RunCommand command)
    {
       "🚀 Preparing tasks ...".Husky();
 
@@ -42,15 +41,14 @@ public class TaskRunner
       if (command.Name != null)
       {
          $"🔍 Using task name '{command.Name}'".Husky();
-         tasks = tasks.Where(q => q.Name == command.Name).ToList();
+         tasks = tasks.Where(q => q.Name != null && q.Name.Equals(command.Name, StringComparison.OrdinalIgnoreCase)).ToList();
       }
 
       if (command.Group != null)
       {
          $"🔍 Using task group '{command.Group}'".Husky();
-         tasks = tasks.Where(q => q.Group == command.Group).ToList();
+         tasks = tasks.Where(q => q.Group != null && q.Group.Equals(command.Group, StringComparison.OrdinalIgnoreCase)).ToList();
       }
-
 
       // filter tasks by branch
       if (tasks.Any(q => !string.IsNullOrEmpty(q.Branch)))
@@ -62,7 +60,7 @@ public class TaskRunner
       if (tasks.Count == 0)
       {
          "💤 Skipped, no task found".Husky();
-         return 0;
+         return;
       }
 
       foreach (var task in tasks)
@@ -103,23 +101,18 @@ public class TaskRunner
             var chunks = GetChunks(totalCommandLength, args);
             for (var i = 1; i <= chunks.Count; i++)
             {
-               var result = await ExecuteHuskyTask($"chunk [{i}]", task, chunks.Dequeue(), cwd);
-               if (result.ExitCode != 0) return result.ExitCode;
-               executionTime += result.RunTime.TotalMilliseconds;
+               executionTime += await ExecuteHuskyTask($"chunk [{i}]", task, chunks.Dequeue(), cwd);
             }
          }
          else // normal execution
          {
-            var result = await ExecuteHuskyTask("", task, args, cwd);
-            if (result.ExitCode != 0) return result.ExitCode;
-            executionTime = result.RunTime.TotalMilliseconds;
+            executionTime = await ExecuteHuskyTask("", task, args, cwd);
          }
 
          $" ✔ Successfully executed in {executionTime:n0}ms".Husky(ConsoleColor.DarkGreen);
       }
 
       Logger.Hr();
-      return 0;
    }
 
    private async Task<string> GetTaskCwd(HuskyTask task)
@@ -177,21 +170,18 @@ public class TaskRunner
       return chunks;
    }
 
-   private async Task<CommandResult> ExecuteHuskyTask(string chunk, HuskyTask task, IEnumerable<(string arg, bool isFile)> args, string cwd)
+   private async ValueTask<double> ExecuteHuskyTask(string chunk, HuskyTask task, IEnumerable<(string arg, bool isFile)> args, string cwd)
    {
       $"⌛ Executing task '{task.Name}' {chunk}...".Husky();
       // execute task in order
       var result = await Utility.RunCommandAsync(task.Command!, args.Select(q => q.arg), cwd, task.Output ?? OutputTypes.Always);
       if (result.ExitCode != 0)
       {
-         Console.WriteLine();
-         $"❌ Task '{task.Name}' failed in {result.RunTime.TotalMilliseconds:n0}ms".Husky(ConsoleColor.Red);
-         Console.WriteLine();
-         return result;
+         throw new CommandException($"\n  ❌ Task '{task.Name}' failed in {result.RunTime.TotalMilliseconds:n0}ms\n");
       }
 
       // in staged mode, we should update the git index
-      if (!_needGitIndexUpdate) return result;
+      if (!_needGitIndexUpdate) return result.RunTime.TotalMilliseconds;
       try
       {
          await Git.ExecAsync("update-index -g");
@@ -203,7 +193,7 @@ public class TaskRunner
          "⚠️ Can not update git index".Husky(ConsoleColor.Yellow);
       }
 
-      return result;
+      return result.RunTime.TotalMilliseconds;
    }
 
    private static void OverrideWindowsSpecifics(HuskyTask task)
