@@ -1,4 +1,3 @@
-using CliFx;
 using CliFx.Attributes;
 using CliFx.Exceptions;
 using CliFx.Infrastructure;
@@ -9,13 +8,13 @@ namespace Husky.Cli;
 [Command("run", Description = "Run task-runner.json tasks")]
 public class RunCommand : CommandBase
 {
-   [CommandOption("name", 'n', Description = "Task name")]
+   [CommandOption("name", 'n', Description = "Filter tasks by name")]
    public string? Name { get; set; }
 
-   [CommandOption("group", 'g', Description = "Task group")]
+   [CommandOption("group", 'g', Description = "Filter tasks by group")]
    public string? Group { get; set; }
 
-   [CommandOption("args", 'a', Description = "Task arguments")]
+   [CommandOption("args", 'a', Description = "Pass custom arguments to tasks")]
    public IReadOnlyList<string>? Arguments { get; set; }
 
    [CommandOption("no-color", 'c', Description = "Disable color output")]
