@@ -1,7 +1,7 @@
 using CliWrap;
 using CliWrap.Buffered;
 using Husky.Helpers;
-using Husky.Logger;
+using Husky.Stdout;
 
 namespace Husky;
 

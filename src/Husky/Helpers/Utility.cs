@@ -1,13 +1,17 @@
 using System.Runtime.InteropServices;
 using CliWrap;
 using CliWrap.Buffered;
-using Husky.Logger;
+using Husky.Stdout;
 using Husky.TaskRunner;
 
 namespace Husky.Helpers;
 
 public static class Utility
 {
+   internal const string HUSKY_FOLDER_NAME = ".husky";
+
+   // Custom dir help TODO: change this url to short version of docs
+   internal const string DOCS_URL = "https://github.com/alirezanet/husky.net";
    public static async Task<BufferedCommandResult> ExecBufferedAsync(string fileName, string args)
    {
       try
@@ -36,7 +40,7 @@ public static class Utility
          .WithValidation(CommandResultValidation.None);
       var result = await ps.ExecuteAsync();
       if (result.ExitCode != 0)
-         "failed to add executable permissions".LogErr();
+         "failed to add executable permissions".Log(ConsoleColor.Yellow);
       return result.ExitCode;
    }
 

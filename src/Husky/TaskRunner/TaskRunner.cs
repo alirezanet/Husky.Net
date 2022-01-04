@@ -1,9 +1,11 @@
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using CliFx.Exceptions;
 using CliWrap;
 using CliWrap.Buffered;
+using Husky.Cli;
 using Husky.Helpers;
-using Husky.Logger;
+using Husky.Stdout;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileSystemGlobbing;
 
@@ -24,7 +26,7 @@ public class TaskRunner
       _customVariableTasks = new Lazy<Task<IList<HuskyTask>>>(GetCustomVariableTasks);
    }
 
-   public async Task<int> Run(IDictionary<string, string>? config = null)
+   public async Task<int> Run(RunCommand command)
    {
       "🚀 Preparing tasks ...".Husky();
 
@@ -37,20 +39,18 @@ public class TaskRunner
             OverrideWindowsSpecifics(task);
 
       // handle run arguments
-      if (config != null)
+      if (command.Name != null)
       {
-         if (config.ContainsKey("name"))
-         {
-            $"🔍 Using task name '{config["name"]}'".Husky();
-            tasks = tasks.Where(q => q.Name == config["name"]).ToList();
-         }
-
-         if (config.ContainsKey("group"))
-         {
-            $"🔍 Using task group '{config["group"]}'".Husky();
-            tasks = tasks.Where(q => q.Group == config["group"]).ToList();
-         }
+         $"🔍 Using task name '{command.Name}'".Husky();
+         tasks = tasks.Where(q => q.Name == command.Name).ToList();
       }
+
+      if (command.Group != null)
+      {
+         $"🔍 Using task group '{command.Group}'".Husky();
+         tasks = tasks.Where(q => q.Group == command.Group).ToList();
+      }
+
 
       // filter tasks by branch
       if (tasks.Any(q => !string.IsNullOrEmpty(q.Branch)))
@@ -67,7 +67,7 @@ public class TaskRunner
 
       foreach (var task in tasks)
       {
-         Logger.Logger.Hr();
+         Logger.Hr();
 
          // use command for task name
          if (string.IsNullOrEmpty(task.Name))
@@ -83,9 +83,7 @@ public class TaskRunner
             continue;
          }
 
-         string? configArgs = null;
-         config?.TryGetValue("args", out configArgs);
-         var args = await ParseArguments(task, configArgs);
+         var args = await ParseArguments(task, command.Arguments);
 
          if (task.Args != null && task.Args.Length > args.Count)
          {
@@ -120,7 +118,7 @@ public class TaskRunner
          $" ✔ Successfully executed in {executionTime:n0}ms".Husky(ConsoleColor.DarkGreen);
       }
 
-      Logger.Logger.Hr();
+      Logger.Hr();
       return 0;
    }
 
@@ -235,18 +233,25 @@ public class TaskRunner
 
    private async Task<List<HuskyTask>> GetTasks()
    {
-      var gitPath = await _git.GetGitPathAsync();
-      var huskyPath = await _git.GetHuskyPathAync();
-      var tasks = new List<HuskyTask>();
-      var dir = Path.Combine(gitPath, huskyPath, "task-runner.json");
-      var config = new ConfigurationBuilder()
-         .AddJsonFile(dir)
-         .Build();
-      config.GetSection("tasks").Bind(tasks);
-      return tasks;
+      try
+      {
+         var gitPath = await _git.GetGitPathAsync();
+         var huskyPath = await _git.GetHuskyPathAync();
+         var tasks = new List<HuskyTask>();
+         var dir = Path.Combine(gitPath, huskyPath, "task-runner.json");
+         var config = new ConfigurationBuilder()
+            .AddJsonFile(dir)
+            .Build();
+         config.GetSection("tasks").Bind(tasks);
+         return tasks;
+      }
+      catch (FileNotFoundException e)
+      {
+         throw new CommandException("Can not find task-runner.json, try 'husky install'", innerException: e);
+      }
    }
 
-   private async Task<IList<(string arg, bool isFile)>> ParseArguments(HuskyTask task, string? configArgs = null)
+   private async Task<IList<(string arg, bool isFile)>> ParseArguments(HuskyTask task, IReadOnlyList<string>? configArgs = null)
    {
       var args = new List<(string arg, bool isFile)>();
       if (task.Args == null) return args;
@@ -262,7 +267,7 @@ public class TaskRunner
          {
             case "${args}":
                if (configArgs != null)
-                  args.Add((configArgs, false));
+                  args.AddRange(configArgs.Select(configArg => (configArg, false)));
                else
                   "⚠️ No arguments passed to the run command".Husky(ConsoleColor.Yellow);
                continue;
@@ -315,7 +320,7 @@ public class TaskRunner
                // check if variable is defined
                if (customVariables.All(q => q.Name != variable))
                {
-                  $"the custom variable '{variable}' not found".LogErr();
+                  $"⚠️ the custom variable '{variable}' not found".Log(ConsoleColor.Yellow);
                   continue;
                }
 
@@ -398,7 +403,7 @@ public class TaskRunner
    private static void LogMatchedFiles(IEnumerable<string> files)
    {
       // show matched files in verbose mode
-      if (!Logger.Logger.Verbose) return;
+      if (!Logger.Verbose) return;
       "Matches:".Husky(ConsoleColor.DarkGray);
       foreach (var file in files)
          $"  {file}".LogVerbose();

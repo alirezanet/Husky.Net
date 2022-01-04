@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace Husky.Logger;
+namespace Husky.Stdout;
 
 internal static class Win32Console
 {

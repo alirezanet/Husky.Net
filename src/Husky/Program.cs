@@ -1,6 +1,10 @@
 using System.Text.RegularExpressions;
-using Husky;
-using Husky.Logger;
+using CliFx;
+using CliFx.Infrastructure;
+using Husky.Cli;
+using Husky.Stdout;
+
+var exitCode = 0;
 
 #if DEBUG
 "Starting development mode ... ".Log(ConsoleColor.DarkGray);
@@ -16,10 +20,14 @@ while (true)
    args = Regex.Matches(cmd!, @"[\""].+?[\""]|[^ ]+").Select(m => m.Value.StartsWith("\"") ? m.Value.Replace("\"", "") : m.Value).ToArray();
 #endif
 
-   // this is the real entry point
-   await Cli.Start(args);
+   exitCode = await new CliApplicationBuilder()
+      .AddCommandsFromThisAssembly()
+      .SetExecutableName("husky")
+      .Build()
+      .RunAsync(args);
 
 #if DEBUG
+   $"\nExited with code {exitCode}".Log();
    "\nPress [Enter] to continue, [ESC] to exit ...".Log();
    var keyInfo = Console.ReadKey();
    if (keyInfo.Key == ConsoleKey.Escape)
@@ -28,3 +36,7 @@ while (true)
       Console.Clear();
 }
 #endif
+
+return exitCode;
+
+

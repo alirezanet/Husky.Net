@@ -1,9 +1,9 @@
-namespace Husky.Logger;
+namespace Husky.Stdout;
 
 public static class Logger
 {
-   public static bool Verbose = false;
-   public static bool Colors = true;
+   public static bool Verbose;
+   public static bool Colors;
    public static bool Vt100Colors = false;
    public static bool Quiet = false;
 
