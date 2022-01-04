@@ -13,7 +13,7 @@ public class AddCommand : CommandBase
    [CommandOption("command", 'c', Description = "command to run")]
    public string cmd { get; set; } = "dotnet husky run";
 
-   public override async ValueTask ExecuteAsync(IConsole console)
+   protected override async ValueTask SafeExecuteAsync(IConsole console)
    {
       var setCommand = new SetCommand() { HookName = HookName, Command = cmd };
       var huskyPath = await setCommand.GetHuskyPath();

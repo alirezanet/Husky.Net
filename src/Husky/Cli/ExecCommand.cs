@@ -19,7 +19,7 @@ public class ExecCommand : CommandBase
    [CommandOption("args", 'a', Description = "Arguments to pass to the script")]
    public IList<string> Arguments { get; set; } = new List<string>();
 
-   public override async ValueTask ExecuteAsync(IConsole console)
+   protected override async ValueTask SafeExecuteAsync(IConsole console)
    {
       if (!File.Exists(Path))
          throw new CommandException($"can not find script file on '{Path}'");
@@ -35,9 +35,7 @@ public class ExecCommand : CommandBase
 
       //check for warnings and errors
       if (diagnostics.Any())
-      {
          foreach (var diagnostic in diagnostics)
-         {
             switch (diagnostic.Severity)
             {
                case DiagnosticSeverity.Hidden:
@@ -54,10 +52,8 @@ public class ExecCommand : CommandBase
                default:
                   throw new CommandException($"unknown diagnostic severity '{diagnostic.Severity}'");
             }
-         }
-      }
 
-      var result = await script.RunAsync(new Globals() { Args = Arguments });
+      var result = await script.RunAsync(new Globals { Args = Arguments });
       if (result.Exception is null && result.ReturnValue is null or 0)
          return;
 

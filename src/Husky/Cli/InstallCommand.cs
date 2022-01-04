@@ -1,5 +1,4 @@
 using System.Reflection;
-using CliFx;
 using CliFx.Attributes;
 using CliFx.Exceptions;
 using CliFx.Infrastructure;
@@ -16,15 +15,12 @@ public class InstallCommand : CommandBase
    [CommandOption("dir", 'd', Description = "The custom directory to install Husky hooks.")]
    public string HuskyDirectory { get; set; } = Utility.HUSKY_FOLDER_NAME;
 
-   public override async ValueTask ExecuteAsync(IConsole console)
+   protected override async ValueTask SafeExecuteAsync(IConsole console)
    {
       // Ensure that we're inside a git repository
       // If git command is not found, we should return exception.
       // That's why ExitCode needs to be checked explicitly.
-      if ((await Git.ExecAsync("rev-parse")).ExitCode != 0)
-      {
-         throw new CommandException($"Not a git repository" + failedMsg);
-      }
+      if ((await Git.ExecAsync("rev-parse")).ExitCode != 0) throw new CommandException("Not a git repository" + failedMsg);
 
       var cwd = Environment.CurrentDirectory;
 

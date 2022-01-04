@@ -31,7 +31,7 @@ public class RunCommand : CommandBase
       set => Logger.Quiet = value;
    }
 
-   public override async ValueTask ExecuteAsync(IConsole console)
+   protected override async ValueTask SafeExecuteAsync(IConsole console)
    {
       var taskRunner = new TaskRunner.TaskRunner();
       var exitCode = await taskRunner.Run(this);

@@ -1,9 +1,6 @@
-using System.Reflection;
-using CliFx;
 using CliFx.Attributes;
 using CliFx.Exceptions;
 using CliFx.Infrastructure;
-using Husky.Helpers;
 using Husky.Stdout;
 
 namespace Husky.Cli;
@@ -11,7 +8,7 @@ namespace Husky.Cli;
 [Command("uninstall", Description = "Uninstall Husky hooks")]
 public class UninstallCommand : CommandBase
 {
-   public override async ValueTask ExecuteAsync(IConsole console)
+   protected override async ValueTask SafeExecuteAsync(IConsole console)
    {
       // TODO: Uninstall git flow hooks
       var p = await Git.ExecAsync("config --unset core.hooksPath");
