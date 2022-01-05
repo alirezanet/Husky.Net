@@ -1,27 +1,20 @@
+using CliFx.Exceptions;
 using CliWrap;
 using CliWrap.Buffered;
 using Husky.Helpers;
-using Husky.Logger;
+using Husky.Stdout;
 
 namespace Husky;
 
 public class Git
 {
-   private readonly AsyncLazy<string> _gitDirRelativePath;
-   private readonly AsyncLazy<string> _gitPath;
    private readonly AsyncLazy<string> _currentBranch;
-   private readonly AsyncLazy<string> _huskyPath;
-   private readonly AsyncLazy<string[]> _stagedFiles;
-   private readonly AsyncLazy<string[]> _lastCommitFiles;
+   private readonly AsyncLazy<string> _gitDirRelativePath;
    private readonly AsyncLazy<string[]> _GitFiles;
-
-   public async Task<string[]> GetStagedFilesAsync() => await _stagedFiles;
-   public async Task<string[]> GitFilesAsync() => await _GitFiles;
-   public async Task<string[]> GetLastCommitFilesAsync() => await _lastCommitFiles;
-   public async Task<string> GetGitPathAsync() => await _gitPath;
-   public async Task<string> GetGitDirRelativePathAsync() => await _gitDirRelativePath;
-   public async Task<string> GetCurrentBranchAsync() => await _currentBranch;
-   public async Task<string> GetHuskyPathAync() => await _huskyPath;
+   private readonly AsyncLazy<string> _gitPath;
+   private readonly AsyncLazy<string> _huskyPath;
+   private readonly AsyncLazy<string[]> _lastCommitFiles;
+   private readonly AsyncLazy<string[]> _stagedFiles;
 
    public Git()
    {
@@ -32,6 +25,41 @@ public class Git
       _lastCommitFiles = new AsyncLazy<string[]>(GetLastCommitFiles);
       _currentBranch = new AsyncLazy<string>(GetCurrentBranch);
       _gitDirRelativePath = new AsyncLazy<string>(GetGitDirRelativePath);
+   }
+
+   public async Task<string[]> GetStagedFilesAsync()
+   {
+      return await _stagedFiles;
+   }
+
+   public async Task<string[]> GitFilesAsync()
+   {
+      return await _GitFiles;
+   }
+
+   public async Task<string[]> GetLastCommitFilesAsync()
+   {
+      return await _lastCommitFiles;
+   }
+
+   public async Task<string> GetGitPathAsync()
+   {
+      return await _gitPath;
+   }
+
+   public async Task<string> GetGitDirRelativePathAsync()
+   {
+      return await _gitDirRelativePath;
+   }
+
+   public async Task<string> GetCurrentBranchAsync()
+   {
+      return await _currentBranch;
+   }
+
+   public async Task<string> GetHuskyPathAsync()
+   {
+      return await _huskyPath;
    }
 
    private static async Task<string> GetGitDirRelativePath()
@@ -47,8 +75,7 @@ public class Git
       catch (Exception e)
       {
          e.Message.LogVerbose(ConsoleColor.DarkRed);
-         "Could not find git directory".LogErr();
-         throw;
+         throw new CommandException("Could not find git directory", innerException: e);
       }
    }
 
@@ -65,19 +92,18 @@ public class Git
       catch (Exception e)
       {
          e.Message.LogVerbose(ConsoleColor.DarkRed);
-         "Could not find git path".LogErr();
-         throw;
+         throw new CommandException("Could not find git path", innerException: e);
       }
    }
 
-   public static async Task<CommandResult> ExecAsync(string args)
+   public static Task<CommandResult> ExecAsync(string args)
    {
-      return await Utility.ExecDirectAsync("git", args);
+      return Utility.ExecDirectAsync("git", args);
    }
 
-   public static async Task<BufferedCommandResult> ExecBufferedAsync(string args)
+   public static Task<BufferedCommandResult> ExecBufferedAsync(string args)
    {
-      return await Utility.ExecBufferedAsync("git", args);
+      return Utility.ExecBufferedAsync("git", args);
    }
 
    private static async Task<string> GetHuskyPath()
@@ -93,8 +119,7 @@ public class Git
       catch (Exception e)
       {
          e.Message.LogVerbose(ConsoleColor.DarkRed);
-         "Could not find Husky path".LogErr();
-         throw;
+         throw new CommandException("Could not find Husky path", innerException: e);
       }
    }
 
@@ -111,8 +136,7 @@ public class Git
       catch (Exception e)
       {
          e.Message.LogVerbose(ConsoleColor.DarkRed);
-         "Could not find git path".LogErr();
-         throw;
+         throw new CommandException("Could not find git path", innerException: e);
       }
    }
 
@@ -129,8 +153,7 @@ public class Git
       catch (Exception e)
       {
          e.Message.LogVerbose(ConsoleColor.DarkRed);
-         "Could not find the last commit files".LogErr();
-         throw;
+         throw new CommandException("Could not find the last commit files", innerException: e);
       }
    }
 
@@ -147,8 +170,7 @@ public class Git
       catch (Exception e)
       {
          e.Message.LogVerbose(ConsoleColor.DarkRed);
-         "Could not find the staged files".LogErr();
-         throw;
+         throw new CommandException("Could not find the staged files", innerException: e);
       }
    }
 
@@ -165,8 +187,7 @@ public class Git
       catch (Exception e)
       {
          e.Message.LogVerbose(ConsoleColor.DarkRed);
-         "Could not find the committed files".LogErr();
-         throw;
+         throw new CommandException("Could not find the committed files", innerException: e);
       }
    }
 }

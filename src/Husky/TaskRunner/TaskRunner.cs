@@ -1,9 +1,10 @@
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-using CliWrap;
+using CliFx.Exceptions;
 using CliWrap.Buffered;
+using Husky.Cli;
 using Husky.Helpers;
-using Husky.Logger;
+using Husky.Stdout;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileSystemGlobbing;
 
@@ -12,10 +13,10 @@ namespace Husky.TaskRunner;
 public class TaskRunner
 {
    private const double MAX_ARG_LENGTH = 8191;
-   private readonly bool _isWindows;
-   private bool _needGitIndexUpdate;
    private readonly Lazy<Task<IList<HuskyTask>>> _customVariableTasks;
    private readonly Git _git;
+   private readonly bool _isWindows;
+   private bool _needGitIndexUpdate;
 
    public TaskRunner()
    {
@@ -24,7 +25,7 @@ public class TaskRunner
       _customVariableTasks = new Lazy<Task<IList<HuskyTask>>>(GetCustomVariableTasks);
    }
 
-   public async Task<int> Run(IDictionary<string, string>? config = null)
+   public async ValueTask Run(RunCommand command)
    {
       "🚀 Preparing tasks ...".Husky();
 
@@ -37,19 +38,16 @@ public class TaskRunner
             OverrideWindowsSpecifics(task);
 
       // handle run arguments
-      if (config != null)
+      if (command.Name != null)
       {
-         if (config.ContainsKey("name"))
-         {
-            $"🔍 Using task name '{config["name"]}'".Husky();
-            tasks = tasks.Where(q => q.Name == config["name"]).ToList();
-         }
+         $"🔍 Using task name '{command.Name}'".Husky();
+         tasks = tasks.Where(q => q.Name != null && q.Name.Equals(command.Name, StringComparison.OrdinalIgnoreCase)).ToList();
+      }
 
-         if (config.ContainsKey("group"))
-         {
-            $"🔍 Using task group '{config["group"]}'".Husky();
-            tasks = tasks.Where(q => q.Group == config["group"]).ToList();
-         }
+      if (command.Group != null)
+      {
+         $"🔍 Using task group '{command.Group}'".Husky();
+         tasks = tasks.Where(q => q.Group != null && q.Group.Equals(command.Group, StringComparison.OrdinalIgnoreCase)).ToList();
       }
 
       // filter tasks by branch
@@ -62,12 +60,12 @@ public class TaskRunner
       if (tasks.Count == 0)
       {
          "💤 Skipped, no task found".Husky();
-         return 0;
+         return;
       }
 
       foreach (var task in tasks)
       {
-         Logger.Logger.Hr();
+         Logger.Hr();
 
          // use command for task name
          if (string.IsNullOrEmpty(task.Name))
@@ -83,9 +81,7 @@ public class TaskRunner
             continue;
          }
 
-         string? configArgs = null;
-         config?.TryGetValue("args", out configArgs);
-         var args = await ParseArguments(task, configArgs);
+         var args = await ParseArguments(task, command.Arguments);
 
          if (task.Args != null && task.Args.Length > args.Count)
          {
@@ -105,23 +101,18 @@ public class TaskRunner
             var chunks = GetChunks(totalCommandLength, args);
             for (var i = 1; i <= chunks.Count; i++)
             {
-               var result = await ExecuteHuskyTask($"chunk [{i}]", task, chunks.Dequeue(), cwd);
-               if (result.ExitCode != 0) return result.ExitCode;
-               executionTime += result.RunTime.TotalMilliseconds;
+               executionTime += await ExecuteHuskyTask($"chunk [{i}]", task, chunks.Dequeue(), cwd);
             }
          }
          else // normal execution
          {
-            var result = await ExecuteHuskyTask("", task, args, cwd);
-            if (result.ExitCode != 0) return result.ExitCode;
-            executionTime = result.RunTime.TotalMilliseconds;
+            executionTime = await ExecuteHuskyTask("", task, args, cwd);
          }
 
          $" ✔ Successfully executed in {executionTime:n0}ms".Husky(ConsoleColor.DarkGreen);
       }
 
-      Logger.Logger.Hr();
-      return 0;
+      Logger.Hr();
    }
 
    private async Task<string> GetTaskCwd(HuskyTask task)
@@ -179,21 +170,18 @@ public class TaskRunner
       return chunks;
    }
 
-   private async Task<CommandResult> ExecuteHuskyTask(string chunk, HuskyTask task, IEnumerable<(string arg, bool isFile)> args, string cwd)
+   private async ValueTask<double> ExecuteHuskyTask(string chunk, HuskyTask task, IEnumerable<(string arg, bool isFile)> args, string cwd)
    {
       $"⌛ Executing task '{task.Name}' {chunk}...".Husky();
       // execute task in order
       var result = await Utility.RunCommandAsync(task.Command!, args.Select(q => q.arg), cwd, task.Output ?? OutputTypes.Always);
       if (result.ExitCode != 0)
       {
-         Console.WriteLine();
-         $"❌ Task '{task.Name}' failed in {result.RunTime.TotalMilliseconds:n0}ms".Husky(ConsoleColor.Red);
-         Console.WriteLine();
-         return result;
+         throw new CommandException($"\n  ❌ Task '{task.Name}' failed in {result.RunTime.TotalMilliseconds:n0}ms\n");
       }
 
       // in staged mode, we should update the git index
-      if (!_needGitIndexUpdate) return result;
+      if (!_needGitIndexUpdate) return result.RunTime.TotalMilliseconds;
       try
       {
          await Git.ExecAsync("update-index -g");
@@ -205,7 +193,7 @@ public class TaskRunner
          "⚠️ Can not update git index".Husky(ConsoleColor.Yellow);
       }
 
-      return result;
+      return result.RunTime.TotalMilliseconds;
    }
 
    private static void OverrideWindowsSpecifics(HuskyTask task)
@@ -235,18 +223,25 @@ public class TaskRunner
 
    private async Task<List<HuskyTask>> GetTasks()
    {
-      var gitPath = await _git.GetGitPathAsync();
-      var huskyPath = await _git.GetHuskyPathAync();
-      var tasks = new List<HuskyTask>();
-      var dir = Path.Combine(gitPath, huskyPath, "task-runner.json");
-      var config = new ConfigurationBuilder()
-         .AddJsonFile(dir)
-         .Build();
-      config.GetSection("tasks").Bind(tasks);
-      return tasks;
+      try
+      {
+         var gitPath = await _git.GetGitPathAsync();
+         var huskyPath = await _git.GetHuskyPathAsync();
+         var tasks = new List<HuskyTask>();
+         var dir = Path.Combine(gitPath, huskyPath, "task-runner.json");
+         var config = new ConfigurationBuilder()
+            .AddJsonFile(dir)
+            .Build();
+         config.GetSection("tasks").Bind(tasks);
+         return tasks;
+      }
+      catch (FileNotFoundException e)
+      {
+         throw new CommandException("Can not find task-runner.json, try 'husky install'", innerException: e);
+      }
    }
 
-   private async Task<IList<(string arg, bool isFile)>> ParseArguments(HuskyTask task, string? configArgs = null)
+   private async Task<IList<(string arg, bool isFile)>> ParseArguments(HuskyTask task, IReadOnlyList<string>? configArgs = null)
    {
       var args = new List<(string arg, bool isFile)>();
       if (task.Args == null) return args;
@@ -262,7 +257,7 @@ public class TaskRunner
          {
             case "${args}":
                if (configArgs != null)
-                  args.Add((configArgs, false));
+                  args.AddRange(configArgs.Select(configArg => (configArg, false)));
                else
                   "⚠️ No arguments passed to the run command".Husky(ConsoleColor.Yellow);
                continue;
@@ -274,7 +269,7 @@ public class TaskRunner
 
                // get match staged files with glob
                var matches = matcher.Match(stagedFiles);
-               AddMatchedFiles(pathMode, matches, args, (await _git.GetGitPathAsync()));
+               AddMatchedFiles(pathMode, matches, args, await _git.GetGitPathAsync());
                _needGitIndexUpdate = true;
                continue;
             }
@@ -315,7 +310,7 @@ public class TaskRunner
                // check if variable is defined
                if (customVariables.All(q => q.Name != variable))
                {
-                  $"the custom variable '{variable}' not found".LogErr();
+                  $"⚠️ the custom variable '{variable}' not found".Log(ConsoleColor.Yellow);
                   continue;
                }
 
@@ -366,7 +361,7 @@ public class TaskRunner
 
    private async Task<IList<HuskyTask>> GetCustomVariableTasks()
    {
-      var dir = Path.Combine(await _git.GetGitPathAsync(), await _git.GetHuskyPathAync(), "task-runner.json");
+      var dir = Path.Combine(await _git.GetGitPathAsync(), await _git.GetHuskyPathAsync(), "task-runner.json");
       var tasks = new List<HuskyTask>();
       var config = new ConfigurationBuilder()
          .AddJsonFile(dir)
@@ -398,7 +393,7 @@ public class TaskRunner
    private static void LogMatchedFiles(IEnumerable<string> files)
    {
       // show matched files in verbose mode
-      if (!Logger.Logger.Verbose) return;
+      if (!Logger.Verbose) return;
       "Matches:".Husky(ConsoleColor.DarkGray);
       foreach (var file in files)
          $"  {file}".LogVerbose();

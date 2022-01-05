@@ -4,5 +4,5 @@ public enum OutputTypes
 {
    Always,
    Verbose,
-   Never,
+   Never
 }
