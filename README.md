@@ -1,15 +1,18 @@
 # Husky.Net
+
 ![GitHub](https://img.shields.io/github/license/alirezanet/husky.net) ![Nuget](https://img.shields.io/nuget/dt/husky?color=%239100ff) ![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/husky?label=latest) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/alirezanet/husky.net/Publish%20Packages?label=checks)
 
-![Husky.Net WorkFlow](.images/workflow.jpg)
+![Husky.Net WorkFlow](docs/.vuepress/public/workflow.jpg)
 
 ## Introduction
 
 Husky improves your commits and more 🐶 woof!
 
-You can use it to lint your commit messages, run tests, lint code, etc... when you commit or push.
+Run linters against staged git files and don't let 💩 slip into your code base!
 
-**Features**
+These two quotes from [husky](https://github.com/typicode/husky) and [lint-staged](https://github.com/okonet/lint-staged) JS tools inspired me to create Husky.Net for dotnet developers. it provides a simple and native way to do both also has a lot of other cool features. You can use it to lint your commit messages, run tests, lint code, etc. when you commit or push. 🚀🚀
+
+## Features
 
 - Supports all Git hooks
 - Powered by modern new Git feature (core.hooksPath)
@@ -24,10 +27,6 @@ You can use it to lint your commit messages, run tests, lint code, etc... when y
 - 🔥 User-define arg variables
 - 🔥 CSharp scripts (csx)
 - 🔥 Supports gitflow hooks
-
-
-If you already know what is the lint-staged or Husky (npm packages),
-this is very similar but you can use Husky.Net without having node, yarn, etc.. installed, with a lot of more features! 🚀🚀
 
 ## Why use Hooks and Husky.Net?
 
