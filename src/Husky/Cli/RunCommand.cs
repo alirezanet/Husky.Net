@@ -24,8 +24,8 @@ public class RunCommand : CommandBase
       set => Logger.Colors = !value;
    }
 
-   [CommandOption("quite", 'q', Description = "Disable [Husky] console output")]
-   public bool Quite
+   [CommandOption("quiet", 'q', Description = "Disable [Husky] console output")]
+   public bool Quiet
    {
       get => Logger.Quiet;
       set => Logger.Quiet = value;
