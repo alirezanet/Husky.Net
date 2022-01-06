@@ -78,21 +78,27 @@ If you installed husky locally, just add the below code to **one** of your proje
 **Important:** Just make sure to update the **working directory** depending on your folder structure.
 
 ```xml
-<Target Name="husky" BeforeTargets="Restore;CollectPackageReferences">
+<Target Name="husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(HUSKY)' != 0">
    <Exec Command="dotnet tool restore"  StandardOutputImportance="Low" StandardErrorImportance="High"/>
    <Exec Command="dotnet husky install" StandardOutputImportance="Low" StandardErrorImportance="High"
          WorkingDirectory="../../" />  <!--Update this to the relative path to your project root dir -->
 </Target>
 ```
 
-If you have only one multiple target project (`TargetFrameworks`) add the bellow condition `IsCrossTargetingBuild` to the target tag to prevent multiple execution
+### Disable husky in CI/CD pipelines
+You can set the `HUSKY` environment variable to `0` to disable husky in CI/CD pipelines.
+
+### Multiple target projects
+If you have only one multiple target project (`TargetFrameworks`) use `IsCrossTargetingBuild` to the target tag to prevent multiple execution
 
 ```xml
-<Target Name="husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(IsCrossTargetingBuild)' == 'true'">
+<Target Name="husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(HUSKY)' != 0 and '$(IsCrossTargetingBuild)' == 'true'">
    ...
 ```
 
-Or If you are using the `npm`, add the below code to your `package.json` file to automatically install husky after the installation process:
+### Using npm
+
+If you are using the `npm`, add the below code to your `package.json` file to automatically install husky after the installation process:
 
 ```json
  "scripts": {
