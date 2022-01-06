@@ -11,6 +11,6 @@ export default defineUserConfig<DefaultThemeOptions, ViteBundlerOptions>({
    plugins: plugin,
    themeConfig: themeConfig,
    port: 3000,
-   base: '/husky.net/',
+   base: '/Husky.Net/',
    head: head,
 })
