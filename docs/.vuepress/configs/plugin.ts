@@ -1,5 +1,4 @@
 import type { PluginOptions, PluginConfig } from 'vuepress-vite';
-import { path } from '@vuepress/utils'
 
 export const plugin: PluginConfig<PluginOptions>[] = [
    [
