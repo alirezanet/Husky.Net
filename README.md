@@ -38,7 +38,6 @@ To get started, check out documentation at  [https://alirezanet.github.io/Husky.
 - Share your feedback and ideas to improve this tool
 - Share Husky.Net on your favorite social media and your friends
 - Write a blog post about Husky.Net
-- All contributions are welcome! Feel free to send pull requests
 
 ## Contribution
 
