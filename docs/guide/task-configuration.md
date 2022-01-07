@@ -71,7 +71,7 @@ e.g.
 "args": [ "${staged}" ]
 ```
 
-### custom variables
+### Custom variables
 
 You can define your own variables by adding a task to the `variables` section in `task-runner.json`.
 
