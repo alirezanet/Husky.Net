@@ -11,11 +11,11 @@ public class AddCommand : CommandBase
    public string HookName { get; set; } = default!;
 
    [CommandOption("command", 'c', Description = "command to run")]
-   public string cmd { get; set; } = "dotnet husky run";
+   public string Command { get; set; } = "dotnet husky run";
 
    protected override async ValueTask SafeExecuteAsync(IConsole console)
    {
-      var setCommand = new SetCommand { HookName = HookName, Command = cmd };
+      var setCommand = new SetCommand { HookName = HookName, Command = Command };
       var huskyPath = await setCommand.GetHuskyPath();
       var hookPath = Path.Combine(huskyPath, HookName);
 
@@ -26,7 +26,7 @@ public class AddCommand : CommandBase
          return;
       }
 
-      await File.AppendAllTextAsync(hookPath, $"{cmd}\n");
+      await File.AppendAllTextAsync(hookPath, $"{Command}\n");
       $"added to '{hookPath}' hook".Log(ConsoleColor.Green);
    }
 }
