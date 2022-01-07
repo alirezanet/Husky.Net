@@ -1,5 +1,7 @@
 # Introduction
 
+![Husky.Net WorkFlow](../.vuepress/public/workflow.jpg)
+
 Husky improves your commits and more 🐶 woof!
 
 Run linters against staged git files and don't let 💩 slip into your code base!
