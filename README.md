@@ -2,7 +2,7 @@
 
 ![GitHub](https://img.shields.io/github/license/alirezanet/husky.net) ![Nuget](https://img.shields.io/nuget/dt/husky?color=%239100ff) ![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/husky?label=latest) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/alirezanet/husky.net/Publish%20Packages?label=checks)
 
-![Husky.Net WorkFlow](docs/.vuepress/public/workflow.jpg)
+![Husky.Net WorkFlow](https://github.com/alirezanet/Husky.Net/blob/master/docs/.vuepress/public/workflow.jpg)
 
 ## Introduction
 
