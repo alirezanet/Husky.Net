@@ -30,7 +30,7 @@ These two quotes from husky and lint-staged JS tools inspired me to create Husky
 
 ## Documentation
 
-Check out the documentation at [https://alirezanet.github.io/Husky.Net/](https://alirezanet.github.io/Husky.Net/).
+To get started, check out documentation at  [https://alirezanet.github.io/Husky.Net/](https://alirezanet.github.io/Husky.Net/).
 
 ## Support
 
@@ -51,7 +51,6 @@ Check out the [Contribution Page](https://alirezanet.github.io/Husky.Net/contrib
 - This tool inspired of [husky](https://github.com/typicode/husky) & [lint-staged](https://github.com/okonet/lint-staged) and a few other tools, for **DotNet**, so make sure to support them too!
 
 - I'd also like to thank [kaylumah](https://github.com/kaylumah) for his [article](https://kaylumah.nl/2019/09/07/using-csharp-code-your-git-hooks.html) that gave me the csharp scripting support idea.
-
 
 ## License
 
