@@ -9,6 +9,12 @@ export const plugin: PluginConfig<PluginOptions>[] = [
          isSearchable: (page) => !page.path.match(/^\/v1\/*.*$/),
       },
    ],
+   [
+      '@vuepress/plugin-google-analytics',
+      {
+        id: 'G-LV6WS6HDKN',
+      },
+   ]
    // [
    //    '@vuepress/plugin-register-components',
    //    {
