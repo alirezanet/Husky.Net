@@ -21,7 +21,7 @@ features:
      details: Supports multiple file states like staged, last-commit, git-files, etc, and user-defined states.
    - title: CSharp Script
      details: Supports C# scripting for more complex tasks.
-footer: MIT Licensed | Copyright © 2021-present AliReZa Sabouri
+footer: MIT Licensed | Copyright © 2022-present AliReZa Sabouri
 ---
 
 
