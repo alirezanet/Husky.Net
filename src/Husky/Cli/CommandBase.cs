@@ -9,15 +9,8 @@ using Husky.Stdout;
 namespace Husky.Cli;
 
 [Command]
-public abstract class CommandBase : ICommand
+public abstract class CommandBase : IGlobalOptions
 {
-   [CommandOption("verbose", 'v', Description = "Enable verbose output")]
-   public bool Verbose
-   {
-      get => Logger.Verbose;
-      set => Logger.Verbose = value;
-   }
-
    public async ValueTask ExecuteAsync(IConsole console)
    {
       // catch unhandled exceptions.
@@ -31,7 +24,7 @@ public abstract class CommandBase : ICommand
       }
       catch (Exception ex)
       {
-         if (Verbose)
+         if (Logger.Verbose)
             throw;
 
          throw new CommandException(ex.Message, innerException: ex);
