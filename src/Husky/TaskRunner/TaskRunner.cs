@@ -341,9 +341,7 @@ public class TaskRunner
          OverrideWindowsSpecifics(task);
          if (task.Command == null || task.Args == null) return output;
          var cwd = await GetTaskCwd(task);
-
-         var fullPath = Utility.GetFullyQualifiedPath(task.Command);
-         var result = await CliWrap.Cli.Wrap(fullPath)
+         var result = await CliWrap.Cli.Wrap(task.Command)
             .WithArguments(task.Args)
             .WithWorkingDirectory(cwd)
             .ExecuteBufferedAsync();

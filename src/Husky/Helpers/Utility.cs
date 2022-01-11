@@ -17,8 +17,7 @@ public static class Utility
    {
       try
       {
-         var fullPath = GetFullyQualifiedPath(fileName);
-         var result = await CliWrap.Cli.Wrap(fullPath)
+         var result = await CliWrap.Cli.Wrap(fileName)
             .WithArguments(args)
             .ExecuteBufferedAsync();
          return result;
@@ -33,9 +32,8 @@ public static class Utility
    public static async ValueTask SetExecutablePermission(params string[] files)
    {
       if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
-      var chmod = GetFullyQualifiedPath("chmod");
       var args = new[] { "+x" }.Concat(files);
-      var ps = CliWrap.Cli.Wrap(chmod)
+      var ps = CliWrap.Cli.Wrap("chmod")
          .WithArguments(args)
          .WithStandardErrorPipe(PipeTarget.ToDelegate(q => q.LogVerbose(ConsoleColor.DarkRed)))
          .WithValidation(CommandResultValidation.None);
@@ -46,8 +44,7 @@ public static class Utility
 
    public static async Task<CommandResult> ExecDirectAsync(string fileName, string args)
    {
-      var fullPath = GetFullyQualifiedPath(fileName);
-      var result = await CliWrap.Cli.Wrap(fullPath)
+      var result = await CliWrap.Cli.Wrap(fileName)
          .WithArguments(args)
          .WithValidation(CommandResultValidation.None)
          .WithStandardOutputPipe(PipeTarget.ToDelegate(q => q.Log()))
@@ -59,8 +56,7 @@ public static class Utility
    public static async Task<CommandResult> RunCommandAsync(string fileName, IEnumerable<string> args, string cwd,
       OutputTypes output = OutputTypes.Verbose)
    {
-      var fullPath = GetFullyQualifiedPath(fileName);
-      var ps = CliWrap.Cli.Wrap(fullPath)
+      var ps = CliWrap.Cli.Wrap(fileName)
          .WithWorkingDirectory(cwd)
          .WithArguments(args)
          .WithValidation(CommandResultValidation.None)
@@ -73,38 +69,8 @@ public static class Utility
       return await ps.ExecuteAsync();
    }
 
-   public static string GetFullyQualifiedPath(string fileName)
-   {
-      var fullPath = GetFullPath(fileName);
-      return fullPath ?? fileName;
-   }
 
-   public static string? GetFullPath(string fileName)
-   {
-      if (File.Exists(fileName))
-         return Path.GetFullPath(fileName);
 
-      var envValues = Environment.GetEnvironmentVariable("PATH");
-      if (envValues == null) return null;
-      foreach (var path in envValues.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries))
-      {
-         var fullPath = Path.Combine(path, fileName);
-         // we should look for .exe and .cmd files on windows
-         if (!fileName.EndsWith(".exe") && !fileName.EndsWith(".cmd") && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-         {
-            if (File.Exists(fullPath + ".exe"))
-               return fullPath + ".exe";
-            if (File.Exists(fullPath + ".cmd"))
-               return fullPath + ".cmd";
-         }
-         else if (File.Exists(fullPath))
-         {
-            return fullPath;
-         }
-      }
-
-      return null;
-   }
 
    private static void LogStandardOutput(string stdout, OutputTypes output)
    {
