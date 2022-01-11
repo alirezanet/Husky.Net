@@ -6,7 +6,7 @@ namespace Husky.Cli;
 
 public interface IGlobalOptions : ICommand
 {
-   [CommandOption("no-color", 'c', Description = "Disable color output")]
+   [CommandOption("no-color", Description = "Disable color output")]
    public bool NoColor
    {
       get => !Logger.Colors;
