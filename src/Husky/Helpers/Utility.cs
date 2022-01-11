@@ -8,11 +8,6 @@ namespace Husky.Helpers;
 
 public static class Utility
 {
-   internal const string HUSKY_FOLDER_NAME = ".husky";
-
-   // Custom dir help TODO: change this url to short version of docs
-   internal const string DOCS_URL = "https://github.com/alirezanet/husky.net";
-
    public static async Task<BufferedCommandResult> ExecBufferedAsync(string fileName, string args)
    {
       try

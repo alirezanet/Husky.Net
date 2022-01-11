@@ -11,9 +11,11 @@ namespace Husky.Cli;
 public class InstallCommand : CommandBase
 {
    private const string FailedMsg = "Git hooks installation failed";
+   private const string HUSKY_FOLDER_NAME = ".husky";
+   private const string DOCS_URL = "https://alirezanet.github.io/Husky.Net/guide/getting-started";
 
    [CommandOption("dir", 'd', Description = "The custom directory to install Husky hooks.")]
-   public string HuskyDirectory { get; set; } = Utility.HUSKY_FOLDER_NAME;
+   public string HuskyDirectory { get; set; } = HUSKY_FOLDER_NAME;
 
    protected override async ValueTask SafeExecuteAsync(IConsole console)
    {
@@ -29,11 +31,11 @@ public class InstallCommand : CommandBase
 
       // Ensure that we're not trying to install outside of cwd
       if (!path.StartsWith(cwd))
-         throw new CommandException($"{path}\nNot allowed (see {Utility.DOCS_URL})\n" + FailedMsg);
+         throw new CommandException($"{path}\nNot allowed (see {DOCS_URL})\n" + FailedMsg);
 
       // Ensure that cwd is git top level
       if (!Directory.Exists(Path.Combine(cwd, ".git")))
-         throw new CommandException($".git can't be found (see {Utility.DOCS_URL})\n" + FailedMsg);
+         throw new CommandException($".git can't be found (see {DOCS_URL})\n" + FailedMsg);
 
       // Create .husky/_
       Directory.CreateDirectory(Path.Combine(path, "_"));
