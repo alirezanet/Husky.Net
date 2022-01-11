@@ -7,7 +7,7 @@ public static class Logger
    public static bool Verbose = false;
    public static bool Colors = true;
    public static bool Vt100Colors = false;
-   public static bool Quiet = false;
+   public static bool HuskyQuiet = false;
 
    internal static void Init()
    {
@@ -52,7 +52,7 @@ public static class Logger
 
    public static void Husky(this string message, ConsoleColor? color = null)
    {
-      if (Quiet) return;
+      if (HuskyQuiet) return;
       Write("[Husky] ", ConsoleColor.Cyan);
       WriteLine($"{message}", color);
    }
@@ -64,7 +64,7 @@ public static class Logger
 
    public static void Hr(int count = 50, ConsoleColor? color = ConsoleColor.DarkGray)
    {
-      if (Quiet) return;
+      if (HuskyQuiet) return;
       WriteLine(new string('-', count), color);
    }
 

@@ -17,7 +17,12 @@ public class RunCommand : CommandBase
    [CommandOption("args", 'a', Description = "Pass custom arguments to tasks")]
    public IReadOnlyList<string>? Arguments { get; set; }
 
-
+   [CommandOption("quiet", 'q', Description = "Disable [Husky] console output")]
+   public bool Quiet
+   {
+      get => Logger.HuskyQuiet;
+      set => Logger.HuskyQuiet = value;
+   }
 
    protected override async ValueTask SafeExecuteAsync(IConsole console)
    {

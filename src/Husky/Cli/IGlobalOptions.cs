@@ -13,13 +13,6 @@ public interface IGlobalOptions : ICommand
       set => Logger.Colors = !value;
    }
 
-   [CommandOption("quiet", 'q', Description = "Disable [Husky] console output")]
-   public bool Quiet
-   {
-      get => Logger.Quiet;
-      set => Logger.Quiet = value;
-   }
-
    [CommandOption("verbose", 'v', Description = "Enable verbose output")]
    public bool Verbose
    {
