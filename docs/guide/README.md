@@ -2,9 +2,9 @@
 
 ![Husky.Net WorkFlow](../.vuepress/public/workflow.jpg)
 
-Husky improves your commits and more 🐶 woof!
-
-Run linters against staged git files and don't let 💩 slip into your code base!
+> Husky improves your commits and more 🐶 woof!
+>
+> Run linters against staged git files and don't let 💩 slip into your code base!
 
 These two quotes from [husky](https://github.com/typicode/husky) and [lint-staged](https://github.com/okonet/lint-staged) JS tools inspired me to create Husky.Net for dotnet developers. it provides a simple and native way to do both also has a lot of other cool features. You can use it to lint your commit messages, run tests, lint code, etc. when you commit or push. 🚀🚀
 
