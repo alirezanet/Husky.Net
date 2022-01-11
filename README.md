@@ -33,8 +33,6 @@ These two quotes from husky and lint-staged JS tools inspired me to create Husky
 - [Get started](https://alirezanet.github.io/Husky.Net/guide/getting-started)
 - [Documentation](https://alirezanet.github.io/Husky.Net)
 
-To get started, check out documentation at  [https://alirezanet.github.io/Husky.Net/](https://alirezanet.github.io/Husky.Net/).
-
 ## Support
 
 - Don't forget to give a ⭐ on [GitHub](https://github.com/alirezanet/husky.net)
