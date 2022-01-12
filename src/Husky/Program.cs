@@ -1,16 +1,19 @@
 using System.Text.RegularExpressions;
 using CliFx;
+using CliFx.Infrastructure;
 using Husky.Stdout;
 
-var exitCode = 0;
+// initialize static testable logger
+LoggerEx.logger = new Logger(new SystemConsole());
 
+var exitCode = 0;
 
 #if DEBUG
 "Starting development mode ... ".Log(ConsoleColor.DarkGray);
 while (true)
 {
-   Logger.Colors = true;
-   Logger.Verbose = false;
+   LoggerEx.logger.Colors = true;
+   LoggerEx.logger.Verbose = false;
 
    "\nEnter your husky commands: ".Log();
    var cmd = Console.ReadLine();
@@ -19,7 +22,7 @@ while (true)
    args = Regex.Matches(cmd!, @"[\""].+?[\""]|[^ ]+").Select(m => m.Value.StartsWith("\"") ? m.Value.Replace("\"", "") : m.Value).ToArray();
 #endif
 
-   Logger.Init();
+
    exitCode = await new CliApplicationBuilder()
       .AddCommandsFromThisAssembly()
       .SetExecutableName("husky")

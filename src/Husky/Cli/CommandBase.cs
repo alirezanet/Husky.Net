@@ -24,7 +24,7 @@ public abstract class CommandBase : IGlobalOptions
       }
       catch (Exception ex)
       {
-         if (Logger.Verbose)
+         if (LoggerEx.logger.Verbose)
             throw;
 
          throw new CommandException(ex.Message, innerException: ex);

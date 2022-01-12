@@ -65,7 +65,7 @@ public class TaskRunner
 
       foreach (var task in tasks)
       {
-         Logger.Hr();
+         LoggerEx.Hr();
 
          // use command for task name
          if (string.IsNullOrEmpty(task.Name))
@@ -112,7 +112,7 @@ public class TaskRunner
          $" ✔ Successfully executed in {executionTime:n0}ms".Husky(ConsoleColor.DarkGreen);
       }
 
-      Logger.Hr();
+      LoggerEx.Hr();
    }
 
    private async Task<string> GetTaskCwd(HuskyTask task)
@@ -391,7 +391,7 @@ public class TaskRunner
    private static void LogMatchedFiles(IEnumerable<string> files)
    {
       // show matched files in verbose mode
-      if (!Logger.Verbose) return;
+      if (!LoggerEx.logger.Verbose) return;
       "Matches:".Husky(ConsoleColor.DarkGray);
       foreach (var file in files)
          $"  {file}".LogVerbose();

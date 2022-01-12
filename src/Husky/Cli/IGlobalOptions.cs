@@ -9,14 +9,14 @@ public interface IGlobalOptions : ICommand
    [CommandOption("no-color", Description = "Disable color output")]
    public bool NoColor
    {
-      get => !Logger.Colors;
-      set => Logger.Colors = !value;
+      get => !LoggerEx.logger.Colors;
+      set => LoggerEx.logger.Colors = !value;
    }
 
    [CommandOption("verbose", 'v', Description = "Enable verbose output")]
    public bool Verbose
    {
-      get => Logger.Verbose;
-      set => Logger.Verbose = value;
+      get => LoggerEx.logger.Verbose;
+      set => LoggerEx.logger.Verbose = value;
    }
 }

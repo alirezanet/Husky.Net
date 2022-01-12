@@ -18,8 +18,8 @@ jobs:
            run: dotnet restore
          - name: Build
            run: dotnet build --configuration Release --no-restore
-#         - name: Test
-#           run: dotnet test --configuration Release --no-build --verbosity normal
+         - name: Test
+           run: dotnet test --configuration Release --no-build --verbosity normal
          - name: Publish Husky
            uses: alirezanet/publish-nuget@v3.0.0
            with:

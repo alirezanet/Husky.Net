@@ -20,8 +20,8 @@ public class RunCommand : CommandBase
    [CommandOption("quiet", 'q', Description = "Disable [Husky] console output")]
    public bool Quiet
    {
-      get => Logger.HuskyQuiet;
-      set => Logger.HuskyQuiet = value;
+      get => LoggerEx.logger.HuskyQuiet;
+      set => LoggerEx.logger.HuskyQuiet = value;
    }
 
    protected override async ValueTask SafeExecuteAsync(IConsole console)

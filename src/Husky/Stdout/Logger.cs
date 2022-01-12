@@ -1,15 +1,59 @@
 using System.Runtime.InteropServices;
+using CliFx.Infrastructure;
 
 namespace Husky.Stdout;
 
-public static class Logger
+public class Logger : ILogger
 {
-   public static bool Verbose = false;
-   public static bool Colors = true;
-   public static bool Vt100Colors = false;
-   public static bool HuskyQuiet = false;
+   public readonly IConsole _console;
 
-   internal static void Init()
+   public Logger(IConsole console, bool init = true)
+   {
+      _console = console;
+
+      // we don't need init in tests
+      if (init)
+         Init();
+   }
+
+   public bool Colors { get; set; } = true;
+   public bool Verbose { get; set; }
+   public bool Vt100Colors { get; set; }
+   public bool HuskyQuiet { get; set; }
+
+   public void Husky(string message, ConsoleColor? color = null)
+   {
+      if (HuskyQuiet) return;
+      Write("[Husky] ", ConsoleColor.Cyan);
+      WriteLine($"{message}", color);
+   }
+
+   public void Log(string message, ConsoleColor? color = null)
+   {
+      WriteLine(message, color);
+   }
+
+   public void Hr(int count = 50, ConsoleColor? color = ConsoleColor.DarkGray)
+   {
+      if (HuskyQuiet) return;
+      WriteLine(new string('-', count), color);
+   }
+
+   public void LogVerbose(string message, ConsoleColor color = ConsoleColor.DarkGray)
+   {
+      if (!Verbose) return;
+      WriteLine(message, color);
+   }
+
+   public void LogErr(string message)
+   {
+      if (Colors && Vt100Colors)
+         Vt100.WriteLine(message, ConsoleColor.Red, _console.Error);
+      else
+         _console.Error.WriteLine(message);
+   }
+
+   private void Init()
    {
       if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || Environment.GetEnvironmentVariable("vt100") is not "1") return;
       try
@@ -20,62 +64,34 @@ public static class Logger
       }
       catch (Exception e)
       {
-         e.Message.LogVerbose(ConsoleColor.DarkRed);
+         LogVerbose(e.Message, ConsoleColor.DarkRed);
       }
    }
-   private static void Write(string message, ConsoleColor? color = null)
+
+   private void Write(string message, ConsoleColor? color = null)
    {
       if (Colors && color != null)
       {
          if (Vt100Colors)
          {
-            Vt100.Write(message, color.Value);
+            Vt100.Write(message, color.Value, _console.Output);
          }
          else
          {
-            Console.ForegroundColor = color.Value;
-            Console.Write(message);
-            Console.ResetColor();
+            _console.ForegroundColor = color.Value;
+            _console.Output.Write(message);
+            _console.ResetColor();
          }
       }
       else
       {
-         Console.Write(message);
+         _console.Output.Write(message);
       }
    }
 
-   private static void WriteLine(string message, ConsoleColor? color = null)
+   private void WriteLine(string message, ConsoleColor? color = null)
    {
       Write(message, color);
       Write(Environment.NewLine);
-   }
-
-   public static void Husky(this string message, ConsoleColor? color = null)
-   {
-      if (HuskyQuiet) return;
-      Write("[Husky] ", ConsoleColor.Cyan);
-      WriteLine($"{message}", color);
-   }
-
-   public static void Log(this string message, ConsoleColor? color = null)
-   {
-      WriteLine(message, color);
-   }
-
-   public static void Hr(int count = 50, ConsoleColor? color = ConsoleColor.DarkGray)
-   {
-      if (HuskyQuiet) return;
-      WriteLine(new string('-', count), color);
-   }
-
-   public static void LogVerbose(this string message, ConsoleColor color = ConsoleColor.DarkGray)
-   {
-      if (!Verbose) return;
-      WriteLine(message, color);
-   }
-
-   public static void LogErr(this string message)
-   {
-      Log(message, ConsoleColor.Red);
    }
 }
