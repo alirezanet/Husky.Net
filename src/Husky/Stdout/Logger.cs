@@ -7,13 +7,10 @@ public class Logger : ILogger
 {
    public readonly IConsole _console;
 
-   public Logger(IConsole console, bool init = true)
+   public Logger(IConsole console)
    {
       _console = console;
-
-      // we don't need init in tests
-      if (init)
-         Init();
+      Init();
    }
 
    public bool Colors { get; set; } = true;
