@@ -5,7 +5,7 @@ namespace Husky.Stdout;
 
 public class Logger : ILogger
 {
-   public readonly IConsole _console;
+   private readonly IConsole _console;
 
    public Logger(IConsole console)
    {
