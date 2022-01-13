@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-namespace Husky.Helpers;
+namespace Husky.Utils;
 
 // https://devblogs.microsoft.com/pfxteam/asynclazyt/
 // https://blog.stephencleary.com/2012/08/asynchronous-lazy-initialization.html

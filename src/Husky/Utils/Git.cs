@@ -1,10 +1,9 @@
 using CliFx.Exceptions;
 using CliWrap;
 using CliWrap.Buffered;
-using Husky.Helpers;
 using Husky.Stdout;
 
-namespace Husky;
+namespace Husky.Utils;
 
 public class Git
 {

@@ -6,14 +6,14 @@ internal static class Vt100
 {
    public static void Write(string message, ConsoleColor color, ConsoleWriter console)
    {
-      SetForegroundColor(color);
+      SetForegroundColor(color, console);
       console.Write(message);
       ResetColors(console);
    }
 
    public static void WriteLine(string message, ConsoleColor color, ConsoleWriter console)
    {
-      SetForegroundColor(color);
+      SetForegroundColor(color, console);
       console.WriteLine(message);
       ResetColors(console);
    }
@@ -23,8 +23,9 @@ internal static class Vt100
    /// Git-bash only supports 8 colors provided by the Windows Console.
    /// </summary>
    /// <param name="color"></param>
+   /// <param name="console"></param>
    /// <exception cref="ArgumentOutOfRangeException"></exception>
-   public static void SetForegroundColor(ConsoleColor color)
+   public static void SetForegroundColor(ConsoleColor color, ConsoleWriter console)
    {
       var colorCode = color switch
       {
@@ -38,7 +39,7 @@ internal static class Vt100
          ConsoleColor.White or ConsoleColor.DarkGray or ConsoleColor.Gray => 37,
          _ => throw new ArgumentOutOfRangeException(nameof(color), color, null)
       };
-      Console.Write($"\x1b[{colorCode}m");
+      console.Write($"\x1b[{colorCode}m");
    }
 
 

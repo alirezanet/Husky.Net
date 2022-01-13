@@ -2,9 +2,8 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using CliFx.Exceptions;
 using CliWrap.Buffered;
-using Husky.Cli;
-using Husky.Helpers;
 using Husky.Stdout;
+using Husky.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileSystemGlobbing;
 
@@ -16,16 +15,18 @@ public class TaskRunner
    private readonly Lazy<Task<IList<HuskyTask>>> _customVariableTasks;
    private readonly Git _git;
    private readonly bool _isWindows;
+   private readonly IRunOption _options;
    private bool _needGitIndexUpdate;
 
-   public TaskRunner()
+   public TaskRunner(Git git, IRunOption options)
    {
+      _git = git;
+      _options = options;
       _isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-      _git = new Git();
       _customVariableTasks = new Lazy<Task<IList<HuskyTask>>>(GetCustomVariableTasks);
    }
 
-   public async ValueTask Run(RunCommand command)
+   public async ValueTask Run()
    {
       "🚀 Preparing tasks ...".Husky();
 
@@ -38,16 +39,16 @@ public class TaskRunner
             OverrideWindowsSpecifics(task);
 
       // handle run arguments
-      if (command.Name != null)
+      if (_options.Name != null)
       {
-         $"🔍 Using task name '{command.Name}'".Husky();
-         tasks = tasks.Where(q => q.Name != null && q.Name.Equals(command.Name, StringComparison.OrdinalIgnoreCase)).ToList();
+         $"🔍 Using task name '{_options.Name}'".Husky();
+         tasks = tasks.Where(q => q.Name != null && q.Name.Equals(_options.Name, StringComparison.OrdinalIgnoreCase)).ToList();
       }
 
-      if (command.Group != null)
+      if (_options.Group != null)
       {
-         $"🔍 Using task group '{command.Group}'".Husky();
-         tasks = tasks.Where(q => q.Group != null && q.Group.Equals(command.Group, StringComparison.OrdinalIgnoreCase)).ToList();
+         $"🔍 Using task group '{_options.Group}'".Husky();
+         tasks = tasks.Where(q => q.Group != null && q.Group.Equals(_options.Group, StringComparison.OrdinalIgnoreCase)).ToList();
       }
 
       // filter tasks by branch
@@ -81,7 +82,7 @@ public class TaskRunner
             continue;
          }
 
-         var args = await ParseArguments(task, command.Arguments);
+         var args = await ParseArguments(task, _options.Arguments);
 
          if (task.Args != null && task.Args.Length > args.Count)
          {
@@ -99,10 +100,7 @@ public class TaskRunner
          if (_isWindows && totalCommandLength > MAX_ARG_LENGTH)
          {
             var chunks = GetChunks(totalCommandLength, args);
-            for (var i = 1; i <= chunks.Count; i++)
-            {
-               executionTime += await ExecuteHuskyTask($"chunk [{i}]", task, chunks.Dequeue(), cwd);
-            }
+            for (var i = 1; i <= chunks.Count; i++) executionTime += await ExecuteHuskyTask($"chunk [{i}]", task, chunks.Dequeue(), cwd);
          }
          else // normal execution
          {
@@ -175,10 +173,7 @@ public class TaskRunner
       $"⌛ Executing task '{task.Name}' {chunk}...".Husky();
       // execute task in order
       var result = await Utility.RunCommandAsync(task.Command!, args.Select(q => q.arg), cwd, task.Output ?? OutputTypes.Always);
-      if (result.ExitCode != 0)
-      {
-         throw new CommandException($"\n  ❌ Task '{task.Name}' failed in {result.RunTime.TotalMilliseconds:n0}ms\n");
-      }
+      if (result.ExitCode != 0) throw new CommandException($"\n  ❌ Task '{task.Name}' failed in {result.RunTime.TotalMilliseconds:n0}ms\n");
 
       // in staged mode, we should update the git index
       if (!_needGitIndexUpdate) return result.RunTime.TotalMilliseconds;
@@ -241,7 +236,7 @@ public class TaskRunner
       }
    }
 
-   private async Task<IList<(string arg, bool isFile)>> ParseArguments(HuskyTask task, IReadOnlyList<string>? configArgs = null)
+   private async Task<IList<(string arg, bool isFile)>> ParseArguments(HuskyTask task, IReadOnlyList<string>? optionArguments = null)
    {
       var args = new List<(string arg, bool isFile)>();
       if (task.Args == null) return args;
@@ -256,8 +251,8 @@ public class TaskRunner
          switch (arg.ToLower().Trim())
          {
             case "${args}":
-               if (configArgs != null)
-                  args.AddRange(configArgs.Select(configArg => (configArg, false)));
+               if (optionArguments != null)
+                  args.AddRange(optionArguments.Select(configArg => (configArg, false)));
                else
                   "⚠️ No arguments passed to the run command".Husky(ConsoleColor.Yellow);
                continue;

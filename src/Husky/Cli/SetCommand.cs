@@ -2,8 +2,8 @@ using System.Reflection;
 using CliFx.Attributes;
 using CliFx.Exceptions;
 using CliFx.Infrastructure;
-using Husky.Helpers;
 using Husky.Stdout;
+using Husky.Utils;
 
 namespace Husky.Cli;
 

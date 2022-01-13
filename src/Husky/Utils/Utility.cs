@@ -4,7 +4,7 @@ using CliWrap.Buffered;
 using Husky.Stdout;
 using Husky.TaskRunner;
 
-namespace Husky.Helpers;
+namespace Husky.Utils;
 
 public static class Utility
 {

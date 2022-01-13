@@ -1,13 +1,21 @@
 using CliFx.Attributes;
-using CliFx.Exceptions;
 using CliFx.Infrastructure;
 using Husky.Stdout;
+using Husky.TaskRunner;
+using Husky.Utils;
 
 namespace Husky.Cli;
 
 [Command("run", Description = "Run task-runner.json tasks")]
-public class RunCommand : CommandBase
+public class RunCommand : CommandBase, IRunOption
 {
+   [CommandOption("quiet", 'q', Description = "Disable [Husky] console output")]
+   public bool Quiet
+   {
+      get => LoggerEx.logger.HuskyQuiet;
+      set => LoggerEx.logger.HuskyQuiet = value;
+   }
+
    [CommandOption("name", 'n', Description = "Filter tasks by name")]
    public string? Name { get; set; }
 
@@ -17,16 +25,10 @@ public class RunCommand : CommandBase
    [CommandOption("args", 'a', Description = "Pass custom arguments to tasks")]
    public IReadOnlyList<string>? Arguments { get; set; }
 
-   [CommandOption("quiet", 'q', Description = "Disable [Husky] console output")]
-   public bool Quiet
+   protected override async ValueTask SafeExecuteAsync(IConsole _)
    {
-      get => LoggerEx.logger.HuskyQuiet;
-      set => LoggerEx.logger.HuskyQuiet = value;
-   }
-
-   protected override async ValueTask SafeExecuteAsync(IConsole console)
-   {
-      var taskRunner = new TaskRunner.TaskRunner();
-      await taskRunner.Run(this);
+      var git = new Git();
+      var taskRunner = new TaskRunner.TaskRunner(git, this);
+      await taskRunner.Run();
    }
 }
