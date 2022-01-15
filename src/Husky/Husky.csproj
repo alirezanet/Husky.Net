@@ -1,68 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-
-   <PropertyGroup>
-      <OutputType>Exe</OutputType>
-      <TargetFrameworks>netcoreapp3.1;net5.0;net6.0</TargetFrameworks>
-      <ImplicitUsings>enable</ImplicitUsings>
-      <Nullable>enable</Nullable>
-      <LangVersion>latest</LangVersion>
-      <PackageId>Husky</PackageId>
-      <Version>0.3.1</Version>
-      <Title>Husky</Title>
-      <Authors>AliReza Sabouri</Authors>
-      <Description>Git hooks made easy, woof!</Description>
-      <Copyright>2021</Copyright>
-      <RepositoryUrl>https://github.com/alirezanet/husky.net</RepositoryUrl>
-      <Company>TuxTeam</Company>
-      <PackAsTool>true</PackAsTool>
-      <ToolCommandName>husky</ToolCommandName>
-      <PackageOutputPath>./nupkg</PackageOutputPath>
-      <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-      <PackageLicenseExpression>MIT</PackageLicenseExpression>
-      <PackageDescription>Easy to use git hook manager with a powerfull task runner! 🐶 </PackageDescription>
-      <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
-      <PublishRepositoryUrl>true</PublishRepositoryUrl>
-      <EmbedUntrackedSources>true</EmbedUntrackedSources>
-      <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-      <IncludeSymbols>true</IncludeSymbols>
-      <PackageReadmeFile>README.md</PackageReadmeFile>
-   </PropertyGroup>
-
-   <Target Name="husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(HUSKY)' != 0 and '$(IsCrossTargetingBuild)' == 'true'">
-      <Exec Command="dotnet tool restore" StandardOutputImportance="low" StandardErrorImportance="High" />
-      <Exec Command="dotnet husky install" StandardOutputImportance="low" StandardErrorImportance="High" WorkingDirectory="../../" />
-   </Target>
-
-   <ItemGroup>
-      <EmbeddedResource Include="templates\husky.sh" />
-      <EmbeddedResource Include="templates\task-runner.json" />
-      <None Remove="husky.sh" />
-      <None Remove="task-runner.json" />
-      <None Remove="templates\hook" />
-      <EmbeddedResource Include="templates\hook" />
-   </ItemGroup>
-
-   <ItemGroup>
-      <None Include="..\..\README.md" Pack="true" PackagePath="\" />
-   </ItemGroup>
-
-   <ItemGroup>
-      <PackageReference Include="CliFx" Version="2.2.0" />
-      <PackageReference Include="CliWrap" Version="3.4.0" />
-      <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.0.1" />
-      <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
-      <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="6.0.0" />
-   </ItemGroup>
-
-   <ItemGroup>
-     <Compile Remove="Cli\UninstallOptions.cs" />
-     <Compile Remove="Cli\SetOptions.cs" />
-     <Compile Remove="Cli\RunOptions.cs" />
-     <Compile Remove="Cli\Options.cs" />
-     <Compile Remove="Cli\Install.cs" />
-     <Compile Remove="Cli\ExecOptions.cs" />
-   </ItemGroup>
-
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>netcoreapp3.1;net5.0;net6.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <PackageId>Husky</PackageId>
+    <Version>0.3.1</Version>
+    <Title>Husky</Title>
+    <Authors>AliReza Sabouri</Authors>
+    <Description>Git hooks made easy, woof!</Description>
+    <Copyright>2021</Copyright>
+    <RepositoryUrl>https://github.com/alirezanet/husky.net</RepositoryUrl>
+    <Company>TuxTeam</Company>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>husky</ToolCommandName>
+    <PackageOutputPath>./nupkg</PackageOutputPath>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageDescription>Easy to use git hook manager with a powerfull task runner! 🐶 </PackageDescription>
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <IncludeSymbols>true</IncludeSymbols>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="templates\husky.sh" />
+    <EmbeddedResource Include="templates\task-runner.json" />
+    <None Remove="husky.sh" />
+    <None Remove="task-runner.json" />
+    <None Remove="templates\hook" />
+    <EmbeddedResource Include="templates\hook" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="CliFx" Version="2.2.0" />
+    <PackageReference Include="CliWrap" Version="3.4.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="6.0.0" />
+  </ItemGroup>
+  <Target Name="Husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(HUSKY)' != 0 and '$(IsCrossTargetingBuild)' == 'true'">
+    <Exec Command="dotnet tool restore" StandardOutputImportance="Low" StandardErrorImportance="High" />
+    <Exec Command="dotnet husky install" StandardOutputImportance="Low" StandardErrorImportance="High" WorkingDirectory="..\.." />
+  </Target>
 </Project>
