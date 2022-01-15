@@ -6,21 +6,23 @@
 >
 > Run linters against staged git files and don't let 💩 slip into your code base!
 
-These two quotes from [husky](https://github.com/typicode/husky) and [lint-staged](https://github.com/okonet/lint-staged) JS tools inspired me to create Husky.Net for dotnet developers. it provides a simple and native way to do both also has a lot of other cool features. You can use it to lint your commit messages, run tests, lint code, etc. when you commit or push. 🚀🚀
+These two quotes from [husky](https://github.com/typicode/husky) and [lint-staged](https://github.com/okonet/lint-staged) JS tools inspired me to create Husky.Net for dotnet developers. it provides a simple native way to do both also has a lot of other cool features, You can use it to lint your commit messages, run tests, lint/format code, etc... when you commit or push. 🚀🚀
 
 ## Features
 
-- User-friendly messages
+- 🔥 It brings the **dev-dependency** concept to the .NET world!
+- 🔥 Supports all Git & gitflow hooks
+- 🔥 Internal task runner!
+- Multiple file states (staged, last-commit, git-files, etc...)
+- CSharp scripts (csx)
 - Supports macOS, Linux and Windows
+- Powered by modern new Git feature (core.hooksPath)
+- User-define variables
+- Compatible with [dotnet-format](https://github.com/dotnet/format)
+- User-friendly messages
 - Git GUIs
 - Custom directories
 - Monorepo
-- 🔥 Internal task runner!
-- 🔥 Multiple file states (staged, last-commit, git-files, etc...)
-- 🔥 Compatible with dotnet-format
-- 🔥 User-define arg variables
-- 🔥 CSharp scripts (csx)
-- 🔥 Supports gitflow hooks
 
 -_A lot of features are coming soon, stay tuned! 👁️‍🗨️👀_
 

@@ -1,14 +1,28 @@
 # Automate installation for other contributors
 
-There are many ways to automate husky installation for everyone. below you can see a few examples.
+Husky.Net brings the **dev-dependency** concept to the .NET ecosystem.
 
-::: tip
-If you want to automate husky for other contributors, you should use local installation.
-:::
+You can attach husky to your project without adding extra dependencies! This way the other contributors will use your pre-configured tasks automatically.
 
-## Using project files (recommended)
+## Attach Husky to your project
 
-You can add the below code to one of your projects (*.csproj/*.vbproj).
+To attach Husky to your project, you can use the following command:
+
+```shell
+dotnet husky attach <path-to-project-file>
+```
+
+This will add the required configuration to your project file.
+
+check out the [Manual Attach](#manual-attach) section for more details.
+
+## Disable husky in CI/CD pipelines
+
+You can set the `HUSKY` environment variable to `0` in order to disable husky in CI/CD pipelines.
+
+## Manual Attach
+
+To manually attach husky to your project, add the below code to one of your projects (*.csproj/*.vbproj).
 
 ``` xml:no-line-numbers:no-v-pre
 <Target Name="husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(HUSKY)' != 0">
@@ -37,11 +51,7 @@ e.g
 
 :::
 
-## Disable husky in CI/CD pipelines
-
-You can set the `HUSKY` environment variable to `0` in order to disable husky in CI/CD pipelines.
-
-## Using package.json
+## package.json alternative
 
 If you are using the npm, add the below code to your package.json file will automatically install husky after the npm install
 

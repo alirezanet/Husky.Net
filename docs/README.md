@@ -1,6 +1,7 @@
 ---
 home: true
 title: Welcome
+tagline: "It brings the dev-dependency concept to the .NET world!"
 actions:
    - text: Get Started
      link: /guide/getting-started.md
