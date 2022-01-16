@@ -14,8 +14,10 @@ Fixes # (issue)
 ## Checklist
 
 - [ ] I have performed a self-review of my code
+- [ ] I have added tests that prove my fix is effective or that my feature works
 - [ ] I have made corresponding changes to the documentation
 - [ ] I have commented my code, particularly in hard-to-understand areas
+- [ ] New and existing unit tests pass locally with my changes
 - [ ] I did test corresponding changes on **Windows**
 - [ ] I did test corresponding changes on **Linux**
 - [ ] I did test corresponding changes on **Mac**
