@@ -2,8 +2,8 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using CliFx.Exceptions;
 using CliWrap.Buffered;
+using Husky.Services.Contracts;
 using Husky.Stdout;
-using Husky.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileSystemGlobbing;
 
@@ -13,15 +13,17 @@ public class TaskRunner
 {
    private const double MAX_ARG_LENGTH = 8191;
    private readonly Lazy<Task<IList<HuskyTask>>> _customVariableTasks;
-   private readonly Git _git;
+   private readonly IGit _git;
    private readonly bool _isWindows;
    private readonly IRunOption _options;
+   private readonly ICliWrap _cliWrap;
    private bool _needGitIndexUpdate;
 
-   public TaskRunner(Git git, IRunOption options)
+   public TaskRunner(IGit git, IRunOption options, ICliWrap cliWrap)
    {
       _git = git;
       _options = options;
+      _cliWrap = cliWrap;
       _isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
       _customVariableTasks = new Lazy<Task<IList<HuskyTask>>>(GetCustomVariableTasks);
    }
@@ -172,14 +174,14 @@ public class TaskRunner
    {
       $"⌛ Executing task '{task.Name}' {chunk}...".Husky();
       // execute task in order
-      var result = await Utility.RunCommandAsync(task.Command!, args.Select(q => q.arg), cwd, task.Output ?? OutputTypes.Always);
+      var result = await _cliWrap.RunCommandAsync(task.Command!, args.Select(q => q.arg), cwd, task.Output ?? OutputTypes.Always);
       if (result.ExitCode != 0) throw new CommandException($"\n  ❌ Task '{task.Name}' failed in {result.RunTime.TotalMilliseconds:n0}ms\n");
 
       // in staged mode, we should update the git index
       if (!_needGitIndexUpdate) return result.RunTime.TotalMilliseconds;
       try
       {
-         await Git.ExecAsync("update-index -g");
+         await _git.ExecAsync("update-index -g");
          _needGitIndexUpdate = false;
       }
       catch (Exception)

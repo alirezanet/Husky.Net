@@ -2,6 +2,7 @@ using System.Reflection;
 using CliFx.Attributes;
 using CliFx.Exceptions;
 using CliFx.Infrastructure;
+using Husky.Services.Contracts;
 using Husky.Stdout;
 using Husky.Utils;
 
@@ -10,11 +11,20 @@ namespace Husky.Cli;
 [Command("set", Description = "Set husky hook (set pre-push -c \"dotnet test\")")]
 public class SetCommand : CommandBase
 {
+   private readonly IGit _git;
+   private readonly ICliWrap _cliWrap;
+
    [CommandParameter(0, Name = "hook-name", Description = "hook name (pre-commit, commit-msg, pre-push, etc.)")]
    public string HookName { get; set; } = default!;
 
    [CommandOption("command", 'c', Description = "command to run")]
    public string Command { get; set; } = "dotnet husky run";
+
+   public SetCommand(IGit git, ICliWrap cliWrap)
+   {
+      _git = git;
+      _cliWrap = cliWrap;
+   }
 
    protected override async ValueTask SafeExecuteAsync(IConsole console)
    {
@@ -33,15 +43,14 @@ public class SetCommand : CommandBase
       }
 
       // needed for linux
-      await Utility.SetExecutablePermission(hookPath);
+      await _cliWrap.SetExecutablePermission(hookPath);
 
       $"created {hookPath}".Log(ConsoleColor.Green);
    }
 
    internal async Task<string> GetHuskyPath()
    {
-      var git = new Git();
-      var huskyPath = await git.GetHuskyPathAsync();
+      var huskyPath = await _git.GetHuskyPathAsync();
 
       if (!File.Exists(Path.Combine(huskyPath, "_", "husky.sh")))
          throw new CommandException("can not find husky required files (try: husky install)");

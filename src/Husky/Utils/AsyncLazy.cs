@@ -6,7 +6,7 @@ namespace Husky.Utils;
 // https://blog.stephencleary.com/2012/08/asynchronous-lazy-initialization.html
 
 /// <summary>
-/// Provides support for asynchronous lazy initialization. This type is fully threadsafe.
+/// Provides support for asynchronous lazy initialization. This type is fully thread safe.
 /// </summary>
 /// <typeparam name="T">The type of object that is being asynchronously initialized.</typeparam>
 public sealed class AsyncLazy<T>
@@ -38,7 +38,7 @@ public sealed class AsyncLazy<T>
    }
 
    /// <summary>
-   /// Asynchronous infrastructure support. This method permits instances of <see cref="AsyncLazy&lt;T&gt;" /> to be await'ed.
+   /// Asynchronous infrastructure support. This method permits instances of <see cref="AsyncLazy&lt;T&gt;" /> to be awaited.
    /// </summary>
    public TaskAwaiter<T> GetAwaiter()
    {

@@ -1,7 +1,14 @@
+using System.IO.Abstractions;
 using System.Text.RegularExpressions;
 using CliFx;
 using CliFx.Infrastructure;
+using Husky.Cli;
+using Husky.Cli.AttachServices;
+using Husky.Services;
+using Husky.Services.Contracts;
 using Husky.Stdout;
+using Husky.Utils;
+using Microsoft.Extensions.DependencyInjection;
 
 // initialize static testable logger
 LoggerEx.logger = new Logger(new SystemConsole());
@@ -22,13 +29,28 @@ while (true)
    args = Regex.Matches(cmd!, @"[\""].+?[\""]|[^ ]+").Select(m => m.Value.StartsWith("\"") ? m.Value.Replace("\"", "") : m.Value).ToArray();
 #endif
 
+   // initialize DI
+   var services = new ServiceCollection()
+      .AddSingleton<IFileSystem, FileSystem>()
+      .AddSingleton<IGit, Git>()
+      .AddTransient<IXmlIO, XmlIO>()
+      .AddTransient<ICliWrap, HuskyCliWrap>()
+      .AddTransient<AddCommand>()
+      .AddTransient<AttachCommand>()
+      .AddTransient<ExecCommand>()
+      .AddTransient<InstallCommand>()
+      .AddTransient<RunCommand>()
+      .AddTransient<SetCommand>()
+      .AddTransient<UninstallCommand>();
+   var serviceProvider = services.BuildServiceProvider();
 
+   // initialize CLI
    exitCode = await new CliApplicationBuilder()
       .AddCommandsFromThisAssembly()
+      .UseTypeActivator(serviceProvider.GetService)
       .SetExecutableName("husky")
       .Build()
       .RunAsync(args);
-
 
 #if DEBUG
    $"\nExited with code {exitCode}".Log();

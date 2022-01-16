@@ -1,12 +1,15 @@
 using CliFx.Exceptions;
 using CliWrap;
 using CliWrap.Buffered;
+using Husky.Services.Contracts;
 using Husky.Stdout;
+using Husky.Utils;
 
-namespace Husky.Utils;
+namespace Husky.Services;
 
-public class Git
+public class Git : IGit
 {
+   private readonly ICliWrap _cliWrap;
    private readonly AsyncLazy<string> _currentBranch;
    private readonly AsyncLazy<string> _gitDirRelativePath;
    private readonly AsyncLazy<string[]> _GitFiles;
@@ -15,8 +18,9 @@ public class Git
    private readonly AsyncLazy<string[]> _lastCommitFiles;
    private readonly AsyncLazy<string[]> _stagedFiles;
 
-   public Git()
+   public Git(ICliWrap cliWrap)
    {
+      _cliWrap = cliWrap;
       _gitPath = new AsyncLazy<string>(GetGitPath);
       _huskyPath = new AsyncLazy<string>(GetHuskyPath);
       _stagedFiles = new AsyncLazy<string[]>(GetStagedFiles);
@@ -61,7 +65,7 @@ public class Git
       return await _huskyPath;
    }
 
-   private static async Task<string> GetGitDirRelativePath()
+   private async Task<string> GetGitDirRelativePath()
    {
       try
       {
@@ -78,7 +82,7 @@ public class Git
       }
    }
 
-   private static async Task<string> GetCurrentBranch()
+   private async Task<string> GetCurrentBranch()
    {
       try
       {
@@ -95,17 +99,17 @@ public class Git
       }
    }
 
-   public static Task<CommandResult> ExecAsync(string args)
+   public Task<CommandResult> ExecAsync(string args)
    {
-      return Utility.ExecDirectAsync("git", args);
+      return _cliWrap.ExecDirectAsync("git", args);
    }
 
-   public static Task<BufferedCommandResult> ExecBufferedAsync(string args)
+   public Task<BufferedCommandResult> ExecBufferedAsync(string args)
    {
-      return Utility.ExecBufferedAsync("git", args);
+      return _cliWrap.ExecBufferedAsync("git", args);
    }
 
-   private static async Task<string> GetHuskyPath()
+   private async Task<string> GetHuskyPath()
    {
       try
       {
@@ -122,7 +126,7 @@ public class Git
       }
    }
 
-   private static async Task<string> GetGitPath()
+   private async Task<string> GetGitPath()
    {
       try
       {
@@ -139,7 +143,7 @@ public class Git
       }
    }
 
-   private static async Task<string[]> GetLastCommitFiles()
+   private async Task<string[]> GetLastCommitFiles()
    {
       try
       {
@@ -156,7 +160,7 @@ public class Git
       }
    }
 
-   private static async Task<string[]> GetStagedFiles()
+   private async Task<string[]> GetStagedFiles()
    {
       try
       {
@@ -173,7 +177,7 @@ public class Git
       }
    }
 
-   private static async Task<string[]> GetGitFiles()
+   private async Task<string[]> GetGitFiles()
    {
       try
       {

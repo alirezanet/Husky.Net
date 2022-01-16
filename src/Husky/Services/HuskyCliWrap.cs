@@ -1,14 +1,15 @@
 using System.Runtime.InteropServices;
 using CliWrap;
 using CliWrap.Buffered;
+using Husky.Services.Contracts;
 using Husky.Stdout;
 using Husky.TaskRunner;
 
-namespace Husky.Utils;
+namespace Husky.Services;
 
-public static class Utility
+public class HuskyCliWrap : ICliWrap
 {
-   public static async Task<BufferedCommandResult> ExecBufferedAsync(string fileName, string args)
+   public async Task<BufferedCommandResult> ExecBufferedAsync(string fileName, string args)
    {
       try
       {
@@ -24,7 +25,7 @@ public static class Utility
       }
    }
 
-   public static async ValueTask SetExecutablePermission(params string[] files)
+   public async ValueTask SetExecutablePermission(params string[] files)
    {
       if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
       var args = new[] { "+x" }.Concat(files);
@@ -37,7 +38,7 @@ public static class Utility
          "failed to add executable permissions".Log(ConsoleColor.Yellow);
    }
 
-   public static async Task<CommandResult> ExecDirectAsync(string fileName, string args)
+   public async Task<CommandResult> ExecDirectAsync(string fileName, string args)
    {
       var result = await CliWrap.Cli.Wrap(fileName)
          .WithArguments(args)
@@ -48,7 +49,7 @@ public static class Utility
       return result;
    }
 
-   public static async Task<CommandResult> RunCommandAsync(string fileName, IEnumerable<string> args, string cwd,
+   public async Task<CommandResult> RunCommandAsync(string fileName, IEnumerable<string> args, string cwd,
       OutputTypes output = OutputTypes.Verbose)
    {
       var ps = CliWrap.Cli.Wrap(fileName)
@@ -63,9 +64,6 @@ public static class Utility
 
       return await ps.ExecuteAsync();
    }
-
-
-
 
    private static void LogStandardOutput(string stdout, OutputTypes output)
    {
