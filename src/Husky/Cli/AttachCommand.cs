@@ -2,7 +2,6 @@ using System.IO.Abstractions;
 using System.Xml.Linq;
 using CliFx.Attributes;
 using CliFx.Infrastructure;
-using Husky.Cli.AttachServices;
 using Husky.Services.Contracts;
 using Husky.Stdout;
 

@@ -3,11 +3,9 @@ using System.Text.RegularExpressions;
 using CliFx;
 using CliFx.Infrastructure;
 using Husky.Cli;
-using Husky.Cli.AttachServices;
 using Husky.Services;
 using Husky.Services.Contracts;
 using Husky.Stdout;
-using Husky.Utils;
 using Microsoft.Extensions.DependencyInjection;
 
 // initialize static testable logger
@@ -31,8 +29,8 @@ while (true)
 
    // initialize DI
    var services = new ServiceCollection()
-      .AddSingleton<IFileSystem, FileSystem>()
       .AddSingleton<IGit, Git>()
+      .AddTransient<IFileSystem, FileSystem>()
       .AddTransient<IXmlIO, XmlIO>()
       .AddTransient<ICliWrap, HuskyCliWrap>()
       .AddTransient<AddCommand>()

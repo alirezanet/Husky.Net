@@ -1,12 +1,7 @@
 using System.Xml.Linq;
+using Husky.Services.Contracts;
 
-namespace Husky.Cli.AttachServices;
-
-public interface IXmlIO
-{
-   XElement Load(string path);
-   void Save(string path, XElement docElement);
-}
+namespace Husky.Services;
 
 public class XmlIO : IXmlIO
 {

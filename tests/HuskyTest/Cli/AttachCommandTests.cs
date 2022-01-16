@@ -3,7 +3,6 @@ using System.Xml.Linq;
 using CliFx.Infrastructure;
 using FluentAssertions;
 using Husky.Cli;
-using Husky.Cli.AttachServices;
 using Husky.Services.Contracts;
 using Husky.Stdout;
 using NSubstitute;
