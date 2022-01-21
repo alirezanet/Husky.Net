@@ -17,7 +17,7 @@ public class TaskRunner
    private readonly bool _isWindows;
    private readonly IRunOption _options;
    private readonly ICliWrap _cliWrap;
-   private bool _needGitIndexUpdate;
+   private bool _isStagedMode;
 
    public TaskRunner(IGit git, IRunOption options, ICliWrap cliWrap)
    {
@@ -178,11 +178,11 @@ public class TaskRunner
       if (result.ExitCode != 0) throw new CommandException($"\n  ❌ Task '{task.Name}' failed in {result.RunTime.TotalMilliseconds:n0}ms\n");
 
       // in staged mode, we should update the git index
-      if (!_needGitIndexUpdate) return result.RunTime.TotalMilliseconds;
+      if (!_isStagedMode) return result.RunTime.TotalMilliseconds;
       try
       {
          await _git.ExecAsync("update-index -g");
-         _needGitIndexUpdate = false;
+         _isStagedMode = false;
       }
       catch (Exception)
       {
@@ -267,7 +267,7 @@ public class TaskRunner
                // get match staged files with glob
                var matches = matcher.Match(stagedFiles);
                AddMatchedFiles(pathMode, matches, args, await _git.GetGitPathAsync());
-               _needGitIndexUpdate = true;
+               _isStagedMode = true;
                continue;
             }
             case "${last-commit}":
