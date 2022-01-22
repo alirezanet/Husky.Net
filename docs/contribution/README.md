@@ -8,6 +8,7 @@ start contributing to the project by submitting pull requests
 
 - :zap: Improve the documentation
 - :zap: Add unit-tests
+- :zap: Refactor TaskRunner class (we need a clean and testable code)
 
 ## Documentation
 
