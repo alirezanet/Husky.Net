@@ -2,8 +2,8 @@ import type { HeadConfig } from 'vuepress-vite';
 
 export const head: HeadConfig[] = [
    // favicon
-   ['link', { rel: 'icon', href: 'favicon.ico', type: "image/x-icon" }],
-   ['link', { rel: 'shortcut icon', href: 'favicon.ico', type: "image/x-icon" }],
+   ['link', { rel: 'icon', href: '/Husky.Net/favicon.ico', type: "image/x-icon" }],
+   ['link', { rel: 'shortcut icon', href: '/Husky.Net/favicon.ico', type: "image/x-icon" }],
 
    // social media image
    ['meta', { property: 'og:image', content: 'https://alirezanet.github.io/Husky.Net/workflow.jpg' }],
