@@ -62,7 +62,7 @@ public class InstallCommand : CommandBase
       }
 
       // find all hooks (if exists) from .husky/ and add executable flag
-      var files = Directory.GetFiles(path).Where(f => !f.Contains(".")).ToList();
+      var files = Directory.GetFiles(path).Where(f => !new FileInfo(f).Name.Contains(".")).ToList();
       files.Add(husky_shPath);
       await _cliWrap.SetExecutablePermission(files.ToArray());
 
