@@ -9,8 +9,9 @@ namespace Husky.Cli;
 [Command("run", Description = "Run task-runner.json tasks")]
 public class RunCommand : CommandBase, IRunOption
 {
-   private readonly IGit _git;
    private readonly ICliWrap _cliWrap;
+   private readonly IHuskyTaskLoader _taskLoader;
+   private readonly IExecutableTaskFactory _executableTaskFactory;
 
    [CommandOption("quiet", 'q', Description = "Disable [Husky] console output")]
    public bool Quiet
@@ -28,15 +29,16 @@ public class RunCommand : CommandBase, IRunOption
    [CommandOption("args", 'a', Description = "Pass custom arguments to tasks")]
    public IReadOnlyList<string>? Arguments { get; set; }
 
-   public RunCommand(IGit git, ICliWrap cliWrap)
+   public RunCommand(ICliWrap cliWrap, IHuskyTaskLoader taskLoader, IExecutableTaskFactory executableTaskFactory)
    {
-      _git = git;
       _cliWrap = cliWrap;
+      _taskLoader = taskLoader;
+      _executableTaskFactory = executableTaskFactory;
    }
 
    protected override async ValueTask SafeExecuteAsync(IConsole _)
    {
-      var taskRunner = new TaskRunner.TaskRunner(_git, this, _cliWrap);
+      var taskRunner = new TaskRunner.TaskRunner(this, _cliWrap, _taskLoader, _executableTaskFactory);
       await taskRunner.Run();
    }
 }

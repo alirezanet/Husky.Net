@@ -164,7 +164,8 @@ public class Git : IGit
    {
       try
       {
-         var result = await ExecBufferedAsync("diff --diff-filter=d --name-only --staged");
+         // '--diff-filter=AM', # select only file additions and modifications
+         var result = await ExecBufferedAsync("diff-index --cached --diff-filter=AM --no-renames --name-only HEAD");
          if (result.ExitCode != 0)
             throw new Exception($"Exit code: {result.ExitCode}"); // break execution
 

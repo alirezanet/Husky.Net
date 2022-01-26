@@ -6,6 +6,7 @@ using Husky.Cli;
 using Husky.Services;
 using Husky.Services.Contracts;
 using Husky.Stdout;
+using Husky.TaskRunner;
 using Microsoft.Extensions.DependencyInjection;
 
 // initialize static testable logger
@@ -30,6 +31,9 @@ while (true)
    // initialize DI
    var services = new ServiceCollection()
       .AddSingleton<IGit, Git>()
+      .AddSingleton<IHuskyTaskLoader, HuskyTaskLoader>()
+      .AddSingleton<IArgumentParser, ArgumentParser>()
+      .AddTransient<IExecutableTaskFactory, ExecutableTaskFactory>()
       .AddTransient<IFileSystem, FileSystem>()
       .AddTransient<IXmlIO, XmlIO>()
       .AddTransient<ICliWrap, HuskyCliWrap>()
