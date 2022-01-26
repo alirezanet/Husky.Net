@@ -13,10 +13,25 @@
          "args": ["husky", "exec", ".husky/csx/commit-lint.csx", "--args", "${args}"]
       },
       {
+         "name": "csharpier",
          "command": "dotnet",
          "group": "pre-commit",
-         "args": ["dotnet-format", "--include", "${staged}"],
+         "args": [ "csharpier", "${staged}" ],
+         "include": [ "**/*.cs" ]
+      },
+      {
+         "name": "dotnet-format",
+         "command": "dotnet",
+         "group": "pre-commit",
+         "args": ["dotnet-format", "--include" , "${staged}"],
          "include": ["**/*.cs"]
+      },
+      {
+         "name": "echo staged files",
+         "pathMode": "absolute",
+         "command": "cmd",
+         "group": "pre-commit",
+         "args": [ "/c", "echo", "${staged}"],
       }
    ]
 }

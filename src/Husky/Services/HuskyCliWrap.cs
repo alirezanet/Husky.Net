@@ -13,9 +13,10 @@ public class HuskyCliWrap : ICliWrap
    {
       try
       {
-         var result = await CliWrap.Cli.Wrap(fileName)
-            .WithArguments(args)
-            .ExecuteBufferedAsync();
+         var result = await CliWrap.Cli
+             .Wrap(fileName)
+             .WithArguments(args)
+             .ExecuteBufferedAsync();
          return result;
       }
       catch (Exception)
@@ -27,12 +28,14 @@ public class HuskyCliWrap : ICliWrap
 
    public async ValueTask SetExecutablePermission(params string[] files)
    {
-      if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
+      if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+         return;
       var args = new[] { "+x" }.Concat(files);
-      var ps = CliWrap.Cli.Wrap("chmod")
-         .WithArguments(args)
-         .WithStandardErrorPipe(PipeTarget.ToDelegate(q => q.LogVerbose(ConsoleColor.DarkRed)))
-         .WithValidation(CommandResultValidation.None);
+      var ps = CliWrap.Cli
+          .Wrap("chmod")
+          .WithArguments(args)
+          .WithStandardErrorPipe(PipeTarget.ToDelegate(q => q.LogVerbose(ConsoleColor.DarkRed)))
+          .WithValidation(CommandResultValidation.None);
       var result = await ps.ExecuteAsync();
       if (result.ExitCode != 0)
          "failed to add executable permissions".Log(ConsoleColor.Yellow);
@@ -40,24 +43,30 @@ public class HuskyCliWrap : ICliWrap
 
    public async Task<CommandResult> ExecDirectAsync(string fileName, string args)
    {
-      var result = await CliWrap.Cli.Wrap(fileName)
-         .WithArguments(args)
-         .WithValidation(CommandResultValidation.None)
-         .WithStandardOutputPipe(PipeTarget.ToDelegate(q => q.Log()))
-         .WithStandardErrorPipe(PipeTarget.ToDelegate(q => q.LogErr()))
-         .ExecuteAsync();
+      var result = await CliWrap.Cli
+          .Wrap(fileName)
+          .WithArguments(args)
+          .WithValidation(CommandResultValidation.None)
+          .WithStandardOutputPipe(PipeTarget.ToDelegate(q => q.Log()))
+          .WithStandardErrorPipe(PipeTarget.ToDelegate(q => q.LogErr()))
+          .ExecuteAsync();
       return result;
    }
 
-   public async Task<CommandResult> RunCommandAsync(string fileName, IEnumerable<string> args, string cwd,
-      OutputTypes output = OutputTypes.Verbose)
+   public async Task<CommandResult> RunCommandAsync(
+       string fileName,
+       IEnumerable<string> args,
+       string cwd,
+       OutputTypes output = OutputTypes.Verbose
+   )
    {
-      var ps = CliWrap.Cli.Wrap(fileName)
-         .WithWorkingDirectory(cwd)
-         .WithArguments(args)
-         .WithValidation(CommandResultValidation.None)
-         .WithStandardOutputPipe(PipeTarget.ToDelegate(q => LogStandardOutput(q, output)))
-         .WithStandardErrorPipe(PipeTarget.ToDelegate(q => LogStandardError(q, output)));
+      var ps = CliWrap.Cli
+          .Wrap(fileName)
+          .WithWorkingDirectory(cwd)
+          .WithArguments(args)
+          .WithValidation(CommandResultValidation.None)
+          .WithStandardOutputPipe(PipeTarget.ToDelegate(q => LogStandardOutput(q, output)))
+          .WithStandardErrorPipe(PipeTarget.ToDelegate(q => LogStandardError(q, output)));
 
       if (!string.IsNullOrEmpty(cwd))
          ps = ps.WithWorkingDirectory(cwd);
@@ -78,7 +87,11 @@ public class HuskyCliWrap : ICliWrap
          case OutputTypes.Never:
             break;
          default:
-            throw new ArgumentOutOfRangeException(nameof(output), output, "Supported (always, never, verbose)");
+            throw new ArgumentOutOfRangeException(
+                nameof(output),
+                output,
+                "Supported (always, never, verbose)"
+            );
       }
    }
 
@@ -95,7 +108,11 @@ public class HuskyCliWrap : ICliWrap
          case OutputTypes.Never:
             break;
          default:
-            throw new ArgumentOutOfRangeException(nameof(output), output, "Supported (always, never, verbose)");
+            throw new ArgumentOutOfRangeException(
+                nameof(output),
+                output,
+                "Supported (always, never, verbose)"
+            );
       }
    }
 }

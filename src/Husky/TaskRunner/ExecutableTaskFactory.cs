@@ -32,28 +32,40 @@ public class ExecutableTaskFactory : IExecutableTaskFactory
       huskyTask.Name ??= huskyTask.Command;
 
       var cwd = await _git.GetTaskCwdAsync(huskyTask);
-      var args = await _argumentParser.ParseAsync(huskyTask, optionArguments);
+      var argsInfo = await _argumentParser.ParseAsync(huskyTask, optionArguments);
 
-      if (huskyTask.Args != null && huskyTask.Args.Length > args.Length)
+      if (huskyTask.Args != null && huskyTask.Args.Length > argsInfo.Length)
       {
          "💤 Skipped, no matched files".Husky(ConsoleColor.Blue);
          return null;
       }
 
       // check for chunk
-      var totalCommandLength = args.Sum(q => q.Argument.Length) + huskyTask.Command.Length;
-      if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && totalCommandLength > MAX_ARG_LENGTH)
-         return CreateChunkTask(huskyTask, totalCommandLength, args, cwd);
+      var totalCommandLength = argsInfo.Sum(q => q.Argument.Length) + huskyTask.Command.Length;
+      if (
+          RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+          && totalCommandLength > MAX_ARG_LENGTH
+      )
+         return CreateChunkTask(huskyTask, totalCommandLength, argsInfo, cwd);
 
-      return CreateExecutableTask(args, new TaskInfo(
-         huskyTask.Name,
-         huskyTask.Command,
-         args.Select(q => q.Argument).ToArray(),
-         cwd,
-         huskyTask.Output ?? OutputTypes.Always));
+      return CreateExecutableTask(
+          new TaskInfo(
+              huskyTask.Name,
+              huskyTask.Command,
+              argsInfo.Select(q => q.Argument).ToArray(),
+              cwd,
+              huskyTask.Output ?? OutputTypes.Always,
+              argsInfo
+          )
+      );
    }
 
-   private IExecutableTask CreateChunkTask(HuskyTask huskyTask, int totalCommandLength, ArgumentInfo[] args, string cwd)
+   private IExecutableTask CreateChunkTask(
+       HuskyTask huskyTask,
+       int totalCommandLength,
+       ArgumentInfo[] args,
+       string cwd
+   )
    {
       var chunks = GetChunks(totalCommandLength, args);
       var subTasks = new IExecutableTask[chunks.Count];
@@ -62,31 +74,37 @@ public class ExecutableTaskFactory : IExecutableTaskFactory
          var argInfo = chunks.Dequeue();
          var chunkedArgs = argInfo.Select(w => w.Argument).ToArray();
          var taskInfo = new TaskInfo(
-            huskyTask.Name!,
-            huskyTask.Command!,
-            chunkedArgs,
-            cwd,
-            huskyTask.Output ?? OutputTypes.Always);
+             huskyTask.Name!,
+             huskyTask.Command!,
+             chunkedArgs,
+             cwd,
+             huskyTask.Output ?? OutputTypes.Always,
+             argInfo
+         );
          // staged-task
-         subTasks[i] = CreateExecutableTask(argInfo, taskInfo);
+         subTasks[i] = CreateExecutableTask(taskInfo);
       }
 
       return new ChunkTask(subTasks);
    }
 
-   private IExecutableTask CreateExecutableTask(IEnumerable<ArgumentInfo> chunkData, TaskInfo taskInfo)
+   private IExecutableTask CreateExecutableTask(TaskInfo taskInfo)
    {
-      return chunkData.Any(q => q.ArgumentTypes == ArgumentTypes.StagedFile)
-         ? new StagedTask(taskInfo, _git)
-         : new ExecutableTask(taskInfo);
+      return taskInfo.ArgumentInfo.Any(q => q.ArgumentTypes == ArgumentTypes.StagedFile)
+        ? new StagedTask(taskInfo, _git)
+        : new ExecutableTask(taskInfo);
    }
 
    private static Queue<ArgumentInfo[]> GetChunks(int totalCommandLength, ArgumentInfo[] args)
    {
       var chunkSize = Math.Ceiling(totalCommandLength / (MAX_ARG_LENGTH / 2));
-      // $"⚠️ The Maximum argument length '{MAX_ARG_LENGTH}' reached, splitting matched files into {chunkSize} chunks".Husky(ConsoleColor.Yellow);
+      $"⚠️ The Maximum argument length '{MAX_ARG_LENGTH}' reached, splitting matched files into {chunkSize} chunks".Husky(
+          ConsoleColor.Yellow
+      );
 
-      var totalFiles = args.Count(a => a.ArgumentTypes is ArgumentTypes.File or ArgumentTypes.StagedFile);
+      var totalFiles = args.Count(
+          a => a.ArgumentTypes is ArgumentTypes.File or ArgumentTypes.StagedFile
+      );
       var totalFilePerChunk = (int)Math.Ceiling(totalFiles / chunkSize);
 
       var chunks = new Queue<ArgumentInfo[]>((int)chunkSize);
@@ -114,15 +132,14 @@ public class ExecutableTaskFactory : IExecutableTaskFactory
             // add file to the chunk,
             // we should continue to the end
             // to support normal arguments after our file list if exists
-            if (fileCounter >= totalFilePerChunk) continue;
+            if (fileCounter >= totalFilePerChunk)
+               continue;
 
             chunk.Add(arg);
             fileCounter += 1;
          }
-
          chunks.Enqueue(chunk.ToArray());
       }
-
       return chunks;
    }
 }

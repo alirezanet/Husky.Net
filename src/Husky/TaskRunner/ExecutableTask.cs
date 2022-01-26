@@ -3,20 +3,27 @@ using Husky.Services.Contracts;
 
 namespace Husky.TaskRunner;
 
-public class ExecutableTask : ExecutableTaskBase
+public partial class ExecutableTask : ExecutableTaskBase
 {
-   private readonly TaskInfo _taskInfo;
+   protected TaskInfo TaskInfo { get; }
 
    public ExecutableTask(TaskInfo taskInfo) : base(ExecutableTaskTypes.Normal)
    {
-      _taskInfo = taskInfo;
+      TaskInfo = taskInfo;
    }
 
    public override async Task<double> Execute(ICliWrap cli)
    {
-      var result = await cli.RunCommandAsync(_taskInfo.Command, _taskInfo.Arguments, _taskInfo.WorkingDirectory, _taskInfo.OutputType);
+      var result = await cli.RunCommandAsync(
+          TaskInfo.Command,
+          TaskInfo.Arguments,
+          TaskInfo.WorkingDirectory,
+          TaskInfo.OutputType
+      );
       if (result.ExitCode != 0)
-         throw new CommandException($"\n  ❌ Task '{_taskInfo.Name}' failed in {result.RunTime.TotalMilliseconds:n0}ms\n");
+         throw new CommandException(
+             $"\n  ❌ Task '{TaskInfo.Name}' failed in {result.RunTime.TotalMilliseconds:n0}ms\n"
+         );
 
       return result.RunTime.TotalMilliseconds;
    }

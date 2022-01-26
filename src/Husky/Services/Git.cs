@@ -30,6 +30,25 @@ public class Git : IGit
       _gitDirRelativePath = new AsyncLazy<string>(GetGitDirRelativePath);
    }
 
+   public async Task<string[]> GetDiffNameOnlyAsync()
+   {
+      try
+      {
+         var result = await ExecBufferedAsync("diff --name-only");
+         if (result.ExitCode != 0)
+            throw new Exception($"Exit code: {result.ExitCode}"); // break execution
+
+         return result.StandardOutput
+             .Trim()
+             .Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+      }
+      catch (Exception e)
+      {
+         e.Message.LogVerbose(ConsoleColor.DarkRed);
+         throw new CommandException("git diff failed", innerException: e);
+      }
+   }
+
    public async Task<string[]> GetStagedFilesAsync()
    {
       return await _stagedFiles;
@@ -63,6 +82,27 @@ public class Git : IGit
    public async Task<string> GetHuskyPathAsync()
    {
       return await _huskyPath;
+   }
+
+   public async Task<string[]> GetDiffStagedRecord()
+   {
+      try
+      {
+         var result = await ExecBufferedAsync(
+             "diff-index --cached --diff-filter=AM --no-renames HEAD"
+         );
+         if (result.ExitCode != 0)
+            throw new Exception($"Exit code: {result.ExitCode}"); // break execution
+
+         return result.StandardOutput
+             .Trim()
+             .Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+      }
+      catch (Exception e)
+      {
+         e.Message.LogVerbose(ConsoleColor.DarkRed);
+         throw new CommandException("Could not find the staged files", innerException: e);
+      }
    }
 
    private async Task<string> GetGitDirRelativePath()
@@ -151,7 +191,9 @@ public class Git : IGit
          if (result.ExitCode != 0)
             throw new Exception($"Exit code: {result.ExitCode}"); // break execution
 
-         return result.StandardOutput.Trim().Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+         return result.StandardOutput
+             .Trim()
+             .Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
       }
       catch (Exception e)
       {
@@ -165,11 +207,15 @@ public class Git : IGit
       try
       {
          // '--diff-filter=AM', # select only file additions and modifications
-         var result = await ExecBufferedAsync("diff-index --cached --diff-filter=AM --no-renames --name-only HEAD");
+         var result = await ExecBufferedAsync(
+             "diff-index --cached --diff-filter=AM --no-renames --name-only HEAD"
+         );
          if (result.ExitCode != 0)
             throw new Exception($"Exit code: {result.ExitCode}"); // break execution
 
-         return result.StandardOutput.Trim().Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+         return result.StandardOutput
+             .Trim()
+             .Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
       }
       catch (Exception e)
       {
@@ -186,7 +232,9 @@ public class Git : IGit
          if (result.ExitCode != 0)
             throw new Exception($"Exit code: {result.ExitCode}"); // break execution
 
-         return result.StandardOutput.Trim().Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+         return result.StandardOutput
+             .Trim()
+             .Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
       }
       catch (Exception e)
       {
