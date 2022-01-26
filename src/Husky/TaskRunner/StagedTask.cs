@@ -9,6 +9,7 @@ public class StagedTask : ExecutableTask
 
    public StagedTask(TaskInfo taskInfo, IGit git) : base(taskInfo)
    {
+      TaskType = ExecutableTaskTypes.Staged;
       _git = git;
    }
    public override async Task<double> Execute(ICliWrap cli)

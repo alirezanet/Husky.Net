@@ -6,7 +6,7 @@ namespace Husky.TaskRunner;
 public class ChunkTask : ExecutableTaskBase
 {
    public IExecutableTask[] Chunks { get; }
-   public ChunkTask(IExecutableTask[] executableTasks) : base(ExecutableTaskTypes.Staged)
+   public ChunkTask(IExecutableTask[] executableTasks) : base(ExecutableTaskTypes.Chunked)
    {
       Chunks = executableTasks;
    }

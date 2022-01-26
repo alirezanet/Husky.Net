@@ -8,6 +8,6 @@ public abstract class ExecutableTaskBase : IExecutableTask
    {
       TaskType = taskType;
    }
-   public ExecutableTaskTypes TaskType { get; }
+   public ExecutableTaskTypes TaskType { get; protected init; }
    public abstract Task<double> Execute(ICliWrap cli);
 }
