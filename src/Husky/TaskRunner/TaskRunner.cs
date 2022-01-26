@@ -45,6 +45,15 @@ public class TaskRunner
          var executableTask = await _factory.CreateAsync(task, _options.Arguments?.ToArray());
          if (executableTask is null) continue;
 
+         if (executableTask.TaskType == ExecutableTaskTypes.Chunked)
+         {
+            var chunkTask = (ChunkTask)executableTask;
+            $"⌛ Executing task '{task.Name}' in {chunkTask.Chunks.Length} chunks ...".Husky();
+         }
+         else
+         {
+            $"⌛ Executing task '{task.Name}' ...".Husky();
+         }
          var executionTime = await executableTask.Execute(_cliWrap);
 
          $" ✔ Successfully executed in {executionTime:n0}ms".Husky(ConsoleColor.DarkGreen);
