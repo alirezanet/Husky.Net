@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using CliFx.Exceptions;
 using Husky.Services.Contracts;
+using Husky.Stdout;
 
 namespace Husky.TaskRunner;
 
@@ -90,10 +91,17 @@ public class StagedTask : ExecutableTask
             );
          }
 
-         // update index entry
-         await _git.ExecAsync(
-             $"update-index --add --cacheinfo {tf.dst_mode},{newHash},{tf.src_path}"
-         );
+         if (newHash != tf.dst_hash)
+         {
+            $"Updating index entry for {tf.src_path}".LogVerbose();
+            await _git.ExecAsync(
+                $"update-index --cacheinfo {tf.dst_mode},{newHash},{tf.src_path}"
+            );
+         }
+         else
+         {
+            $"file {tf.src_path} did not changed by formatters".LogVerbose();
+         }
 
          // remove the temporary file
          File.Delete(tf.tmp_path!);
@@ -113,7 +121,11 @@ public class StagedTask : ExecutableTask
           .Except(partialStagedFiles)
           .ToList();
       if (stagedFiles.Any())
+      {
+         $"Re-staging staged files...".LogVerbose();
+         string.Join(Environment.NewLine, stagedFiles).LogVerbose();
          await _git.ExecAsync($"add {string.Join(" ", stagedFiles)}");
+      }
    }
 
    private async Task<List<DiffRecord>> GetStagedRecord()
