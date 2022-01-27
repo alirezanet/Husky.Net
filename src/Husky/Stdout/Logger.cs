@@ -5,7 +5,7 @@ namespace Husky.Stdout;
 
 public class Logger : ILogger
 {
-   private readonly IConsole _console;
+   private IConsole _console;
 
    public Logger(IConsole console)
    {
@@ -20,7 +20,8 @@ public class Logger : ILogger
 
    public void Husky(string message, ConsoleColor? color = null)
    {
-      if (HuskyQuiet) return;
+      if (HuskyQuiet)
+         return;
       Write("[Husky] ", ConsoleColor.Cyan);
       WriteLine($"{message}", color);
    }
@@ -32,13 +33,15 @@ public class Logger : ILogger
 
    public void Hr(int count = 50, ConsoleColor? color = ConsoleColor.DarkGray)
    {
-      if (HuskyQuiet) return;
+      if (HuskyQuiet)
+         return;
       WriteLine(new string('-', count), color);
    }
 
    public void LogVerbose(string message, ConsoleColor color = ConsoleColor.DarkGray)
    {
-      if (!Verbose) return;
+      if (!Verbose)
+         return;
       WriteLine(message, color);
    }
 
@@ -52,7 +55,11 @@ public class Logger : ILogger
 
    private void Init()
    {
-      if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || Environment.GetEnvironmentVariable("vt100") is not "1") return;
+      if (
+          !RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+          || Environment.GetEnvironmentVariable("vt100") is not "1"
+      )
+         return;
       try
       {
          // enabling vt100 colors for windows
@@ -67,21 +74,31 @@ public class Logger : ILogger
 
    private void Write(string message, ConsoleColor? color = null)
    {
-      if (Colors && color != null)
+      try
       {
-         if (Vt100Colors)
+         if (Colors && color != null)
          {
-            Vt100.Write(message, color.Value, _console.Output);
+            if (Vt100Colors)
+            {
+               Vt100.Write(message, color.Value, _console.Output);
+            }
+            else
+            {
+               _console.ForegroundColor = color.Value;
+               _console.Output.Write(message);
+               _console.ResetColor();
+            }
          }
          else
          {
-            _console.ForegroundColor = color.Value;
             _console.Output.Write(message);
-            _console.ResetColor();
          }
       }
-      else
+      catch (Exception)
       {
+         // TODO: fix clifx bug
+         // temporary fix the clifx overflow exception
+         _console = new SystemConsole();
          _console.Output.Write(message);
       }
    }
