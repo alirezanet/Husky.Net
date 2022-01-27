@@ -1,7 +1,6 @@
 using System.Text.RegularExpressions;
 using CliFx.Exceptions;
 using Husky.Services.Contracts;
-using Husky.Stdout;
 
 namespace Husky.TaskRunner;
 
@@ -23,14 +22,12 @@ public class StagedTask : ExecutableTask
 
       var hasAnyPartialStagedFiles = partialStagedFiles.Any();
 
-      // normal execution -------------------------------------
+      if (hasAnyPartialStagedFiles)
+         return await PartialExecution(cli, partialStagedFiles);
 
-      if (!hasAnyPartialStagedFiles)
-         return await NormalExecutionAsync(cli);
-
-      // partial execution ------------------------------------
-
-      return await PartialExecution(cli, partialStagedFiles);
+      var executionTime = await base.Execute(cli);
+      await ReStageFiles(partialStagedFiles);
+      return executionTime;
    }
 
    private async Task<double> PartialExecution(ICliWrap cli, List<string> partialStagedFiles)
@@ -103,6 +100,13 @@ public class StagedTask : ExecutableTask
       }
 
       // re-staged staged files
+      await ReStageFiles(partialStagedFiles);
+
+      return executionTime;
+   }
+
+   private async Task ReStageFiles(List<string> partialStagedFiles)
+   {
       var stagedFiles = TaskInfo.ArgumentInfo
           .Where(q => q.ArgumentTypes == ArgumentTypes.StagedFile)
           .Select(q => q.Argument)
@@ -110,8 +114,6 @@ public class StagedTask : ExecutableTask
           .ToList();
       if (stagedFiles.Any())
          await _git.ExecAsync($"add {string.Join(" ", stagedFiles)}");
-
-      return executionTime;
    }
 
    private async Task<List<DiffRecord>> GetStagedRecord()
@@ -130,23 +132,6 @@ public class StagedTask : ExecutableTask
           )
           .ToList();
       return stagedRecord;
-   }
-
-   private async Task<double> NormalExecutionAsync(ICliWrap cli)
-   {
-      var executionTime = await base.Execute(cli);
-      // in staged mode, we should update the git index
-      try
-      {
-         await _git.ExecAsync("update-index -g");
-      }
-      catch (Exception)
-      {
-         // Silently ignore the error if happens, we don't want to break the execution
-         "⚠️ Can not update git index".Husky(ConsoleColor.Yellow);
-      }
-
-      return executionTime;
    }
 
    private DiffRecord ParseDiff(string diff)
