@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 using CliFx.Exceptions;
 using Husky.Services.Contracts;
 using Husky.Stdout;
