@@ -68,8 +68,9 @@ public class ExecutableTaskFactory : IExecutableTaskFactory
    )
    {
       var chunks = GetChunks(totalCommandLength, args);
-      var subTasks = new IExecutableTask[chunks.Count];
-      for (var i = 1; i <= chunks.Count; i++)
+      var chunkLength = chunks.Count;
+      var subTasks = new IExecutableTask[chunkLength];
+      for (var i = 0; i < chunkLength; i++)
       {
          var argInfo = chunks.Dequeue();
          var chunkedArgs = argInfo.Select(w => w.Argument).ToArray();
