@@ -26,7 +26,8 @@ public class ArgumentParser : IArgumentParser
    public async Task<ArgumentInfo[]> ParseAsync(HuskyTask task, string[]? optionArguments = null)
    {
       var args = new List<ArgumentInfo>();
-      if (task.Args == null) return Array.Empty<ArgumentInfo>();
+      if (task.Args == null)
+         return Array.Empty<ArgumentInfo>();
 
       // this is not lazy, because each task can have different patterns
       var matcher = GetPatternMatcher(task);
@@ -66,7 +67,7 @@ public class ArgumentParser : IArgumentParser
                break;
             }
             default:
-               args.Add(new ArgumentInfo(arg, ArgumentTypes.Static));
+               args.Add(new ArgumentInfo(ArgumentTypes.Static, arg));
                break;
          }
       }
@@ -76,9 +77,12 @@ public class ArgumentParser : IArgumentParser
 
    private async Task AddStagedFiles(Matcher matcher, List<ArgumentInfo> args, PathModes pathMode)
    {
-      var stagedFiles = (await _git.GetStagedFilesAsync()).Where(q => !string.IsNullOrWhiteSpace(q)).ToArray();
+      var stagedFiles = (await _git.GetStagedFilesAsync())
+          .Where(q => !string.IsNullOrWhiteSpace(q))
+          .ToArray();
       // continue if nothing is staged
-      if (!stagedFiles.Any()) return;
+      if (!stagedFiles.Any())
+         return;
 
       // get match staged files with glob
       var matches = matcher.Match(stagedFiles);
@@ -86,7 +90,12 @@ public class ArgumentParser : IArgumentParser
       AddMatchedFiles(args, pathMode, ArgumentTypes.StagedFile, matches, gitPath);
    }
 
-   private async Task AddCustomVariable(string x, Matcher matcher, List<ArgumentInfo> args, PathModes pathMode)
+   private async Task AddCustomVariable(
+       string x,
+       Matcher matcher,
+       List<ArgumentInfo> args,
+       PathModes pathMode
+   )
    {
       var customVariables = await _customVariableTasks.Value;
       var variable = x[2..^1];
@@ -103,8 +112,8 @@ public class ArgumentParser : IArgumentParser
 
       // get relative paths for matcher
       var files = (await GetCustomVariableOutput(huskyVariableTask))
-         .Where(q => !string.IsNullOrWhiteSpace(q))
-         .Select(q => Path.IsPathFullyQualified(q) ? Path.GetRelativePath(gitPath, q) : q);
+          .Where(q => !string.IsNullOrWhiteSpace(q))
+          .Select(q => Path.IsPathFullyQualified(q) ? Path.GetRelativePath(gitPath, q) : q);
       var matches = matcher.Match(gitPath, files);
       AddMatchedFiles(args, pathMode, ArgumentTypes.CustomVariable, matches, gitPath);
    }
@@ -114,14 +123,19 @@ public class ArgumentParser : IArgumentParser
       var output = Array.Empty<string>();
       try
       {
-         if (task.Command == null || task.Args == null) return output;
+         if (task.Command == null || task.Args == null)
+            return output;
          var cwd = await _git.GetTaskCwdAsync(task);
-         var result = await CliWrap.Cli.Wrap(task.Command)
-            .WithArguments(task.Args)
-            .WithWorkingDirectory(cwd)
-            .ExecuteBufferedAsync();
+         var result = await CliWrap.Cli
+             .Wrap(task.Command)
+             .WithArguments(task.Args)
+             .WithWorkingDirectory(cwd)
+             .ExecuteBufferedAsync();
          if (result.ExitCode == 0)
-            return result.StandardOutput.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+            return result.StandardOutput.Split(
+                new[] { "\r\n", "\r", "\n" },
+                StringSplitOptions.None
+            );
       }
       catch (Exception e)
       {
@@ -134,11 +148,13 @@ public class ArgumentParser : IArgumentParser
 
    private async Task<IList<HuskyTask>> GetCustomVariableTasks()
    {
-      var dir = Path.Combine(await _git.GetGitPathAsync(), await _git.GetHuskyPathAsync(), "task-runner.json");
+      var dir = Path.Combine(
+          await _git.GetGitPathAsync(),
+          await _git.GetHuskyPathAsync(),
+          "task-runner.json"
+      );
       var tasks = new List<HuskyTask>();
-      var config = new ConfigurationBuilder()
-         .AddJsonFile(dir)
-         .Build();
+      var config = new ConfigurationBuilder().AddJsonFile(dir).Build();
       config.GetSection("variables").Bind(tasks);
       return tasks;
    }
@@ -159,7 +175,8 @@ public class ArgumentParser : IArgumentParser
    private async Task AddGitFiles(Matcher matcher, List<ArgumentInfo> args, PathModes pathMode)
    {
       var gitFiles = await _git.GitFilesAsync();
-      if (gitFiles.Length < 1) return;
+      if (gitFiles.Length < 1)
+         return;
       var matches = matcher.Match(gitFiles);
       var gitPath = await _git.GetGitPathAsync();
       AddMatchedFiles(args, pathMode, ArgumentTypes.File, matches, gitPath);
@@ -167,38 +184,58 @@ public class ArgumentParser : IArgumentParser
 
    private async Task AddLastCommit(Matcher matcher, List<ArgumentInfo> args, PathModes pathMode)
    {
-      var lastCommitFiles = (await _git.GetLastCommitFilesAsync()).Where(q => !string.IsNullOrWhiteSpace(q)).ToArray();
-      if (lastCommitFiles.Length < 1) return;
+      var lastCommitFiles = (await _git.GetLastCommitFilesAsync())
+          .Where(q => !string.IsNullOrWhiteSpace(q))
+          .ToArray();
+      if (lastCommitFiles.Length < 1)
+         return;
       var matches = matcher.Match(lastCommitFiles);
       var gitPath = await _git.GetGitPathAsync();
       AddMatchedFiles(args, pathMode, ArgumentTypes.File, matches, gitPath);
    }
 
-   private static void AddMatchedFiles(List<ArgumentInfo> args, PathModes pathMode, ArgumentTypes argumentType, PatternMatchingResult matches,
-      string rootPath)
+   private static void AddMatchedFiles(
+       List<ArgumentInfo> args,
+       PathModes pathMode,
+       ArgumentTypes argumentType,
+       PatternMatchingResult matches,
+       string rootPath
+   )
    {
-      if (!matches.HasMatches) return;
+      if (!matches.HasMatches)
+         return;
       var matchFiles = matches.Files.Select(q => $"{q.Path}").ToArray();
       LogMatchedFiles(matchFiles);
       foreach (var f in matchFiles)
          switch (pathMode)
          {
             case PathModes.Relative:
-               args.Add(new ArgumentInfo(f, argumentType));
+               args.Add(new FileArgumentInfo(argumentType, pathMode, f));
                break;
             case PathModes.Absolute:
-               args.Add(new ArgumentInfo(Path.GetFullPath(f, rootPath), argumentType));
+               args.Add(
+                   new FileArgumentInfo(
+                       argumentType,
+                       pathMode,
+                       f,
+                       Path.GetFullPath(f, rootPath)
+                   )
+               );
                break;
             default:
-               throw new ArgumentOutOfRangeException(nameof(HuskyTask.PathMode), pathMode,
-                  "Invalid path mode. Supported modes: (relative | absolute)");
+               throw new ArgumentOutOfRangeException(
+                   nameof(HuskyTask.PathMode),
+                   pathMode,
+                   "Invalid path mode. Supported modes: (relative | absolute)"
+               );
          }
    }
 
    private static void LogMatchedFiles(IEnumerable<string> files)
    {
       // show matched files in verbose mode
-      if (!LoggerEx.logger.Verbose) return;
+      if (!LoggerEx.logger.Verbose)
+         return;
       "Matches:".Husky(ConsoleColor.DarkGray);
       foreach (var file in files)
          $"  {file}".LogVerbose();
@@ -207,7 +244,9 @@ public class ArgumentParser : IArgumentParser
    private static void AddCustomArguments(List<ArgumentInfo> args, string[]? optionArguments)
    {
       if (optionArguments != null)
-         args.AddRange(optionArguments.Select(q => new ArgumentInfo(q, ArgumentTypes.CustomArgument)));
+         args.AddRange(
+             optionArguments.Select(q => new ArgumentInfo(ArgumentTypes.CustomArgument, q))
+         );
       else
          "⚠️ No arguments passed to the run command".Husky(ConsoleColor.Yellow);
    }

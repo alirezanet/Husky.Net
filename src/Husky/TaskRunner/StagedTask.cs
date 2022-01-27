@@ -19,7 +19,10 @@ public class StagedTask : ExecutableTask
    {
       // Check if any partial staged files are present
       var diffNames = await _git.GetDiffNameOnlyAsync();
-      var partialStagedFiles = diffNames.Intersect(TaskInfo.Arguments).ToList();
+      var fileArgumentInfo = TaskInfo.ArgumentInfo.OfType<FileArgumentInfo>().ToList();
+      var partialStagedFiles = fileArgumentInfo
+          .IntersectBy(diffNames, q => q.RelativePath)
+          .ToList();
 
       var hasAnyPartialStagedFiles = partialStagedFiles.Any();
 
@@ -31,7 +34,10 @@ public class StagedTask : ExecutableTask
       return executionTime;
    }
 
-   private async Task<double> PartialExecution(ICliWrap cli, List<string> partialStagedFiles)
+   private async Task<double> PartialExecution(
+       ICliWrap cli,
+       List<FileArgumentInfo> partialStagedFiles
+   )
    {
       // create tmp folder
       var gitPath = await _git.GetGitDirRelativePathAsync();
@@ -45,13 +51,12 @@ public class StagedTask : ExecutableTask
       var stagedRecord = await GetStagedRecord();
       foreach (var psf in partialStagedFiles)
       {
-         var record = stagedRecord.First(q => q.src_path == psf);
+         var record = stagedRecord.First(q => q.src_path == psf.RelativePath);
 
          // first, we need to create a temporary file
-         var tmpFile = Path.Combine(tmp, new FileInfo(psf).Name);
+         var tmpFile = Path.Combine(tmp, new FileInfo(psf.RelativePath).Name);
 
-         // check if it is a absolute path
-         if (Path.IsPathFullyQualified(psf))
+         if (psf.PathMode == PathModes.Absolute)
             tmpFile = Path.GetFullPath(tmpFile);
 
          var hash = record.dst_hash;
@@ -64,7 +69,7 @@ public class StagedTask : ExecutableTask
          }
 
          // insert the temporary file into the arguments
-         var index = arguments.FindIndex(q => q == psf);
+         var index = arguments.FindIndex(q => q == psf.Argument);
          arguments.Insert(index, tmpFile);
          tmpFiles.Add(record with { tmp_path = tmpFile });
       }
@@ -113,12 +118,13 @@ public class StagedTask : ExecutableTask
       return executionTime;
    }
 
-   private async Task ReStageFiles(List<string> partialStagedFiles)
+   private async Task ReStageFiles(List<FileArgumentInfo> partialStagedFiles)
    {
       var stagedFiles = TaskInfo.ArgumentInfo
+          .OfType<FileArgumentInfo>()
           .Where(q => q.ArgumentTypes == ArgumentTypes.StagedFile)
-          .Select(q => q.Argument)
           .Except(partialStagedFiles)
+          .Select(q => q.RelativePath)
           .ToList();
       if (stagedFiles.Any())
       {
@@ -135,11 +141,11 @@ public class StagedTask : ExecutableTask
       var stagedRecord = parsedDiff
           .Where(
               x =>
-                  x.dst_mode != "120000"
-                  && // symlinks
-                  TaskInfo.ArgumentInfo
+                  x.dst_mode != "120000" // symlinks
+                  && TaskInfo.ArgumentInfo
+                      .OfType<FileArgumentInfo>()
                       .Where(q => q.ArgumentTypes == ArgumentTypes.StagedFile)
-                      .Select(q => q.Argument)
+                      .Select(q => q.RelativePath)
                       .Contains(x.src_path)
           )
           .ToList();
