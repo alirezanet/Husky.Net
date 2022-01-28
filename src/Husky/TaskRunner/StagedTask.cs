@@ -1,5 +1,4 @@
 using System.Text.RegularExpressions;
-using System.Xml.Linq;
 using CliFx.Exceptions;
 using Husky.Services.Contracts;
 using Husky.Stdout;
@@ -41,10 +40,10 @@ public class StagedTask : ExecutableTask
    )
    {
       // create tmp folder
-      var gitPath = await _git.GetGitDirRelativePathAsync();
-      var tmp = Path.Combine(gitPath, "tmp");
-      if (!Directory.Exists(tmp))
-         Directory.CreateDirectory(tmp);
+      var huskyPath = await _git.GetHuskyPathAsync();
+      var cache = Path.Combine(huskyPath, "_", "cache");
+      if (!Directory.Exists(cache))
+         Directory.CreateDirectory(cache);
 
       var arguments = TaskInfo.Arguments.ToList();
       var tmpFiles = new List<DiffRecord>();
@@ -55,7 +54,7 @@ public class StagedTask : ExecutableTask
          var record = stagedRecord.First(q => q.src_path == psf.RelativePath);
 
          // first, we need to create a temporary file
-         var tmpFile = Path.Combine(tmp, new FileInfo(psf.RelativePath).Name);
+         var tmpFile = Path.Combine(cache, new FileInfo(psf.RelativePath).Name);
 
          if (psf.PathMode == PathModes.Absolute)
             tmpFile = Path.GetFullPath(tmpFile);
@@ -92,6 +91,7 @@ public class StagedTask : ExecutableTask
          if (string.IsNullOrEmpty(newHash))
          {
             File.Delete(tf.tmp_path!);
+            Directory.Delete(cache);
             throw new CommandException(
                 "Failed to hash temp file. Please check the partial staged files."
             );
@@ -111,6 +111,7 @@ public class StagedTask : ExecutableTask
 
          // remove the temporary file
          File.Delete(tf.tmp_path!);
+         Directory.Delete(cache);
       }
 
       // re-staged staged files
@@ -129,7 +130,7 @@ public class StagedTask : ExecutableTask
           .ToList();
       if (stagedFiles.Any())
       {
-         $"Re-staging staged files...".LogVerbose();
+         "Re-staging staged files...".LogVerbose();
          string.Join(Environment.NewLine, stagedFiles).LogVerbose();
          await _git.ExecAsync($"add {string.Join(" ", stagedFiles)}");
       }
