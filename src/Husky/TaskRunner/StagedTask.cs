@@ -21,8 +21,8 @@ public class StagedTask : ExecutableTask
       var diffNames = await _git.GetDiffNameOnlyAsync();
       var fileArgumentInfo = TaskInfo.ArgumentInfo.OfType<FileArgumentInfo>().ToList();
       var partialStagedFiles = fileArgumentInfo
-          .IntersectBy(diffNames, q => q.RelativePath)
-          .ToList();
+         .IntersectBy(diffNames, q => q.RelativePath)
+         .ToList();
 
       var hasAnyPartialStagedFiles = partialStagedFiles.Any();
 
@@ -35,8 +35,8 @@ public class StagedTask : ExecutableTask
    }
 
    private async Task<double> PartialExecution(
-       ICliWrap cli,
-       List<FileArgumentInfo> partialStagedFiles
+      ICliWrap cli,
+      List<FileArgumentInfo> partialStagedFiles
    )
    {
       // create tmp folder
@@ -63,8 +63,8 @@ public class StagedTask : ExecutableTask
          {
             await using var output = File.Create(tmpFile);
             await (
-                CliWrap.Cli.Wrap("git").WithArguments(new[] { "cat-file", "blob", hash }!)
-                | output
+               CliWrap.Cli.Wrap("git").WithArguments(new[] { "cat-file", "blob", hash }!)
+               | output
             ).ExecuteAsync();
          }
 
@@ -91,9 +91,8 @@ public class StagedTask : ExecutableTask
          if (string.IsNullOrEmpty(newHash))
          {
             File.Delete(tf.tmp_path!);
-            Directory.Delete(cache);
             throw new CommandException(
-                "Failed to hash temp file. Please check the partial staged files."
+               "Failed to hash temp file. Please check the partial staged files."
             );
          }
 
@@ -101,7 +100,7 @@ public class StagedTask : ExecutableTask
          {
             $"Updating index entry for {tf.src_path}".LogVerbose();
             await _git.ExecAsync(
-                $"update-index --cacheinfo {tf.dst_mode},{newHash},{tf.src_path}"
+               $"update-index --cacheinfo {tf.dst_mode},{newHash},{tf.src_path}"
             );
          }
          else
@@ -111,8 +110,11 @@ public class StagedTask : ExecutableTask
 
          // remove the temporary file
          File.Delete(tf.tmp_path!);
-         Directory.Delete(cache);
       }
+
+      // clean up the cache folder
+      if (Directory.Exists(cache))
+         Directory.Delete(cache, true);
 
       // re-staged staged files
       await ReStageFiles(partialStagedFiles);
@@ -123,11 +125,11 @@ public class StagedTask : ExecutableTask
    private async Task ReStageFiles(List<FileArgumentInfo> partialStagedFiles)
    {
       var stagedFiles = TaskInfo.ArgumentInfo
-          .OfType<FileArgumentInfo>()
-          .Where(q => q.ArgumentTypes == ArgumentTypes.StagedFile)
-          .Except(partialStagedFiles)
-          .Select(q => q.RelativePath)
-          .ToList();
+         .OfType<FileArgumentInfo>()
+         .Where(q => q.ArgumentTypes == ArgumentTypes.StagedFile)
+         .Except(partialStagedFiles)
+         .Select(q => q.RelativePath)
+         .ToList();
       if (stagedFiles.Any())
       {
          "Re-staging staged files...".LogVerbose();
@@ -141,16 +143,16 @@ public class StagedTask : ExecutableTask
       var diffStaged = await _git.GetDiffStagedRecord();
       var parsedDiff = diffStaged.Select(ParseDiff).AsQueryable();
       var stagedRecord = parsedDiff
-          .Where(
-              x =>
-                  x.dst_mode != "120000" // symlinks
-                  && TaskInfo.ArgumentInfo
-                      .OfType<FileArgumentInfo>()
-                      .Where(q => q.ArgumentTypes == ArgumentTypes.StagedFile)
-                      .Select(q => q.RelativePath)
-                      .Contains(x.src_path)
-          )
-          .ToList();
+         .Where(
+            x =>
+               x.dst_mode != "120000" // symlinks
+               && TaskInfo.ArgumentInfo
+                  .OfType<FileArgumentInfo>()
+                  .Where(q => q.ArgumentTypes == ArgumentTypes.StagedFile)
+                  .Select(q => q.RelativePath)
+                  .Contains(x.src_path)
+         )
+         .ToList();
       return stagedRecord;
    }
 
@@ -158,21 +160,21 @@ public class StagedTask : ExecutableTask
    {
       // Format: src_mode dst_mode src_hash dst_hash status/score? src_path dst_path?
       var diff_pat = new Regex(
-          @"^:(\d+) (\d+) ([a-f0-9]+) ([a-f0-9]+) ([A-Z])(\d+)?\t([^\t]+)(?:\t([^\t]+))?$"
+         @"^:(\d+) (\d+) ([a-f0-9]+) ([a-f0-9]+) ([A-Z])(\d+)?\t([^\t]+)(?:\t([^\t]+))?$"
       );
       var match = diff_pat.Match(diff);
       if (!match.Success)
          throw new CommandException("Failed to parse diff-index line:  + diff");
 
       return new DiffRecord(
-          UnlessZeroed(match.Groups[1].Value),
-          UnlessZeroed(match.Groups[2].Value),
-          UnlessZeroed(match.Groups[3].Value),
-          UnlessZeroed(match.Groups[4].Value),
-          match.Groups[5].Value,
-          int.TryParse(match.Groups[6].Value, out var score) ? score : null,
-          match.Groups[7].Value,
-          match.Groups[8].Value
+         UnlessZeroed(match.Groups[1].Value),
+         UnlessZeroed(match.Groups[2].Value),
+         UnlessZeroed(match.Groups[3].Value),
+         UnlessZeroed(match.Groups[4].Value),
+         match.Groups[5].Value,
+         int.TryParse(match.Groups[6].Value, out var score) ? score : null,
+         match.Groups[7].Value,
+         match.Groups[8].Value
       );
    }
 
@@ -188,14 +190,14 @@ public class StagedTask : ExecutableTask
    }
 
    private record DiffRecord(
-       string? src_mode,
-       string? dst_mode,
-       string? src_hash,
-       string? dst_hash,
-       string? status,
-       int? score,
-       string? src_path,
-       string? dst_path,
-       string? tmp_path = null
+      string? src_mode,
+      string? dst_mode,
+      string? src_hash,
+      string? dst_hash,
+      string? status,
+      int? score,
+      string? src_path,
+      string? dst_path,
+      string? tmp_path = null
    );
 }
