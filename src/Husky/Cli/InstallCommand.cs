@@ -1,10 +1,10 @@
+using System.IO.Abstractions;
 using System.Reflection;
 using CliFx.Attributes;
 using CliFx.Exceptions;
 using CliFx.Infrastructure;
 using Husky.Services.Contracts;
 using Husky.Stdout;
-using Husky.Utils;
 
 namespace Husky.Cli;
 
@@ -13,6 +13,7 @@ public class InstallCommand : CommandBase
 {
    private readonly IGit _git;
    private readonly ICliWrap _cliWrap;
+   private readonly IFileSystem _fileSystem;
    private const string FailedMsg = "Git hooks installation failed";
    private const string HUSKY_FOLDER_NAME = ".husky";
    private const string DOCS_URL = "https://alirezanet.github.io/Husky.Net/guide/getting-started";
@@ -20,10 +21,11 @@ public class InstallCommand : CommandBase
    [CommandOption("dir", 'd', Description = "The custom directory to install Husky hooks.")]
    public string HuskyDirectory { get; set; } = HUSKY_FOLDER_NAME;
 
-   public InstallCommand(IGit git, ICliWrap cliWrap)
+   public InstallCommand(IGit git, ICliWrap cliWrap, IFileSystem fileSystem)
    {
       _git = git;
       _cliWrap = cliWrap;
+      _fileSystem = fileSystem;
    }
 
    protected override async ValueTask SafeExecuteAsync(IConsole console)
@@ -43,14 +45,14 @@ public class InstallCommand : CommandBase
          throw new CommandException($"{path}\nNot allowed (see {DOCS_URL})\n" + FailedMsg);
 
       // Ensure that cwd is git top level
-      if (!Directory.Exists(Path.Combine(cwd, ".git")))
+      if (!_fileSystem.Directory.Exists(Path.Combine(cwd, ".git")))
          throw new CommandException($".git can't be found (see {DOCS_URL})\n" + FailedMsg);
 
       // Create .husky/_
-      Directory.CreateDirectory(Path.Combine(path, "_"));
+      _fileSystem.Directory.CreateDirectory(Path.Combine(path, "_"));
 
       // Create .husky/_/.  ignore
-      await File.WriteAllTextAsync(Path.Combine(path, "_/.gitignore"), "*");
+      await _fileSystem.File.WriteAllTextAsync(Path.Combine(path, "_/.gitignore"), "*");
 
       // Copy husky.sh to .husky/_/husky.sh
       var husky_shPath = Path.Combine(path, "_/husky.sh");
@@ -58,22 +60,22 @@ public class InstallCommand : CommandBase
          await using var stream = Assembly.GetAssembly(typeof(Program))!.GetManifestResourceStream("Husky.templates.husky.sh")!;
          using var sr = new StreamReader(stream);
          var content = await sr.ReadToEndAsync();
-         await File.WriteAllTextAsync(husky_shPath, content);
+         await _fileSystem.File.WriteAllTextAsync(husky_shPath, content);
       }
 
       // find all hooks (if exists) from .husky/ and add executable flag
-      var files = Directory.GetFiles(path).Where(f => !new FileInfo(f).Name.Contains(".")).ToList();
+      var files = _fileSystem.Directory.GetFiles(path).Where(f => !_fileSystem.FileInfo.FromFileName(f).Name.Contains('.')).ToList();
       files.Add(husky_shPath);
       await _cliWrap.SetExecutablePermission(files.ToArray());
 
       // Created task-runner.json file
       // We don't want to override this file
-      if (!File.Exists(Path.Combine(path, "task-runner.json")))
+      if (!_fileSystem.File.Exists(Path.Combine(path, "task-runner.json")))
       {
          await using var stream = Assembly.GetAssembly(typeof(Program))!.GetManifestResourceStream("Husky.templates.task-runner.json")!;
          using var sr = new StreamReader(stream);
          var content = await sr.ReadToEndAsync();
-         await File.WriteAllTextAsync(Path.Combine(path, "task-runner.json"), content);
+         await _fileSystem.File.WriteAllTextAsync(Path.Combine(path, "task-runner.json"), content);
       }
 
       // Configure repo

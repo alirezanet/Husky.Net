@@ -1,17 +1,15 @@
 using CliFx.Attributes;
 using CliFx.Infrastructure;
-using Husky.Services.Contracts;
 using Husky.Stdout;
 using Husky.TaskRunner;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Husky.Cli;
 
 [Command("run", Description = "Run task-runner.json tasks")]
 public class RunCommand : CommandBase, IRunOption
 {
-   private readonly ICliWrap _cliWrap;
-   private readonly IHuskyTaskLoader _taskLoader;
-   private readonly IExecutableTaskFactory _executableTaskFactory;
+   private readonly IServiceProvider _provider;
 
    [CommandOption("quiet", 'q', Description = "Disable [Husky] console output")]
    public bool Quiet
@@ -29,16 +27,14 @@ public class RunCommand : CommandBase, IRunOption
    [CommandOption("args", 'a', Description = "Pass custom arguments to tasks")]
    public IReadOnlyList<string>? Arguments { get; set; }
 
-   public RunCommand(ICliWrap cliWrap, IHuskyTaskLoader taskLoader, IExecutableTaskFactory executableTaskFactory)
+   public RunCommand(IServiceProvider provider)
    {
-      _cliWrap = cliWrap;
-      _taskLoader = taskLoader;
-      _executableTaskFactory = executableTaskFactory;
+      _provider = provider;
    }
 
    protected override async ValueTask SafeExecuteAsync(IConsole _)
    {
-      var taskRunner = new TaskRunner.TaskRunner(this, _cliWrap, _taskLoader, _executableTaskFactory);
+      var taskRunner = ActivatorUtilities.CreateInstance<TaskRunner.TaskRunner>(_provider, this);
       await taskRunner.Run();
    }
 }

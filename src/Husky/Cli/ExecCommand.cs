@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.IO.Abstractions;
 using CliFx.Attributes;
 using CliFx.Exceptions;
 using CliFx.Infrastructure;
@@ -13,6 +14,13 @@ namespace Husky.Cli;
 [Command("exec", Description = "Execute a csharp script (.csx) file")]
 public class ExecCommand : CommandBase
 {
+   private readonly IFileSystem _fileSystem;
+
+   public ExecCommand(IFileSystem fileSystem)
+   {
+      _fileSystem = fileSystem;
+   }
+
    [CommandParameter(0, Description = "The script file to execute")]
    public string Path { get; set; } = default!;
 
@@ -21,10 +29,10 @@ public class ExecCommand : CommandBase
 
    protected override async ValueTask SafeExecuteAsync(IConsole console)
    {
-      if (!File.Exists(Path))
+      if (!_fileSystem.File.Exists(Path))
          throw new CommandException($"can not find script file on '{Path}'");
 
-      var code = await File.ReadAllTextAsync(Path);
+      var code = await _fileSystem.File.ReadAllTextAsync(Path);
       var workingDirectory = System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(Path));
       var opts = ScriptOptions.Default
          .WithSourceResolver(new SourceFileResolver(ImmutableArray<string>.Empty, workingDirectory))

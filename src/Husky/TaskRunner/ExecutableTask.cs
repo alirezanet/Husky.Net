@@ -7,14 +7,14 @@ public partial class ExecutableTask : ExecutableTaskBase
 {
    protected TaskInfo TaskInfo { get; }
 
-   public ExecutableTask(TaskInfo taskInfo) : base(ExecutableTaskTypes.Normal)
+   public ExecutableTask(ICliWrap cliWrap, TaskInfo taskInfo) : base(cliWrap, ExecutableTaskTypes.Normal)
    {
       TaskInfo = taskInfo;
    }
 
-   public override async Task<double> Execute(ICliWrap cli)
+   public override async Task<double> Execute()
    {
-      var result = await cli.RunCommandAsync(
+      var result = await _cliWrap.RunCommandAsync(
           TaskInfo.Command,
           TaskInfo.Arguments,
           TaskInfo.WorkingDirectory,

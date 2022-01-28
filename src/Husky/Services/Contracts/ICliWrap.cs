@@ -12,4 +12,5 @@ public interface ICliWrap
 
    Task<CommandResult> RunCommandAsync(string fileName, IEnumerable<string> args, string cwd,
       OutputTypes output = OutputTypes.Verbose);
+   Command Wrap(string fileName);
 }

@@ -1,24 +1,16 @@
-using Husky.Services.Contracts;
 using Husky.Stdout;
 
 namespace Husky.TaskRunner;
 
 public class TaskRunner
 {
-   private readonly ICliWrap _cliWrap;
-   private readonly IExecutableTaskFactory _factory;
    private readonly IRunOption _options;
+   private readonly IExecutableTaskFactory _factory;
    private readonly IHuskyTaskLoader _taskLoader;
 
-   public TaskRunner(
-       IRunOption options,
-       ICliWrap cliWrap,
-       IHuskyTaskLoader taskLoader,
-       IExecutableTaskFactory factory
-   )
+   public TaskRunner(IHuskyTaskLoader taskLoader, IExecutableTaskFactory factory, IRunOption options)
    {
       _options = options;
-      _cliWrap = cliWrap;
       _taskLoader = taskLoader;
       _factory = factory;
    }
@@ -52,7 +44,7 @@ public class TaskRunner
             continue;
 
          $"⌛ Executing task '{task.Name}' ...".Husky();
-         var executionTime = await executableTask.Execute(_cliWrap);
+         var executionTime = await executableTask.Execute();
 
          $" ✔ Successfully executed in {executionTime:n0}ms".Husky(ConsoleColor.DarkGreen);
       }

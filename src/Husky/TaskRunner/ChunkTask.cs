@@ -7,19 +7,19 @@ public class ChunkTask : ExecutableTaskBase
 {
    public IExecutableTask[] Chunks { get; }
 
-   public ChunkTask(IExecutableTask[] executableTasks) : base(ExecutableTaskTypes.Chunked)
+   public ChunkTask(ICliWrap cliWrap, IExecutableTask[] executableTasks) : base(cliWrap, ExecutableTaskTypes.Chunked)
    {
       Chunks = executableTasks;
    }
 
-   public override async Task<double> Execute(ICliWrap cli)
+   public override async Task<double> Execute()
    {
       var options = new ParallelOptions
       {
          MaxDegreeOfParallelism = (int)Math.Log2(Chunks.Length)
       };
       var sw = Stopwatch.StartNew();
-      await Parallel.ForEachAsync(Chunks, options, async (task, _) => await task.Execute(cli));
+      await Parallel.ForEachAsync(Chunks, options, async (task, _) => await task.Execute());
       sw.Stop();
       return sw.ElapsedMilliseconds;
    }

@@ -1,3 +1,4 @@
+using System.IO.Abstractions;
 using System.Text.RegularExpressions;
 using CliFx.Exceptions;
 using Husky.Services.Contracts;
@@ -8,14 +9,16 @@ namespace Husky.TaskRunner;
 public class StagedTask : ExecutableTask
 {
    private readonly IGit _git;
+   private readonly IFileSystem _fileSystem;
 
-   public StagedTask(TaskInfo taskInfo, IGit git) : base(taskInfo)
+   public StagedTask(ICliWrap cliWrap, IGit git, IFileSystem fileSystem, TaskInfo taskInfo) : base(cliWrap, taskInfo)
    {
       TaskType = ExecutableTaskTypes.Staged;
       _git = git;
+      _fileSystem = fileSystem;
    }
 
-   public override async Task<double> Execute(ICliWrap cli)
+   public override async Task<double> Execute()
    {
       // Check if any partial staged files are present
       var diffNames = await _git.GetDiffNameOnlyAsync();
@@ -27,23 +30,20 @@ public class StagedTask : ExecutableTask
       var hasAnyPartialStagedFiles = partialStagedFiles.Any();
 
       if (hasAnyPartialStagedFiles)
-         return await PartialExecution(cli, partialStagedFiles);
+         return await PartialExecution(partialStagedFiles);
 
-      var executionTime = await base.Execute(cli);
+      var executionTime = await base.Execute();
       await ReStageFiles(partialStagedFiles);
       return executionTime;
    }
 
-   private async Task<double> PartialExecution(
-      ICliWrap cli,
-      List<FileArgumentInfo> partialStagedFiles
-   )
+   private async Task<double> PartialExecution(List<FileArgumentInfo> partialStagedFiles)
    {
       // create tmp folder
       var huskyPath = await _git.GetHuskyPathAsync();
       var cache = Path.Combine(huskyPath, "_", "cache");
-      if (!Directory.Exists(cache))
-         Directory.CreateDirectory(cache);
+      if (!_fileSystem.Directory.Exists(cache))
+         _fileSystem.Directory.CreateDirectory(cache);
 
       var arguments = TaskInfo.Arguments.ToList();
       var tmpFiles = new List<DiffRecord>();
@@ -54,16 +54,16 @@ public class StagedTask : ExecutableTask
          var record = stagedRecord.First(q => q.src_path == psf.RelativePath);
 
          // first, we need to create a temporary file
-         var tmpFile = Path.Combine(cache, new FileInfo(psf.RelativePath).Name);
+         var tmpFile = Path.Combine(cache, _fileSystem.FileInfo.FromFileName(psf.RelativePath).Name);
 
          if (psf.PathMode == PathModes.Absolute)
             tmpFile = Path.GetFullPath(tmpFile);
 
          var hash = record.dst_hash;
          {
-            await using var output = File.Create(tmpFile);
+            await using var output = _fileSystem.File.Create(tmpFile);
             await (
-               CliWrap.Cli.Wrap("git").WithArguments(new[] { "cat-file", "blob", hash }!)
+               _cliWrap.Wrap("git").WithArguments(new[] { "cat-file", "blob", hash }!)
                | output
             ).ExecuteAsync();
          }
@@ -78,7 +78,7 @@ public class StagedTask : ExecutableTask
       TaskInfo.Arguments = arguments.ToArray();
 
       // execute the task to format all staged files and temporary files
-      var executionTime = await base.Execute(cli);
+      var executionTime = await base.Execute();
 
       // stage temporary files
       foreach (var tf in tmpFiles)
@@ -90,7 +90,9 @@ public class StagedTask : ExecutableTask
          // check if the partial hash exists
          if (string.IsNullOrEmpty(newHash))
          {
-            File.Delete(tf.tmp_path!);
+            if (_fileSystem.File.Exists(tf.tmp_path))
+               _fileSystem.File.Delete(tf.tmp_path);
+
             throw new CommandException(
                "Failed to hash temp file. Please check the partial staged files."
             );
@@ -109,12 +111,13 @@ public class StagedTask : ExecutableTask
          }
 
          // remove the temporary file
-         File.Delete(tf.tmp_path!);
+         if (_fileSystem.File.Exists(tf.tmp_path))
+            _fileSystem.File.Delete(tf.tmp_path);
       }
 
       // clean up the cache folder
-      if (Directory.Exists(cache))
-         Directory.Delete(cache, true);
+      if (_fileSystem.Directory.Exists(cache))
+         _fileSystem.Directory.Delete(cache, true);
 
       // re-staged staged files
       await ReStageFiles(partialStagedFiles);

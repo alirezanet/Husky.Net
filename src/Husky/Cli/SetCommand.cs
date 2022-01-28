@@ -1,3 +1,4 @@
+using System.IO.Abstractions;
 using System.Reflection;
 using CliFx.Attributes;
 using CliFx.Exceptions;
@@ -13,6 +14,7 @@ public class SetCommand : CommandBase
 {
    private readonly IGit _git;
    private readonly ICliWrap _cliWrap;
+   private readonly IFileSystem _fileSystem;
 
    [CommandParameter(0, Name = "hook-name", Description = "hook name (pre-commit, commit-msg, pre-push, etc.)")]
    public string HookName { get; set; } = default!;
@@ -20,10 +22,11 @@ public class SetCommand : CommandBase
    [CommandOption("command", 'c', Description = "command to run")]
    public string Command { get; set; } = "dotnet husky run";
 
-   public SetCommand(IGit git, ICliWrap cliWrap)
+   public SetCommand(IGit git, ICliWrap cliWrap, IFileSystem fileSystem)
    {
       _git = git;
       _cliWrap = cliWrap;
+      _fileSystem = fileSystem;
    }
 
    protected override async ValueTask SafeExecuteAsync(IConsole console)
@@ -39,7 +42,7 @@ public class SetCommand : CommandBase
          await using var stream = Assembly.GetAssembly(typeof(Program))!.GetManifestResourceStream("Husky.templates.hook")!;
          using var sr = new StreamReader(stream);
          var content = await sr.ReadToEndAsync();
-         await File.WriteAllTextAsync(hookPath, $"{content}\n{Command}\n");
+         await _fileSystem.File.WriteAllTextAsync(hookPath, $"{content}\n{Command}\n");
       }
 
       // needed for linux
@@ -52,7 +55,7 @@ public class SetCommand : CommandBase
    {
       var huskyPath = await _git.GetHuskyPathAsync();
 
-      if (!File.Exists(Path.Combine(huskyPath, "_", "husky.sh")))
+      if (!_fileSystem.File.Exists(Path.Combine(huskyPath, "_", "husky.sh")))
          throw new CommandException("can not find husky required files (try: husky install)");
 
       if (HookName.Contains(Path.PathSeparator))

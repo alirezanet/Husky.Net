@@ -74,6 +74,11 @@ public class HuskyCliWrap : ICliWrap
       return await ps.ExecuteAsync();
    }
 
+   public Command Wrap(string fileName)
+   {
+      return CliWrap.Cli.Wrap(fileName);
+   }
+
    private static void LogStandardOutput(string stdout, OutputTypes output)
    {
       switch (output)
