@@ -12,13 +12,13 @@
          "command": "dotnet",
          "args": ["husky", "exec", ".husky/csx/commit-lint.csx", "--args", "${args}"]
       },
-      {
-         "name": "csharpier",
-         "command": "dotnet",
-         "group": "pre-commit",
-         "args": [ "csharpier", "${staged}" ],
-         "include": [ "**/*.cs" ]
-      },
+//      {
+//         "name": "csharpier",
+//         "command": "dotnet",
+//         "group": "pre-commit",
+//         "args": [ "csharpier", "${staged}" ],
+//         "include": [ "**/*.cs" ]
+//      },
       {
          "name": "dotnet-format",
          "command": "dotnet",
