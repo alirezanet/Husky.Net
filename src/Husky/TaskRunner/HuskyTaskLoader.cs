@@ -11,7 +11,6 @@ public interface IHuskyTaskLoader
    IList<HuskyTask> Tasks { get; }
    ValueTask ApplyOptions(IRunOption options);
    Task LoadAsync();
-
 }
 
 public class HuskyTaskLoader : IHuskyTaskLoader
@@ -73,29 +72,19 @@ public class HuskyTaskLoader : IHuskyTaskLoader
    {
       if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) return;
 
+      var properties = typeof(HuskyTask).GetProperties();
       foreach (var task in Tasks.Where(q => q.Windows != null))
       {
-         if (task.Windows == null) continue;
-         if (task.Windows.Cwd != null)
-            task.Cwd = task.Windows.Cwd;
-         if (task.Windows.Args != null)
-            task.Args = task.Windows.Args;
-         if (task.Windows.Command != null)
-            task.Command = task.Windows.Command;
-         if (task.Windows.Group != null)
-            task.Group = task.Windows.Group;
-         if (task.Windows.Name != null)
-            task.Name = task.Windows.Name;
-         if (task.Windows.Exclude != null)
-            task.Exclude = task.Windows.Exclude;
-         if (task.Windows.Include != null)
-            task.Include = task.Windows.Include;
-         if (task.Windows.Output != null)
-            task.Output = task.Windows.Output;
-         if (task.Branch != null)
-            task.Branch = task.Windows.Branch;
-         if (task.Windows.PathMode != null)
-            task.PathMode = task.Windows.PathMode;
+         // replace Task.Windows to Task
+         foreach (var prop in properties)
+         {
+            if (prop.Name == nameof(HuskyTask.Windows))
+               continue;
+
+            var value = prop.GetValue(task.Windows);
+            if (value != null)
+               prop.SetValue(task, value);
+         }
       }
    }
 }
