@@ -11,9 +11,7 @@ public sealed class TemporaryFile : IDisposable
    {
       _fileSystem = fileSystem;
 
-      var path = fileArgumentInfo.PathMode == PathModes.Absolute
-         ? fileArgumentInfo.AbsolutePath
-         : fileArgumentInfo.RelativePath;
+      var path = fileArgumentInfo.GetPath();
 
       var dir = Path.GetDirectoryName(path) ?? "";
       var oldName = Path.GetFileName(path);

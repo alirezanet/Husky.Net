@@ -17,4 +17,14 @@ public class FileArgumentInfo : ArgumentInfo
       RelativePath = relativePath;
       AbsolutePath = absolutePath;
    }
+
+   public string GetPath()
+   {
+      return PathMode switch
+      {
+         PathModes.Relative => RelativePath,
+         PathModes.Absolute => AbsolutePath,
+         _ => throw new ArgumentOutOfRangeException()
+      };
+   }
 }
