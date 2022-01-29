@@ -96,7 +96,7 @@ public class Logger : ILogger
       }
       catch (Exception)
       {
-         // TODO: fix clifx bug
+         // TODO: fix clifx bug https://github.com/Tyrrrz/CliFx/issues/123
          // temporary fix the clifx overflow exception
          _console = new SystemConsole();
          _console.Output.Write(message);
