@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using CliFx.Exceptions;
 using Husky.Services.Contracts;
 using Husky.Stdout;
+using Husky.Utils;
 
 namespace Husky.TaskRunner;
 
@@ -39,38 +40,33 @@ public class StagedTask : ExecutableTask
 
    private async Task<double> PartialExecution(List<FileArgumentInfo> partialStagedFiles)
    {
-      // create tmp folder
-      var huskyPath = await _git.GetHuskyPathAsync();
-      var cache = Path.Combine(huskyPath, "_", "cache");
-      if (!_fileSystem.Directory.Exists(cache))
-         _fileSystem.Directory.CreateDirectory(cache);
-
       var arguments = TaskInfo.Arguments.ToList();
       var tmpFiles = new List<DiffRecord>();
 
       var stagedRecord = await GetStagedRecord();
+
+      using var scope = new DisposableScope(() => "Cleaning up ...".LogVerbose());
+
       foreach (var psf in partialStagedFiles)
       {
+         // create temp file
+         var tmpFile = scope.Using(new TemporaryFile(_fileSystem, psf));
+
+         // find the diff record for the file
          var record = stagedRecord.First(q => q.src_path == psf.RelativePath);
-
-         // first, we need to create a temporary file
-         var tmpFile = Path.Combine(cache, _fileSystem.FileInfo.FromFileName(psf.RelativePath).Name);
-
-         if (psf.PathMode == PathModes.Absolute)
-            tmpFile = Path.GetFullPath(tmpFile);
-
          var hash = record.dst_hash;
+
+         // add staged content to temp file
          {
             await using var output = _fileSystem.File.Create(tmpFile);
-            await (
-               _cliWrap.Wrap("git").WithArguments(new[] { "cat-file", "blob", hash }!)
-               | output
-            ).ExecuteAsync();
+            await (_cliWrap.Wrap("git").WithArguments(new[] { "cat-file", "blob", hash }!) | output).ExecuteAsync();
          }
 
          // insert the temporary file into the arguments
          var index = arguments.FindIndex(q => q == psf.Argument);
          arguments.Insert(index, tmpFile);
+
+         // keep track of the temporary files and diff records
          tmpFiles.Add(record with { tmp_path = tmpFile });
       }
 
@@ -90,9 +86,6 @@ public class StagedTask : ExecutableTask
          // check if the partial hash exists
          if (string.IsNullOrEmpty(newHash))
          {
-            if (_fileSystem.File.Exists(tf.tmp_path))
-               _fileSystem.File.Delete(tf.tmp_path);
-
             throw new CommandException(
                "Failed to hash temp file. Please check the partial staged files."
             );
@@ -109,15 +102,7 @@ public class StagedTask : ExecutableTask
          {
             $"file {tf.src_path} did not changed by formatters".LogVerbose();
          }
-
-         // remove the temporary file
-         if (_fileSystem.File.Exists(tf.tmp_path))
-            _fileSystem.File.Delete(tf.tmp_path);
       }
-
-      // clean up the cache folder
-      if (_fileSystem.Directory.Exists(cache))
-         _fileSystem.Directory.Delete(cache, true);
 
       // re-staged staged files
       await ReStageFiles(partialStagedFiles);
@@ -125,7 +110,7 @@ public class StagedTask : ExecutableTask
       return executionTime;
    }
 
-   private async Task ReStageFiles(List<FileArgumentInfo> partialStagedFiles)
+   private async Task ReStageFiles(IEnumerable<FileArgumentInfo> partialStagedFiles)
    {
       var stagedFiles = TaskInfo.ArgumentInfo
          .OfType<FileArgumentInfo>()
@@ -159,7 +144,7 @@ public class StagedTask : ExecutableTask
       return stagedRecord;
    }
 
-   private DiffRecord ParseDiff(string diff)
+   private static DiffRecord ParseDiff(string diff)
    {
       // Format: src_mode dst_mode src_hash dst_hash status/score? src_path dst_path?
       var diff_pat = new Regex(
@@ -186,7 +171,7 @@ public class StagedTask : ExecutableTask
    /// returns `None`
    /// </summary>
    /// <param name="s"></param>
-   private string? UnlessZeroed(string s)
+   private static string? UnlessZeroed(string s)
    {
       var zeroed_pat = new Regex(@"^0+$");
       return zeroed_pat.IsMatch(s) ? null : s;
@@ -201,6 +186,6 @@ public class StagedTask : ExecutableTask
       int? score,
       string? src_path,
       string? dst_path,
-      string? tmp_path = null
+      TemporaryFile? tmp_path = null
    );
 }
