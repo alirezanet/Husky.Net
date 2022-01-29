@@ -15,9 +15,11 @@ public sealed class TemporaryFile : IDisposable
          ? fileArgumentInfo.AbsolutePath
          : fileArgumentInfo.RelativePath;
 
-      var fileInfo = _fileSystem.FileInfo.FromFileName(path);
+      var dir = Path.GetDirectoryName(path) ?? "";
+      var oldName = Path.GetFileName(path);
       var guid = Guid.NewGuid().ToString()[..5];
-      _filePath = path.Replace(fileInfo.Name, $"{guid}_{fileInfo.Name}");
+      var newName = $"{guid}_{oldName}";
+      _filePath = Path.Combine(dir, newName);
    }
 
    public static implicit operator string(TemporaryFile temporaryFile) => temporaryFile._filePath;
