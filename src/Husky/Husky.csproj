@@ -39,7 +39,7 @@
     <None Include="..\..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="CliFx" Version="2.2.1" />
+    <PackageReference Include="CliFx" Version="2.2.2" />
     <PackageReference Include="CliWrap" Version="3.4.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.0.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />

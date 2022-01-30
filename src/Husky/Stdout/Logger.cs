@@ -56,8 +56,8 @@ public class Logger : ILogger
    private void Init()
    {
       if (
-          !RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-          || Environment.GetEnvironmentVariable("vt100") is not "1"
+         !RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+         || Environment.GetEnvironmentVariable("vt100") is not "1"
       )
          return;
       try
@@ -74,31 +74,21 @@ public class Logger : ILogger
 
    private void Write(string message, ConsoleColor? color = null)
    {
-      try
+      if (Colors && color != null)
       {
-         if (Colors && color != null)
+         if (Vt100Colors)
          {
-            if (Vt100Colors)
-            {
-               Vt100.Write(message, color.Value, _console.Output);
-            }
-            else
-            {
-               _console.ForegroundColor = color.Value;
-               _console.Output.Write(message);
-               _console.ResetColor();
-            }
+            Vt100.Write(message, color.Value, _console.Output);
          }
          else
          {
+            _console.ForegroundColor = color.Value;
             _console.Output.Write(message);
+            _console.ResetColor();
          }
       }
-      catch (Exception)
+      else
       {
-         // TODO: fix clifx bug https://github.com/Tyrrrz/CliFx/issues/123
-         // temporary fix the clifx overflow exception
-         _console = new SystemConsole();
          _console.Output.Write(message);
       }
    }
