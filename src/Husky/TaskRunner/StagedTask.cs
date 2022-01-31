@@ -5,6 +5,11 @@ using Husky.Services.Contracts;
 using Husky.Stdout;
 using Husky.Utils;
 
+// Needed for .Net5
+// ReSharper disable once RedundantUsingDirective
+using Husky.Utils.Dotnet;
+
+
 namespace Husky.TaskRunner;
 
 public class StagedTask : ExecutableTask

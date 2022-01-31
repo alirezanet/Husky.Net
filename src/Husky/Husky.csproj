@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFrameworks>net6.0;net5.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
@@ -49,7 +49,14 @@
     <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="6.0.0" />
     <PackageReference Include="System.IO.Abstractions" Version="16.1.4" />
   </ItemGroup>
-  <Target Name="Husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(HUSKY)' != 0">
+  <ItemGroup>
+    <Compile Remove="Utils\Dotnet\ParallelRangeManager.cs" />
+    <Compile Remove="Utils\Dotnet\ParallelLoopState.cs" />
+    <Compile Remove="Utils\Dotnet\ParallelForEach.cs" />
+    <Compile Remove="Utils\Dotnet\ParallelETWProvider.cs" />
+    <Compile Remove="Utils\Dotnet\Parallel.cs" />
+  </ItemGroup>
+  <Target Name="Husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(HUSKY)' != 0 and '$(IsCrossTargetingBuild)' == 'true'">
     <Exec Command="dotnet tool restore" StandardOutputImportance="Low" StandardErrorImportance="High" />
     <Exec Command="dotnet husky install" StandardOutputImportance="Low" StandardErrorImportance="High" WorkingDirectory="..\.." />
   </Target>

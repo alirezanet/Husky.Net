@@ -14,12 +14,8 @@ public class ChunkTask : ExecutableTaskBase
 
    public override async Task<double> Execute()
    {
-      var options = new ParallelOptions
-      {
-         MaxDegreeOfParallelism = (int)Math.Log2(Chunks.Length)
-      };
       var sw = Stopwatch.StartNew();
-      await Parallel.ForEachAsync(Chunks, options, async (task, _) => await task.Execute());
+      await Task.WhenAll(Chunks.Select(chunk => chunk.Execute()));
       sw.Stop();
       return sw.ElapsedMilliseconds;
    }
