@@ -28,28 +28,10 @@ while (true)
    args = Regex.Matches(cmd!, @"[\""].+?[\""]|[^ ]+").Select(m => m.Value.StartsWith("\"") ? m.Value.Replace("\"", "") : m.Value).ToArray();
 #endif
 
-   // initialize DI
-   var services = new ServiceCollection()
-      .AddSingleton<IGit, Git>()
-      .AddSingleton<IHuskyTaskLoader, HuskyTaskLoader>()
-      .AddSingleton<IArgumentParser, ArgumentParser>()
-      .AddTransient<IExecutableTaskFactory, ExecutableTaskFactory>()
-      .AddTransient<IFileSystem, FileSystem>()
-      .AddTransient<IXmlIO, XmlIO>()
-      .AddTransient<ICliWrap, HuskyCliWrap>()
-      .AddTransient<AddCommand>()
-      .AddTransient<AttachCommand>()
-      .AddTransient<ExecCommand>()
-      .AddTransient<InstallCommand>()
-      .AddTransient<RunCommand>()
-      .AddTransient<SetCommand>()
-      .AddTransient<UninstallCommand>();
-   var serviceProvider = services.BuildServiceProvider();
-
    // initialize CLI
    exitCode = await new CliApplicationBuilder()
       .AddCommandsFromThisAssembly()
-      .UseTypeActivator(serviceProvider.GetService)
+      .UseTypeActivator(BuildServiceProvider().GetService)
       .SetExecutableName("husky")
       .Build()
       .RunAsync(args);
@@ -66,3 +48,28 @@ while (true)
 #endif
 
 return exitCode;
+
+ServiceProvider BuildServiceProvider()
+{
+   var services = new ServiceCollection()
+
+      // Services
+      .AddSingleton<IGit, Git>()
+      .AddSingleton<IHuskyTaskLoader, HuskyTaskLoader>()
+      .AddSingleton<IArgumentParser, ArgumentParser>()
+
+      .AddTransient<IExecutableTaskFactory, ExecutableTaskFactory>()
+      .AddTransient<IFileSystem, FileSystem>()
+      .AddTransient<IXmlIO, XmlIO>()
+      .AddTransient<ICliWrap, HuskyCliWrap>()
+
+      // Commands
+      .AddTransient<AddCommand>()
+      .AddTransient<AttachCommand>()
+      .AddTransient<ExecCommand>()
+      .AddTransient<InstallCommand>()
+      .AddTransient<RunCommand>()
+      .AddTransient<SetCommand>()
+      .AddTransient<UninstallCommand>();
+   return services.BuildServiceProvider();
+}
