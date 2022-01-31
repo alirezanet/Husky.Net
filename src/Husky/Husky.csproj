@@ -19,7 +19,7 @@
     <PackageOutputPath>./nupkg</PackageOutputPath>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageDescription>Easy to use git hook manager with a powerfull task runner! 🐶 </PackageDescription>
+    <PackageDescription>Git hooks made easy with Husky.Net internal task runner! 🐶 It brings the dev-dependency concept to the .NET world!</PackageDescription>
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
