@@ -13,12 +13,6 @@
       "commands": [
         "dotnet-format"
       ]
-    },
-    "csharpier": {
-      "version": "0.14.0",
-      "commands": [
-        "dotnet-csharpier"
-      ]
     }
   }
 }
