@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "Husky": {
+      "commandName": "Project",
+      "commandLineArgs": "exec .husky\\csx\\hello.csx",
+      "workingDirectory": "C:\\Users\\alire\\Source\\Husky.Net\\"
+    }
+  }
+}
