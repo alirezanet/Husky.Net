@@ -49,7 +49,8 @@ namespace HuskyTest.Cli
       public async Task Add_WhenHookNameContainsPathSeparator_ThrowException()
       {
          // Arrange
-         var command = new AddCommand(_serviceProvider, _io) { Command = "-c \"echo husky.net is awesome\"", HookName = "pre-commit;commit" };
+         string hookName = $"pre-commit{Path.PathSeparator}commit";
+         var command = new AddCommand(_serviceProvider, _io) { Command = "-c \"echo husky.net is awesome\"", HookName = hookName };
          _io.File.Exists(Arg.Any<string>()).Returns(true);
 
          // Act

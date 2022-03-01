@@ -49,7 +49,8 @@ namespace HuskyTest.Cli
       public async Task Set_WhenHookNameContainsPathSeparator_ThrowException()
       {
          // Arrange
-         var command = new SetCommand(_git, _cliWrap, _fileSystem) { HookName = "pre-commit;commit" };
+         string hookName = $"pre-commit{Path.PathSeparator}commit";
+         var command = new SetCommand(_git, _cliWrap, _fileSystem) { HookName = hookName };
          _fileSystem.File.Exists(Path.Combine(HuskyPath, "_", "husky.sh")).Returns(true);
 
          // Act
