@@ -9,7 +9,7 @@ if [ -z "$husky_skip_init" ]; then
   readonly hook_name="$(basename "$0")"
   debug "starting $hook_name..."
 
-  if [ "$HUSKY" = "0" ]; then
+  if [ "$HUSKY" = "0" ] || [ "$HUSKY" = "false" ]; then
     debug "HUSKY env variable is set to 0, skipping hook"
     exit 0
   fi
