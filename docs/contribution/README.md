@@ -43,4 +43,5 @@ check out the [github contributing guide](https://git-scm.com/book/en/v2/GitHub-
 
 - [AliReZa Sabouri](https://github.com/alirezanet)
 - [Atif Aziz](https://github.com/atifaziz)
+- [Pierre Mercier](https://github.com/acesyde)
 - Add your name
