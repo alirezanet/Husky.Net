@@ -404,3 +404,4 @@ docs/.vuepress/dist
 nupkg
 .temp
 nuget.config*
+.vscode
