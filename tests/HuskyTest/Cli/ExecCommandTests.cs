@@ -27,7 +27,7 @@ namespace HuskyTest.Cli
       public async Task Exec_WhenFileMissing_ThrowException()
       {
          // Arrange
-         string filePath = "fake_file.csx";
+         const string filePath = "fake_file.csx";
          var command = new ExecCommand(_io) { Path = filePath };
 
          // Act
@@ -40,8 +40,8 @@ namespace HuskyTest.Cli
       public async Task Exec_WithErrorInScript_ThrowException()
       {
          // Arrange
-         string filePath = "fake_file.csx";
-         string stringContent = "BadCode";
+         const string filePath = "fake_file.csx";
+         const string stringContent = "BadCode";
          _io.File.Exists(Arg.Any<string>()).Returns(true);
          _io.File.ReadAllTextAsync(Arg.Any<string>()).Returns(stringContent);
          var command = new ExecCommand(_io) { Path = filePath };
@@ -56,8 +56,8 @@ namespace HuskyTest.Cli
       public async Task Exec_WithScriptThrowException_ThrowException()
       {
          // Arrange
-         string filePath = "fake_file.csx";
-         string stringContent = @"
+         const string filePath = "fake_file.csx";
+         const string stringContent = @"
                throw new Exception(""Inner script exception."");
             ";
          _io.File.Exists(Arg.Any<string>()).Returns(true);
@@ -74,8 +74,8 @@ namespace HuskyTest.Cli
       public async Task Exec_WithScriptReturnGreaterThan0_ThrowException()
       {
          // Arrange
-         string filePath = "fake_file.csx";
-         string stringContent = @"
+         const string filePath = "fake_file.csx";
+         const string stringContent = @"
                return 1;
             ";
          _io.File.Exists(Arg.Any<string>()).Returns(true);
@@ -92,8 +92,8 @@ namespace HuskyTest.Cli
       public async Task Exec_WithoutArguments_Succeed()
       {
          // Arrange
-         string filePath = "fake_file.csx";
-         string stringContent = @"
+         const string filePath = "fake_file.csx";
+         const string stringContent = @"
                Console.WriteLine(""Test"");
             ";
          _io.File.Exists(Arg.Any<string>()).Returns(true);
@@ -108,8 +108,8 @@ namespace HuskyTest.Cli
       public async Task Exec_WithArguments_Succeed()
       {
          // Arrange
-         string filePath = "fake_file.csx";
-         string stringContent = @"
+         const string filePath = "fake_file.csx";
+         const string stringContent = @"
                Console.WriteLine(Args[0]);
             ";
          _io.File.Exists(Arg.Any<string>()).Returns(true);
