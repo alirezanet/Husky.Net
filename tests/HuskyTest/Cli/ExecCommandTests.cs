@@ -49,7 +49,8 @@ namespace HuskyTest.Cli
          // Act
          Func<Task> act = async () => await command.ExecuteAsync(_console);
 
-         await act.Should().ThrowAsync<CommandException>().WithMessage("The name 'BadCode' does not exist in the current context\nscript compilation failed");
+         await act.Should().ThrowAsync<CommandException>()
+            .Where(e => e.Message.EndsWith("script compilation failed"));
       }
 
       [Fact]
