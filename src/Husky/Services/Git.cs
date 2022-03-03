@@ -207,16 +207,9 @@ public class Git : IGit
    {
       try
       {
-         // Check if the repository contains at least one commit
-         var latestCommit = await ExecBufferedAsync(
-            "rev-list -n1 --all");
-
-         if (latestCommit.ExitCode == 0 && string.IsNullOrEmpty(latestCommit.StandardOutput))
-            return new string[0];
-
          // '--diff-filter=AM', # select only file additions and modifications
          var result = await ExecBufferedAsync(
-             "diff-index --cached --diff-filter=AM --no-renames --name-only HEAD"
+             "diff --staged --name-only --no-ext-diff --diff-filter=AM"
          );
          if (result.ExitCode != 0)
             throw new Exception($"Exit code: {result.ExitCode}"); // break execution

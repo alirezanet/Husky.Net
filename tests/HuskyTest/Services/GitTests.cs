@@ -1,3 +1,4 @@
+using CliFx.Exceptions;
 using CliFx.Infrastructure;
 using FluentAssertions;
 using Husky.Services;
@@ -23,18 +24,46 @@ namespace HuskyTest.Services
       }
 
       [Fact]
-      public async Task GetStagedFiles_WhenTheRepositoryHasNoCommits_ReturnEmptyArray()
+      public async Task GetStagedFiles_WhenGitReturnExitCodeDifferentThanZero_ThrowCommandException()
       {
          // Arrange
          var git = new Git(_cliWrap);
          var now = DateTime.UtcNow;
-         _cliWrap.ExecBufferedAsync("git", "rev-list -n1 --all").Returns(Task.FromResult(new CliWrap.Buffered.BufferedCommandResult(0, now, now, string.Empty, string.Empty)));
+         _cliWrap.ExecBufferedAsync(Arg.Any<string>(), Arg.Any<string>()).Returns(Task.FromResult(new CliWrap.Buffered.BufferedCommandResult(1, now, now, string.Empty, string.Empty)));
+
+         // Act
+         Func<Task> act = async () => await git.GetStagedFilesAsync();
+
+         // Assert
+         await act.Should()
+            .ThrowAsync<CommandException>()
+            .WithMessage("Could not find the staged files");
+      }
+
+      [Fact]
+      public async Task GetStagedFiles_Return_StagedFiles()
+      {
+         // Arrange
+         var git = new Git(_cliWrap);
+         var now = DateTime.UtcNow;
+         var gitOutput = $"myfile.cs{Environment.NewLine}mysecondfile.cs{Environment.NewLine}src\\mythirdfile.cs";
+         _cliWrap.ExecBufferedAsync("git", "diff --staged --name-only --no-ext-diff --diff-filter=AM").Returns(Task.FromResult(new CliWrap.Buffered.BufferedCommandResult(0, now, now, gitOutput, string.Empty)));
 
          // Act
          var stagedFiles = await git.GetStagedFilesAsync();
 
          // Assert
-         stagedFiles.Should().BeEmpty();
+         stagedFiles.Should()
+            .NotBeEmpty()
+            .And
+            .HaveCount(3)
+            .And
+            .Contain(new List<string>
+            {
+               "myfile.cs",
+               "mysecondfile.cs",
+               "src\\mythirdfile.cs"
+            });
       }
    }
 }
