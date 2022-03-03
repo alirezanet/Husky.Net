@@ -23,6 +23,12 @@ export const sidebar: SidebarConfig = {
             '/guide/csharp-script.md',
          ]
       },
+      {
+         text: 'Troubleshoot',
+         children: [
+            '/guide/troubleshoot.md',
+         ]
+      },
       // {
       //    text: 'Advanced',
       //    children: [
