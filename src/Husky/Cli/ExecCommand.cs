@@ -1,8 +1,11 @@
 using System.Collections.Immutable;
 using System.IO.Abstractions;
+using System.Reflection;
+using System.Security.Cryptography;
 using CliFx.Attributes;
 using CliFx.Exceptions;
 using CliFx.Infrastructure;
+using Husky.Services.Contracts;
 using Husky.Stdout;
 using Husky.Utils;
 using Microsoft.CodeAnalysis;
@@ -15,10 +18,12 @@ namespace Husky.Cli;
 public class ExecCommand : CommandBase
 {
    private readonly IFileSystem _fileSystem;
+   private readonly IGit _git;
 
-   public ExecCommand(IFileSystem fileSystem)
+   public ExecCommand(IFileSystem fileSystem, IGit git)
    {
       _fileSystem = fileSystem;
+      _git = git;
    }
 
    [CommandParameter(0, Description = "The script file to execute")]
@@ -27,18 +32,41 @@ public class ExecCommand : CommandBase
    [CommandOption("args", 'a', Description = "Arguments to pass to the script")]
    public IList<string> Arguments { get; set; } = new List<string>();
 
+   [CommandOption("no-cache", Description = "Disable caching")]
+   public bool NoCache { get; set; } = false;
+
    protected override async ValueTask SafeExecuteAsync(IConsole console)
    {
       if (!_fileSystem.File.Exists(Path))
          throw new CommandException($"can not find script file on '{Path}'");
 
-      var code = await _fileSystem.File.ReadAllTextAsync(Path);
-      var workingDirectory = System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(Path));
+      if (NoCache)
+         await ExecuteScript(Path);
+
+      var (exist, compiledScriptPath) = await GetCachedScript(Path);
+      if (!exist)
+         await GenerateScriptCache(Path, compiledScriptPath);
+
+      await ExecuteCachedScript(compiledScriptPath);
+   }
+
+   private async Task GenerateScriptCache(string scriptPath, string compiledScriptPath)
+   {
+      var (_, compilation) = await GetCSharpScriptCompilation(scriptPath);
+
+      compilation.Emit(compiledScriptPath);
+   }
+
+   private async Task<(Script<object>, Compilation)> GetCSharpScriptCompilation(string scriptPath)
+   {
+      var code = await _fileSystem.File.ReadAllTextAsync(scriptPath);
+      var workingDirectory = System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(scriptPath));
       var opts = ScriptOptions.Default
          .WithSourceResolver(new SourceFileResolver(ImmutableArray<string>.Empty, workingDirectory))
          .WithImports("System", "System.IO", "System.Collections.Generic", "System.Text", "System.Threading.Tasks");
       var script = CSharpScript.Create(code, opts, typeof(Globals));
       var compilation = script.GetCompilation();
+
       var diagnostics = compilation.GetDiagnostics();
 
       //check for warnings and errors
@@ -61,6 +89,43 @@ public class ExecCommand : CommandBase
                   throw new CommandException($"unknown diagnostic severity '{diagnostic.Severity}'");
             }
 
+      return (script, compilation);
+   }
+
+   internal async Task ExecuteCachedScript(string scriptPath)
+   {
+      var gitPath = await _git.GetGitPathAsync();
+      var assembly = Assembly.LoadFile(System.IO.Path.Combine(gitPath, scriptPath));
+      var type = assembly.GetType("Submission#0");
+      if (type == null)
+      {
+         throw new CommandException("Unable to execute cached script.");
+      }
+
+      var factory = type.GetMethod("<Factory>");
+      if (factory == null)
+      {
+         throw new CommandException("Unable to execute cached script.");
+      }
+
+      var submissionArray = new object[2];
+      submissionArray[0] = new Globals { Args = Arguments };
+
+      if (factory.Invoke(null, new object[] { submissionArray }) is Task<object> task)
+         try
+         {
+            await task;
+         }
+         catch (Exception e)
+         {
+            throw new CommandException("Unable to execute cached script", innerException: e);
+         }
+   }
+
+   internal async ValueTask ExecuteScript(string scriptPath)
+   {
+      var (script, _) = await GetCSharpScriptCompilation(scriptPath);
+
       var result = await script.RunAsync(new Globals { Args = Arguments });
       if (result.Exception is null && result.ReturnValue is null or 0)
          return;
@@ -69,5 +134,38 @@ public class ExecCommand : CommandBase
          throw new CommandException("script execution failed", i, false, result.Exception);
 
       throw new CommandException("script execution failed", innerException: result.Exception);
+   }
+
+   internal async Task<(bool, string)> GetCachedScript(string scriptPath)
+   {
+      var cacheFolder = await GetHuskyCacheFolder();
+      await using var fileStream = new FileStream(scriptPath, FileMode.Open);
+
+      var hash = await CalculateHashAsync(fileStream);
+
+      var cachedScriptPath = System.IO.Path.Combine(cacheFolder, hash);
+
+      return (_fileSystem.File.Exists(cachedScriptPath), cachedScriptPath);
+   }
+
+   internal async Task<string> CalculateHashAsync(Stream stream)
+   {
+      using var sha512 = SHA512.Create();
+      var computedHashBytes = await sha512.ComputeHashAsync(stream);
+      return BitConverter.ToString(computedHashBytes).Replace("-", string.Empty);
+   }
+
+   internal async Task<string> GetHuskyCacheFolder()
+   {
+      var huskyPath = await _git.GetHuskyPathAsync();
+
+      if (!_fileSystem.Directory.Exists(System.IO.Path.Combine(huskyPath, "_")))
+         throw new CommandException("can not find husky required files (try: husky install)");
+
+      var cacheFolder = System.IO.Path.Combine(huskyPath, "_", "cache", "scripts");
+      if (!_fileSystem.Directory.Exists(cacheFolder))
+         _fileSystem.Directory.CreateDirectory(cacheFolder);
+
+      return cacheFolder;
    }
 }
