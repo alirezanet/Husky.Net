@@ -41,7 +41,10 @@ public class ExecCommand : CommandBase
          throw new CommandException($"can not find script file on '{Path}'");
 
       if (NoCache)
+      {
          await ExecuteScript(Path);
+         return;
+      }
 
       var (exist, compiledScriptPath) = await GetCachedScript(Path);
       if (!exist)
