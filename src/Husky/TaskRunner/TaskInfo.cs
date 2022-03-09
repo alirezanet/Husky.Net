@@ -8,7 +8,8 @@ public class TaskInfo
        string[] arguments,
        string workingDirectory,
        OutputTypes outputType,
-       ArgumentInfo[] argumentInfo
+       ArgumentInfo[] argumentInfo,
+       bool noPartial
    )
    {
       Name = name;
@@ -17,6 +18,7 @@ public class TaskInfo
       WorkingDirectory = workingDirectory;
       OutputType = outputType;
       ArgumentInfo = argumentInfo;
+      NoPartial = noPartial;
    }
 
    public string Name { get; set; }
@@ -25,4 +27,5 @@ public class TaskInfo
    public string WorkingDirectory { get; set; }
    public OutputTypes OutputType { get; set; }
    public ArgumentInfo[] ArgumentInfo { get; set; }
+   public bool NoPartial { get; set; }
 }

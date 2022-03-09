@@ -1,4 +1,3 @@
-using System.IO.Abstractions;
 using System.Runtime.InteropServices;
 using Husky.Services.Contracts;
 using Husky.Stdout;
@@ -9,7 +8,7 @@ namespace Husky.TaskRunner;
 
 public interface IExecutableTaskFactory
 {
-   Task<IExecutableTask?> CreateAsync(HuskyTask huskyTask, string[]? optionArguments);
+   Task<IExecutableTask?> CreateAsync(HuskyTask huskyTask, IRunOption options);
 }
 
 public class ExecutableTaskFactory : IExecutableTaskFactory
@@ -26,7 +25,7 @@ public class ExecutableTaskFactory : IExecutableTaskFactory
       _argumentParser = argumentParser;
    }
 
-   public async Task<IExecutableTask?> CreateAsync(HuskyTask huskyTask, string[]? optionArguments)
+   public async Task<IExecutableTask?> CreateAsync(HuskyTask huskyTask, IRunOption options)
    {
       if (huskyTask.Command == null)
       {
@@ -37,7 +36,7 @@ public class ExecutableTaskFactory : IExecutableTaskFactory
       huskyTask.Name ??= huskyTask.Command;
 
       var cwd = await _git.GetTaskCwdAsync(huskyTask);
-      var argsInfo = await _argumentParser.ParseAsync(huskyTask, optionArguments);
+      var argsInfo = await _argumentParser.ParseAsync(huskyTask, options.Arguments?.ToArray());
 
       if (huskyTask.Args != null && huskyTask.Args.Length > argsInfo.Length)
       {
@@ -51,7 +50,7 @@ public class ExecutableTaskFactory : IExecutableTaskFactory
          RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
          && totalCommandLength > MAX_ARG_LENGTH
       )
-         return CreateChunkTask(huskyTask, totalCommandLength, argsInfo, cwd);
+         return CreateChunkTask(huskyTask, totalCommandLength, argsInfo, cwd, options.NoPartial);
 
       return CreateExecutableTask(
          new TaskInfo(
@@ -60,7 +59,8 @@ public class ExecutableTaskFactory : IExecutableTaskFactory
             argsInfo.Select(q => q.Argument).ToArray(),
             cwd,
             huskyTask.Output ?? OutputTypes.Always,
-            argsInfo
+            argsInfo,
+            options.NoPartial
          )
       );
    }
@@ -69,7 +69,8 @@ public class ExecutableTaskFactory : IExecutableTaskFactory
       HuskyTask huskyTask,
       int totalCommandLength,
       ArgumentInfo[] args,
-      string cwd
+      string cwd,
+      bool noPartial
    )
    {
       var chunks = GetChunks(totalCommandLength, args);
@@ -85,7 +86,8 @@ public class ExecutableTaskFactory : IExecutableTaskFactory
             chunkedArgs,
             cwd,
             huskyTask.Output ?? OutputTypes.Always,
-            argInfo
+            argInfo,
+            noPartial
          );
          // staged-task
          subTasks[i] = CreateExecutableTask(taskInfo);
