@@ -26,6 +26,9 @@ public class StagedTask : ExecutableTask
 
    public override async Task<double> Execute()
    {
+
+      if (TaskInfo.NoPartial) return await NormalExecution();
+
       // Check if any partial staged files are present
       var diffNames = await _git.GetDiffNameOnlyAsync();
       var fileArgumentInfo = TaskInfo.ArgumentInfo.OfType<FileArgumentInfo>().ToList();
@@ -40,6 +43,24 @@ public class StagedTask : ExecutableTask
 
       var executionTime = await base.Execute();
       await ReStageFiles(partialStagedFiles);
+      return executionTime;
+
+   }
+
+   private async Task<double> NormalExecution()
+   {
+      var executionTime = await base.Execute();
+      // in staged mode, we should update the git index
+      try
+      {
+         await _git.ExecAsync("update-index -g");
+      }
+      catch (Exception)
+      {
+         // Silently ignore the error if happens, we don't want to break the execution
+         "⚠️ Can not update git index".Husky(ConsoleColor.Yellow);
+      }
+
       return executionTime;
    }
 

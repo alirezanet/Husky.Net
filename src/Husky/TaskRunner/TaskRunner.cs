@@ -38,7 +38,7 @@ public class TaskRunner
             task.Name = task.Command;
 
          $"⚡ Preparing task '{task.Name}'".Husky();
-         var executableTask = await _factory.CreateAsync(task, _options.Arguments?.ToArray());
+         var executableTask = await _factory.CreateAsync(task, _options);
 
          if (executableTask is null)
             continue;

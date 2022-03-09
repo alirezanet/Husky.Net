@@ -27,6 +27,9 @@ public class RunCommand : CommandBase, IRunOption
    [CommandOption("args", 'a', Description = "Pass custom arguments to tasks")]
    public IReadOnlyList<string>? Arguments { get; set; }
 
+   [CommandOption("no-partial", 'p', Description = "Disable partial commit and temporary file generation")]
+   public bool NoPartial { get; set; }
+
    public RunCommand(IServiceProvider provider)
    {
       _provider = provider;
