@@ -1,6 +1,7 @@
 using CliFx.Exceptions;
 using CliWrap;
 using CliWrap.Buffered;
+using CliWrap.Exceptions;
 using Husky.Services.Contracts;
 using Husky.Stdout;
 using Husky.Utils;
@@ -208,7 +209,7 @@ public class Git : IGit
       {
          // '--diff-filter=AM', # select only file additions and modifications
          var result = await ExecBufferedAsync(
-             "diff-index --cached --diff-filter=AM --no-renames --name-only HEAD"
+             "diff --staged --name-only --no-ext-diff --diff-filter=AM"
          );
          if (result.ExitCode != 0)
             throw new Exception($"Exit code: {result.ExitCode}"); // break execution
