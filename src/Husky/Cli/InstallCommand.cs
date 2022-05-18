@@ -49,13 +49,8 @@ public class InstallCommand : CommandBase
       {
          // Need to check if we're inside a git work tree or not (issue #43)
          // If we are we can skip installation and if we're not, we should return exception.
-         if ((await _git.ExecBufferedAsync("rev-parse --git-dir")).StandardOutput.Contains("worktrees"))
-         {
-            "Skipping husky installation in worktrees".Log(ConsoleColor.Yellow);
-            return;
-         }
-
-         throw new CommandException($".git can't be found (see {DOCS_URL})\n" + FailedMsg);
+         if (!(await _git.ExecBufferedAsync("rev-parse --git-dir")).StandardOutput.Contains("worktrees"))
+            throw new CommandException($".git can't be found (see {DOCS_URL})\n" + FailedMsg);
       }
 
       // Create .husky/_
