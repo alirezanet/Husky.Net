@@ -18,8 +18,7 @@ var exitCode = 0;
 "Starting development mode ... ".Log(ConsoleColor.DarkGray);
 while (true)
 {
-   LoggerEx.logger.Colors = true;
-   LoggerEx.logger.Verbose = false;
+   LoggerEx.logger = new Logger(new SystemConsole());
 
    "\nEnter your husky commands: ".Log();
    var cmd = Console.ReadLine();
