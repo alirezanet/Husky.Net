@@ -94,4 +94,20 @@ public class LoggerTests
       }
    }
 
+   [Theory]
+   [InlineData("ASCII✔")]
+   [InlineData("✔ASCII")]
+   [InlineData("✔AS✔CII✔")]
+   public void Husky_WhenNoUnicodeIsTrue_ShouldRemoveNonASCIICharacters(string input)
+   {
+      // Arrange
+      var console = new FakeInMemoryConsole();
+      var logger = new Logger(console) { NoUnicode = true };
+
+      // Act
+      logger.Husky(input);
+
+      // Assert
+      console.ReadOutputString().Trim().Should().Be("[Husky] ASCII");
+   }
 }
