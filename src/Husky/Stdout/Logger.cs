@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using System.Text;
 using CliFx.Infrastructure;
 
 namespace Husky.Stdout;
@@ -17,15 +18,19 @@ public class Logger : ILogger
    public bool Verbose { get; set; }
    public bool Vt100Colors { get; set; }
    public bool HuskyQuiet { get; set; }
+   public bool NoUnicode { get; set; }
 
    public void Husky(string message, ConsoleColor? color = null)
    {
       if (HuskyQuiet)
          return;
+
+      if (NoUnicode)
+         message = RemoveUnicodeCharacters(message);
+
       Write("[Husky] ", ConsoleColor.Cyan);
       WriteLine($"{message}", color);
    }
-
    public void Log(string message, ConsoleColor? color = null)
    {
       WriteLine(message, color);
@@ -97,5 +102,15 @@ public class Logger : ILogger
    {
       Write(message, color);
       Write(Environment.NewLine);
+   }
+
+   private static string RemoveUnicodeCharacters(string message)
+   {
+      return Encoding.ASCII.GetString(
+         Encoding.Convert(Encoding.UTF8, Encoding.GetEncoding(
+            Encoding.ASCII.EncodingName,
+            new EncoderReplacementFallback(string.Empty),
+            new DecoderExceptionFallback()),
+        Encoding.UTF8.GetBytes(message)));
    }
 }

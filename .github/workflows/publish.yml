@@ -5,9 +5,12 @@ on:
    # push:
    #    branches: [ master ]
    workflow_dispatch:
+
 jobs:
    build:
       runs-on: ubuntu-latest
+      env:
+         HUSKY: 0
       steps:
          - uses: actions/checkout@v2
          - name: Setup .NET

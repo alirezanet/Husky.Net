@@ -1,6 +1,4 @@
-# Troubleshoot
-
-## Missing Emojis
+# Missing Emojis
 
 If emojies are missing when you use `Husky.Net` under Windows environment you can check these points below :
 
@@ -14,3 +12,7 @@ If emojies are missing when you use `Husky.Net` under Windows environment you ca
 |Before|After|
 |-|-|
 |![Without emojis](../.vuepress/public/troubleshoot/without_emojis.png)|![With emojis](../.vuepress/public/troubleshoot/with_emojis.png)|
+
+## Disabling Emojis
+
+If none of the above solutions worked, you can disable husky unicode characters by setting the `HUSKY_NOUNICODE` environment variable to `true` or use the `no-unicode` or `-u` option after `husky run` command.

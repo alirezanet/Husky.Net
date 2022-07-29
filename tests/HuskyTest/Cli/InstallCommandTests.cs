@@ -52,12 +52,34 @@ namespace HuskyTest.Cli
          var command = new InstallCommand(_git, _cliWrap, _fileSystem);
          var now = DateTimeOffset.Now;
          _git.ExecAsync("rev-parse").Returns(Task.FromResult(new CommandResult(0, now, now)));
+         _git.ExecBufferedAsync("rev-parse --git-dir").Returns(new BufferedCommandResult(0, now, now, "C:\\TestPath\\.git\\branch", ""));
 
          // Act
          Func<Task> act = async () => await command.ExecuteAsync(_console);
 
          // Assert
-         await act.Should().ThrowAsync<CommandException>().WithMessage(".git can't be found (see https://alirezanet.github.io/Husky.Net/guide/getting-started)\nGit hooks installation failed");
+         await act.Should().ThrowAsync<CommandException>()
+            .WithMessage(".git can't be found (see https://alirezanet.github.io/Husky.Net/guide/getting-started)\nGit hooks installation failed");
+      }
+
+      [Fact]
+      public async Task Install_WhenTheTopFolderIsNotAGitRepositoryButItIsAWorktree_NotThrowException()
+      {
+         // Arrange
+         var command = new InstallCommand(_git, _cliWrap, _fileSystem);
+         var now = DateTimeOffset.Now;
+         _git.ExecAsync("rev-parse").Returns(Task.FromResult(new CommandResult(0, now, now)));
+         _fileSystem.Directory.Exists(Path.Combine(Environment.CurrentDirectory, ".git")).Returns(false);
+         _git.ExecBufferedAsync("rev-parse --git-dir").Returns(new BufferedCommandResult(0, now, now, "C:\\TestPath\\.git\\worktrees\\branch", ""));
+         _git.ExecAsync("config core.hooksPath .husky").Returns(Task.FromResult(new CommandResult(0, now, now)));
+         _git.ExecBufferedAsync("config --local --list").Returns(new BufferedCommandResult(0, now, now, "gitflow", ""));
+         _git.ExecAsync("config gitflow.path.hooks .husky").Returns(Task.FromResult(new CommandResult(0, now, now)));
+
+         // Act
+         Func<Task> act = async () => await command.ExecuteAsync(_console);
+
+         // Assert
+         await act.Should().NotThrowAsync();
       }
 
       [Fact]

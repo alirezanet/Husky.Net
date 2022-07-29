@@ -46,7 +46,12 @@ public class InstallCommand : CommandBase
 
       // Ensure that cwd is git top level
       if (!_fileSystem.Directory.Exists(Path.Combine(cwd, ".git")))
-         throw new CommandException($".git can't be found (see {DOCS_URL})\n" + FailedMsg);
+      {
+         // Need to check if we're inside a git work tree or not (issue #43)
+         // If we are we can skip installation and if we're not, we should return exception.
+         if (!(await _git.ExecBufferedAsync("rev-parse --git-dir")).StandardOutput.Contains("worktrees"))
+            throw new CommandException($".git can't be found (see {DOCS_URL})\n" + FailedMsg);
+      }
 
       // Create .husky/_
       _fileSystem.Directory.CreateDirectory(Path.Combine(path, "_"));
