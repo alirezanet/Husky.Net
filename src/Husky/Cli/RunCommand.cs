@@ -11,7 +11,7 @@ public class RunCommand : CommandBase, IRunOption
 {
    private readonly IServiceProvider _provider;
 
-   [CommandOption("quiet", 'q', Description = "Disable [Husky] console output")]
+   [CommandOption("quiet", 'q', Description = "Disable [Husky] console output", EnvironmentVariable = "HUSKY_QUIET")]
    public bool Quiet
    {
       get => LoggerEx.logger.HuskyQuiet;
@@ -27,8 +27,16 @@ public class RunCommand : CommandBase, IRunOption
    [CommandOption("args", 'a', Description = "Pass custom arguments to tasks")]
    public IReadOnlyList<string>? Arguments { get; set; }
 
-   [CommandOption("no-partial", 'p', Description = "Disable partial commit and temporary file generation")]
+   [CommandOption("no-partial", 'p', Description = "Disable partial commit and temporary file generation",
+      EnvironmentVariable = "HUSKY_NOPARTIAL")]
    public bool NoPartial { get; set; }
+
+   [CommandOption("no-unicode", 'u', Description = "Disable unicode characters", EnvironmentVariable = "HUSKY_NOUNICODE")]
+   public bool NoUnicode
+   {
+      get => LoggerEx.logger.NoUnicode;
+      set => LoggerEx.logger.NoUnicode = value;
+   }
 
    public RunCommand(IServiceProvider provider)
    {

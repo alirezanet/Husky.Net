@@ -6,6 +6,7 @@ public interface ILogger
    public bool Verbose { get; set; }
    public bool Vt100Colors { get; set; }
    public bool HuskyQuiet { get; set; }
+   public bool NoUnicode { get; set; }
 
    void Husky(string message, ConsoleColor? color = null);
    void Log(string message, ConsoleColor? color = null);
