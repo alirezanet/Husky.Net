@@ -46,6 +46,7 @@ namespace HuskyTest.Cli
          const string filePath = "fake_file.csx";
          const string stringContent = "BadCode";
          _io.File.Exists(Arg.Any<string>()).Returns(true);
+         _io.Path.GetDirectoryName(Arg.Any<string>()).Returns(@"c:\fakeDir");
          _io.File.ReadAllTextAsync(Arg.Any<string>()).Returns(stringContent);
          var command = new ExecCommand(_io, _git) { Path = filePath, NoCache = true };
 
@@ -64,6 +65,7 @@ namespace HuskyTest.Cli
          const string stringContent = @"
                throw new Exception(""Inner script exception."");
             ";
+         _io.Path.GetDirectoryName(Arg.Any<string>()).Returns(@"c:\fakeDir");
          _io.File.Exists(Arg.Any<string>()).Returns(true);
          _io.File.ReadAllTextAsync(Arg.Any<string>()).Returns(stringContent);
          var command = new ExecCommand(_io, _git) { Path = filePath, NoCache = true };
@@ -82,6 +84,7 @@ namespace HuskyTest.Cli
          const string stringContent = @"
                return 1;
             ";
+         _io.Path.GetDirectoryName(Arg.Any<string>()).Returns(@"c:\fakeDir");
          _io.File.Exists(Arg.Any<string>()).Returns(true);
          _io.File.ReadAllTextAsync(Arg.Any<string>()).Returns(stringContent);
          var command = new ExecCommand(_io, _git) { Path = filePath, NoCache = true };
@@ -100,6 +103,7 @@ namespace HuskyTest.Cli
          const string stringContent = @"
                Console.WriteLine(""Test"");
             ";
+         _io.Path.GetDirectoryName(Arg.Any<string>()).Returns(@"c:\fakeDir");
          _io.File.Exists(Arg.Any<string>()).Returns(true);
          _io.File.ReadAllTextAsync(Arg.Any<string>()).Returns(stringContent);
          var command = new ExecCommand(_io, _git) { Path = filePath, NoCache = true };
@@ -116,6 +120,7 @@ namespace HuskyTest.Cli
          const string stringContent = @"
                Console.WriteLine(Args[0]);
             ";
+         _io.Path.GetDirectoryName(Arg.Any<string>()).Returns(@"c:\fakeDir");
          _io.File.Exists(Arg.Any<string>()).Returns(true);
          _io.File.ReadAllTextAsync(Arg.Any<string>()).Returns(stringContent);
          var command = new ExecCommand(_io, _git) { Path = filePath, Arguments = new List<string> { "test" }, NoCache = true };
