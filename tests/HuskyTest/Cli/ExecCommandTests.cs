@@ -3,6 +3,7 @@ using CliFx.Exceptions;
 using CliFx.Infrastructure;
 using FluentAssertions;
 using Husky.Cli;
+using Husky.Services.Contracts;
 using Husky.Stdout;
 using NSubstitute;
 using Xunit;
@@ -13,6 +14,7 @@ namespace HuskyTest.Cli
    {
       private readonly FakeInMemoryConsole _console;
       private readonly IFileSystem _io;
+      private readonly IGit _git;
 
       public ExecCommandTests()
       {
@@ -21,14 +23,15 @@ namespace HuskyTest.Cli
 
          // sub
          _io = Substitute.For<IFileSystem>();
+         _git = Substitute.For<IGit>();
       }
 
       [Fact]
-      public async Task Exec_WhenFileMissing_ThrowException()
+      public async Task Exec_WithoutCache_WhenFileMissing_ThrowException()
       {
          // Arrange
          const string filePath = "fake_file.csx";
-         var command = new ExecCommand(_io) { Path = filePath };
+         var command = new ExecCommand(_io, _git) { Path = filePath, NoCache = true };
 
          // Act
          Func<Task> act = async () => await command.ExecuteAsync(_console);
@@ -37,14 +40,15 @@ namespace HuskyTest.Cli
       }
 
       [Fact]
-      public async Task Exec_WithErrorInScript_ThrowException()
+      public async Task Exec_WithoutCache_WithErrorInScript_ThrowException()
       {
          // Arrange
          const string filePath = "fake_file.csx";
          const string stringContent = "BadCode";
          _io.File.Exists(Arg.Any<string>()).Returns(true);
+         _io.Path.GetDirectoryName(Arg.Any<string>()).Returns(Directory.GetCurrentDirectory());
          _io.File.ReadAllTextAsync(Arg.Any<string>()).Returns(stringContent);
-         var command = new ExecCommand(_io) { Path = filePath };
+         var command = new ExecCommand(_io, _git) { Path = filePath, NoCache = true };
 
          // Act
          Func<Task> act = async () => await command.ExecuteAsync(_console);
@@ -54,16 +58,17 @@ namespace HuskyTest.Cli
       }
 
       [Fact]
-      public async Task Exec_WithScriptThrowException_ThrowException()
+      public async Task Exec_WithoutCache_WithScriptThrowException_ThrowException()
       {
          // Arrange
          const string filePath = "fake_file.csx";
          const string stringContent = @"
                throw new Exception(""Inner script exception."");
             ";
+         _io.Path.GetDirectoryName(Arg.Any<string>()).Returns(Directory.GetCurrentDirectory());
          _io.File.Exists(Arg.Any<string>()).Returns(true);
          _io.File.ReadAllTextAsync(Arg.Any<string>()).Returns(stringContent);
-         var command = new ExecCommand(_io) { Path = filePath };
+         var command = new ExecCommand(_io, _git) { Path = filePath, NoCache = true };
 
          // Act
          Func<Task> act = async () => await command.ExecuteAsync(_console);
@@ -72,16 +77,17 @@ namespace HuskyTest.Cli
       }
 
       [Fact]
-      public async Task Exec_WithScriptReturnGreaterThan0_ThrowException()
+      public async Task Exec_WithoutCache_WithScriptReturnGreaterThan0_ThrowException()
       {
          // Arrange
          const string filePath = "fake_file.csx";
          const string stringContent = @"
                return 1;
             ";
+         _io.Path.GetDirectoryName(Arg.Any<string>()).Returns(Directory.GetCurrentDirectory());
          _io.File.Exists(Arg.Any<string>()).Returns(true);
          _io.File.ReadAllTextAsync(Arg.Any<string>()).Returns(stringContent);
-         var command = new ExecCommand(_io) { Path = filePath };
+         var command = new ExecCommand(_io, _git) { Path = filePath, NoCache = true };
 
          // Act
          Func<Task> act = async () => await command.ExecuteAsync(_console);
@@ -90,32 +96,34 @@ namespace HuskyTest.Cli
       }
 
       [Fact]
-      public async Task Exec_WithoutArguments_Succeed()
+      public async Task Exec_WithoutCache_WithoutArguments_Succeed()
       {
          // Arrange
          const string filePath = "fake_file.csx";
          const string stringContent = @"
                Console.WriteLine(""Test"");
             ";
+         _io.Path.GetDirectoryName(Arg.Any<string>()).Returns(Directory.GetCurrentDirectory());
          _io.File.Exists(Arg.Any<string>()).Returns(true);
          _io.File.ReadAllTextAsync(Arg.Any<string>()).Returns(stringContent);
-         var command = new ExecCommand(_io) { Path = filePath };
+         var command = new ExecCommand(_io, _git) { Path = filePath, NoCache = true };
 
          // Act
          await command.ExecuteAsync(_console);
       }
 
       [Fact]
-      public async Task Exec_WithArguments_Succeed()
+      public async Task Exec_WithoutCache_WithArguments_Succeed()
       {
          // Arrange
          const string filePath = "fake_file.csx";
          const string stringContent = @"
                Console.WriteLine(Args[0]);
             ";
+         _io.Path.GetDirectoryName(Arg.Any<string>()).Returns(Directory.GetCurrentDirectory());
          _io.File.Exists(Arg.Any<string>()).Returns(true);
          _io.File.ReadAllTextAsync(Arg.Any<string>()).Returns(stringContent);
-         var command = new ExecCommand(_io) { Path = filePath, Arguments = new List<string> { "test" } };
+         var command = new ExecCommand(_io, _git) { Path = filePath, Arguments = new List<string> { "test" }, NoCache = true };
 
          // Act
          await command.ExecuteAsync(_console);
