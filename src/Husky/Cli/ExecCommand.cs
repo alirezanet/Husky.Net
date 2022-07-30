@@ -63,7 +63,7 @@ public class ExecCommand : CommandBase
    private async Task<(Script<object>, Compilation)> GetCSharpScriptCompilation(string scriptPath)
    {
       var code = await _fileSystem.File.ReadAllTextAsync(scriptPath);
-      var workingDirectory = System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(scriptPath));
+      var workingDirectory = _fileSystem.Path.GetDirectoryName(_fileSystem.Path.GetFullPath(scriptPath));
       var opts = ScriptOptions.Default
          .WithSourceResolver(new SourceFileResolver(ImmutableArray<string>.Empty, workingDirectory))
          .WithImports("System", "System.IO", "System.Collections.Generic", "System.Text", "System.Threading.Tasks");
@@ -98,17 +98,17 @@ public class ExecCommand : CommandBase
    internal async Task ExecuteCachedScript(string scriptPath)
    {
       var gitPath = await _git.GetGitPathAsync();
-      var assembly = Assembly.LoadFile(System.IO.Path.Combine(gitPath, scriptPath));
+      var assembly = Assembly.LoadFile(_fileSystem.Path.Combine(gitPath, scriptPath));
       var type = assembly.GetType("Submission#0");
       if (type == null)
       {
-         throw new CommandException("Unable to execute cached script.");
+         throw new CommandException("Unable to execute cached script. Submission not found.");
       }
 
       var factory = type.GetMethod("<Factory>");
       if (factory == null)
       {
-         throw new CommandException("Unable to execute cached script.");
+         throw new CommandException("Unable to execute cached script. Factory not found.");
       }
 
       var submissionArray = new object[2];
@@ -146,26 +146,28 @@ public class ExecCommand : CommandBase
 
       var hash = await CalculateHashAsync(fileStream);
 
-      var cachedScriptPath = System.IO.Path.Combine(cacheFolder, hash);
+      var cachedScriptPath = _fileSystem.Path.Combine(cacheFolder, hash);
 
       return (_fileSystem.File.Exists(cachedScriptPath), cachedScriptPath);
    }
 
-   internal async Task<string> CalculateHashAsync(Stream stream)
+   internal static async Task<string> CalculateHashAsync(Stream stream)
    {
       using var sha512 = SHA512.Create();
       var computedHashBytes = await sha512.ComputeHashAsync(stream);
-      return BitConverter.ToString(computedHashBytes).Replace("-", string.Empty);
+      return Convert.ToHexString(computedHashBytes);
    }
 
    internal async Task<string> GetHuskyCacheFolder()
    {
-      var huskyPath = await _git.GetHuskyPathAsync();
+      var gitPath = await _git.GetGitPathAsync();
+      var huskyFolder = await _git.GetHuskyPathAsync();
+      var huskyIgnorePath = _fileSystem.Path.Combine(gitPath, huskyFolder, "_");
 
-      if (!_fileSystem.Directory.Exists(System.IO.Path.Combine(huskyPath, "_")))
+      if (!_fileSystem.Directory.Exists(huskyIgnorePath))
          throw new CommandException("can not find husky required files (try: husky install)");
 
-      var cacheFolder = System.IO.Path.Combine(huskyPath, "_", "cache", "scripts");
+      var cacheFolder = _fileSystem.Path.Combine(huskyIgnorePath, "cache");
       if (!_fileSystem.Directory.Exists(cacheFolder))
          _fileSystem.Directory.CreateDirectory(cacheFolder);
 
