@@ -30,11 +30,13 @@ public class CleanupCommand : CommandBase
 
    internal async Task<string> GetHuskyCacheFolder()
    {
-      var huskyPath = await _git.GetHuskyPathAsync();
+      var gitPath = await _git.GetGitPathAsync();
+      var huskyFolder = await _git.GetHuskyPathAsync();
+      var huskyIgnorePath = _fileSystem.Path.Combine(gitPath, huskyFolder, "_");
 
-      if (!_fileSystem.Directory.Exists(Path.Combine(huskyPath, "_")))
+      if (!_fileSystem.Directory.Exists(huskyIgnorePath))
          throw new CommandException("can not find husky required files (try: husky install)");
 
-      return Path.Combine(huskyPath, "_", "cache");
+      return Path.Combine(huskyIgnorePath, "cache");
    }
 }
