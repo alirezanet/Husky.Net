@@ -139,7 +139,7 @@ namespace HuskyTest.Cli
       }
 
       [Fact]
-      public async Task Exec_CachedScript_ShouldHandleNonZeroExitCode()
+      public async Task Exec_CachedScript_ShouldThrowWithNonZeroExitCode()
       {
          // Arrange
          const string filePath = "fake_file.csx";
@@ -150,7 +150,7 @@ namespace HuskyTest.Cli
          _io.File.Exists(Arg.Any<string>()).Returns(true);
          _io.Directory.Exists(Arg.Any<string>()).Returns(true);
          _io.File.ReadAllTextAsync(Arg.Any<string>()).Returns(stringContent);
-         var stream = new MemoryStream(Encoding.UTF8.GetBytes(stringContent));
+         await using var stream = new MemoryStream(Encoding.UTF8.GetBytes(stringContent));
          _io.FileStream.Create(Arg.Any<string>(), FileMode.Open).Returns(stream);
 
          var opts = ScriptOptions.Default
@@ -160,7 +160,7 @@ namespace HuskyTest.Cli
          var compilation = script.GetCompilation();
 
          await using var assemblyStream = new MemoryStream();
-         var result = compilation.Emit(assemblyStream);
+         var _ = compilation.Emit(assemblyStream);
          _assembly.LoadFile(Arg.Any<string>()).Returns(Assembly.Load(assemblyStream.ToArray()));
 
          var command = new ExecCommand(_io, _git, _assembly) { Path = filePath, Arguments = new List<string> { "test" }, NoCache = false };
