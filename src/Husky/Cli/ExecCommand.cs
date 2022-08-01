@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using System.IO.Abstractions;
-using System.Reflection;
 using System.Security.Cryptography;
 using CliFx.Attributes;
 using CliFx.Exceptions;
@@ -19,11 +18,13 @@ public class ExecCommand : CommandBase
 {
    private readonly IFileSystem _fileSystem;
    private readonly IGit _git;
+   private readonly IAssembly _assembly;
 
-   public ExecCommand(IFileSystem fileSystem, IGit git)
+   public ExecCommand(IFileSystem fileSystem, IGit git, IAssembly assembly)
    {
       _fileSystem = fileSystem;
       _git = git;
+      _assembly = assembly;
    }
 
    [CommandParameter(0, Description = "The script file to execute")]
@@ -97,8 +98,9 @@ public class ExecCommand : CommandBase
 
    internal async Task ExecuteCachedScript(string scriptPath)
    {
+
       var gitPath = await _git.GetGitPathAsync();
-      var assembly = Assembly.LoadFile(_fileSystem.Path.Combine(gitPath, scriptPath));
+      var assembly = _assembly.LoadFile(_fileSystem.Path.Combine(gitPath, scriptPath));
       var type = assembly.GetType("Submission#0");
       if (type == null)
       {
@@ -117,7 +119,20 @@ public class ExecCommand : CommandBase
       if (factory.Invoke(null, new object[] { submissionArray }) is Task<object> task)
          try
          {
-            await task;
+            var result = await task;
+            switch (result)
+            {
+               case null or 0:
+                  return;
+               case int i:
+                  throw new CommandException("script execution failed", i);
+               default:
+                  throw new CommandException("script execution failed");
+            }
+         }
+         catch (CommandException)
+         {
+            throw;
          }
          catch (Exception e)
          {
@@ -142,7 +157,7 @@ public class ExecCommand : CommandBase
    internal async Task<(bool, string)> GetCachedScript(string scriptPath)
    {
       var cacheFolder = await GetHuskyCacheFolder();
-      await using var fileStream = new FileStream(scriptPath, FileMode.Open);
+      await using var fileStream = _fileSystem.FileStream.Create(scriptPath, FileMode.Open);
 
       var hash = await CalculateHashAsync(fileStream);
 

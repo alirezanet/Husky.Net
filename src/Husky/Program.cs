@@ -56,10 +56,10 @@ ServiceProvider BuildServiceProvider()
       .AddSingleton<IGit, Git>()
       .AddSingleton<IHuskyTaskLoader, HuskyTaskLoader>()
       .AddSingleton<IArgumentParser, ArgumentParser>()
-
       .AddTransient<IExecutableTaskFactory, ExecutableTaskFactory>()
       .AddTransient<IFileSystem, FileSystem>()
       .AddTransient<IXmlIO, XmlIO>()
+      .AddTransient<IAssembly, AssemblyProxy>()
       .AddTransient<ICliWrap, HuskyCliWrap>()
 
       // Commands
