@@ -12,7 +12,7 @@ namespace HuskyTest.Cli;
 
 public class AttachCommandTests
 {
-   private readonly FakeInMemoryConsole _console;
+   private FakeInMemoryConsole _console;
 
    private string _currentDirectory;
    private string _fileName;
@@ -44,6 +44,8 @@ public class AttachCommandTests
    public async Task Attach_WhenParametersProvided_ShouldAddHuskyTargetElement()
    {
       // Arrange
+      _console = new FakeInMemoryConsole();
+      LoggerEx.logger = new Logger(_console);
       var command = new AttachCommand(_git, _io, _xmlIo) { FileName = _fileName };
 
       // Act
@@ -62,6 +64,8 @@ public class AttachCommandTests
    public async Task Attach_WhenHuskyTargetAlreadyExists_ShouldReturnEarly()
    {
       // Arrange
+      _console = new FakeInMemoryConsole();
+      LoggerEx.logger = new Logger(_console);
       _xmlDoc.Add(new XElement("Target", new XAttribute("Name", "Husky")));
       var command = new AttachCommand(_git, _io, _xmlIo) { FileName = _fileName };
 
@@ -77,6 +81,7 @@ public class AttachCommandTests
    public async Task Attach_WhenForceIsTrue_ShouldReplaceTargetTag()
    {
       // Arrange
+      _console = new FakeInMemoryConsole();
       _xmlDoc.Add(new XElement("Target", new XAttribute("Name", "Husky")));
       var command = new AttachCommand(_git, _io, _xmlIo) { FileName = _fileName, Force = true };
 
@@ -100,6 +105,7 @@ public class AttachCommandTests
    public async Task Attach_WorkingDirectoryShouldBeRelativePathToProjectRoot(string currentDirectory, string projectPath, string fileName, string[] relativePath)
    {
       // Arrange
+      _console = new FakeInMemoryConsole();
       _git.GetGitPathAsync().Returns(projectPath);
       _currentDirectory = currentDirectory;
       _fileName = fileName;
