@@ -151,8 +151,6 @@ namespace HuskyTest.Cli
          var taskList = new List<Func<Task>>()
          {
             () => command.ExecuteAsync(_console).AsTask(),
-            () => command.ExecuteAsync(_console).AsTask(),
-            () => command.ExecuteAsync(_console).AsTask(),
             () => command.ExecuteAsync(_console).AsTask()
          };
          await Task.WhenAll(taskList.AsParallel().Select(async q => await q()));
