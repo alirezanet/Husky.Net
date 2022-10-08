@@ -159,7 +159,9 @@ namespace HuskyTest.Cli
 
          // Assert
          _fileSystem.Directory.Received(1).CreateDirectory(Arg.Any<string>());
-         await _fileSystem.File.Received(3).WriteAllTextAsync(Arg.Any<string>(), Arg.Any<string>());
+
+         // ReSharper disable once MethodHasAsyncOverload
+         _fileSystem.File.Received(3).WriteAllText(Arg.Any<string>(), Arg.Any<string>());
       }
 
       [Fact]

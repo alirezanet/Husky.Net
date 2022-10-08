@@ -63,7 +63,7 @@ public class InstallCommand : CommandBase
       if (AllowParallelism)
       {
          // breaks if another instance already running
-         if (await RunUnderMutexControl(path))
+         if (RunUnderMutexControl(path))
          {
             "Resource creation skipped due to multiple executions".LogVerbose();
             return;
@@ -71,13 +71,13 @@ public class InstallCommand : CommandBase
       }
       else
       {
-         await CreateResources(path);
+         await CreateResourcesAsync(path);
       }
 
       "Git hooks installed".Log(ConsoleColor.Green);
    }
 
-   private async Task<bool> RunUnderMutexControl(string path)
+   private bool RunUnderMutexControl(string path)
    {
       using var mutex = new Mutex(false, "Global\\" + appGuid);
       if (!mutex.WaitOne(0, false))
@@ -88,7 +88,7 @@ public class InstallCommand : CommandBase
 
       try
       {
-         await CreateResources(path);
+         CreateResources(path);
       }
       finally
       {
@@ -98,7 +98,38 @@ public class InstallCommand : CommandBase
       return false;
    }
 
-   private async Task CreateResources(string path)
+   private void CreateResources(string path)
+   {
+      // Create .husky/_
+      _fileSystem.Directory.CreateDirectory(Path.Combine(path, "_"));
+
+      // Create .husky/_/.  ignore
+      _fileSystem.File.WriteAllText(Path.Combine(path, "_/.gitignore"), "*");
+
+      // Copy husky.sh to .husky/_/husky.sh
+      var husky_shPath = Path.Combine(path, "_/husky.sh");
+      {
+         using var stream = Assembly.GetAssembly(typeof(Program))!.GetManifestResourceStream("Husky.templates.husky.sh")!;
+         using var sr = new StreamReader(stream);
+         var content = sr.ReadToEnd();
+         _fileSystem.File.WriteAllText(husky_shPath, content);
+      }
+
+      // here we have to run the `ConfigureGitAndFilePermission` synchronously because mutex will fail if thread changes
+      ConfigureGitAndFilePermission(path, husky_shPath).GetAwaiter().GetResult();
+
+      // Created task-runner.json file
+      // We don't want to override this file
+      if (!_fileSystem.File.Exists(Path.Combine(path, "task-runner.json")))
+      {
+         using var stream = Assembly.GetAssembly(typeof(Program))!.GetManifestResourceStream("Husky.templates.task-runner.json")!;
+         using var sr = new StreamReader(stream);
+         var content = sr.ReadToEnd();
+         _fileSystem.File.WriteAllText(Path.Combine(path, "task-runner.json"), content);
+      }
+   }
+
+   private async Task CreateResourcesAsync(string path)
    {
       // Create .husky/_
       _fileSystem.Directory.CreateDirectory(Path.Combine(path, "_"));
@@ -115,10 +146,7 @@ public class InstallCommand : CommandBase
          await _fileSystem.File.WriteAllTextAsync(husky_shPath, content);
       }
 
-      // find all hooks (if exists) from .husky/ and add executable flag
-      var files = _fileSystem.Directory.GetFiles(path).Where(f => !_fileSystem.FileInfo.FromFileName(f).Name.Contains('.')).ToList();
-      files.Add(husky_shPath);
-      await _cliWrap.SetExecutablePermission(files.ToArray());
+      await ConfigureGitAndFilePermission(path, husky_shPath);
 
       // Created task-runner.json file
       // We don't want to override this file
@@ -129,6 +157,14 @@ public class InstallCommand : CommandBase
          var content = await sr.ReadToEndAsync();
          await _fileSystem.File.WriteAllTextAsync(Path.Combine(path, "task-runner.json"), content);
       }
+   }
+
+   private async Task ConfigureGitAndFilePermission(string path, string husky_shPath)
+   {
+      // find all hooks (if exists) from .husky/ and add executable flag
+      var files = _fileSystem.Directory.GetFiles(path).Where(f => !_fileSystem.FileInfo.FromFileName(f).Name.Contains('.')).ToList();
+      files.Add(husky_shPath);
+      await _cliWrap.SetExecutablePermission(files.ToArray());
 
       // Configure repo
       var p = await _git.ExecAsync($"config core.hooksPath {HuskyDirectory}");
@@ -137,6 +173,8 @@ public class InstallCommand : CommandBase
 
       // Configure gitflow repo
       var local = await _git.ExecBufferedAsync("config --local --list");
+
+      // ReSharper disable once InvertIf
       if (local.ExitCode == 0 && local.StandardOutput.Contains("gitflow"))
       {
          var gf = await _git.ExecAsync($"config gitflow.path.hooks {HuskyDirectory}");
