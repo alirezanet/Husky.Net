@@ -133,5 +133,33 @@ namespace HuskyTest.Cli
          // Act
          await command.ExecuteAsync(_console);
       }
+
+      [Fact]
+      public async Task Install_ParallelExecutionShouldAbortResourceCreation()
+      {
+         // Arrange
+         var command = new InstallCommand(_git, _cliWrap, _fileSystem);
+         var now = DateTimeOffset.Now;
+         _git.ExecAsync("rev-parse").Returns(Task.FromResult(new CommandResult(0, now, now)));
+         _fileSystem.Directory.Exists(Path.Combine(Environment.CurrentDirectory, ".git")).Returns(true);
+         _git.ExecAsync("config core.hooksPath .husky").Returns(Task.FromResult(new CommandResult(0, now, now)));
+         _git.ExecBufferedAsync("config --local --list").Returns(new BufferedCommandResult(0, now, now, "gitflow", ""));
+         _git.ExecAsync("config gitflow.path.hooks .husky").Returns(Task.FromResult(new CommandResult(0, now, now)));
+
+         // Act
+
+         var taskList = new List<Func<Task>>()
+         {
+            () => command.ExecuteAsync(_console).AsTask(),
+            () => command.ExecuteAsync(_console).AsTask(),
+            () => command.ExecuteAsync(_console).AsTask(),
+            () => command.ExecuteAsync(_console).AsTask()
+         };
+         await Task.WhenAll(taskList.AsParallel().Select(async q => await q()));
+
+         // Assert
+         _fileSystem.Directory.Received(1).CreateDirectory(Arg.Any<string>());
+         await _fileSystem.File.Received(3).WriteAllTextAsync(Arg.Any<string>(), Arg.Any<string>());
+      }
    }
 }

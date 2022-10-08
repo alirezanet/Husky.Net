@@ -21,6 +21,13 @@ public class InstallCommand : CommandBase
    [CommandOption("dir", 'd', Description = "The custom directory to install Husky hooks.")]
    public string HuskyDirectory { get; set; } = HUSKY_FOLDER_NAME;
 
+   [CommandOption("parallel", 'p', Description = "If True, husky resource creation will run once " +
+                                                 "to prevent locks, when multiple instances are running")]
+   public bool AllowParallelism { get; set; } = true;
+
+   // using for mutex
+   private const string appGuid = "085a64e3-0998-4202-ab59-17b1ed287f6e";
+
    public InstallCommand(IGit git, ICliWrap cliWrap, IFileSystem fileSystem)
    {
       _git = git;
@@ -53,6 +60,46 @@ public class InstallCommand : CommandBase
             throw new CommandException($".git can't be found (see {DOCS_URL})\n" + FailedMsg);
       }
 
+      if (AllowParallelism)
+      {
+         // breaks if another instance already running
+         if (await RunUnderMutexControl(path))
+         {
+            "Resource creation skipped due to multiple executions".LogVerbose();
+            return;
+         }
+      }
+      else
+      {
+         await CreateResources(path);
+      }
+
+      "Git hooks installed".Log(ConsoleColor.Green);
+   }
+
+   private async Task<bool> RunUnderMutexControl(string path)
+   {
+      using var mutex = new Mutex(false, "Global\\" + appGuid);
+      if (!mutex.WaitOne(0, false))
+      {
+         // another instance is already running
+         return true;
+      }
+
+      try
+      {
+         await CreateResources(path);
+      }
+      finally
+      {
+         mutex.ReleaseMutex();
+      }
+
+      return false;
+   }
+
+   private async Task CreateResources(string path)
+   {
       // Create .husky/_
       _fileSystem.Directory.CreateDirectory(Path.Combine(path, "_"));
 
@@ -96,7 +143,5 @@ public class InstallCommand : CommandBase
          if (gf.ExitCode != 0)
             throw new CommandException("Failed to configure gitflow\n" + FailedMsg);
       }
-
-      "Git hooks installed".Log(ConsoleColor.Green);
    }
 }
