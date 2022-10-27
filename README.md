@@ -41,6 +41,11 @@ These two quotes from husky and lint-staged JS tools inspired me to create Husky
 - Share Husky.Net on your favorite social media and your friends
 - Write a blog post about Husky.Net
 
+## Articles / Examples
+- [Automatically version and release .Net Application](https://blog.antosubash.com/posts/automatic-version-and-release) by [@antosubash](https://github.com/antosubash)
+- [<span dir="rtl" align="right">چرا باید از Git Hooks استفاده کنیم؟ معرفی Husky.Net</span>](https://www.dntips.ir/post/3367/%da%86%d8%b1%d8%a7-%d8%a8%d8%a7%db%8c%d8%af-%d8%a7%d8%b2-git-hooks-%d8%a7%d8%b3%d8%aa%d9%81%d8%a7%d8%af%d9%87-%da%a9%d9%86%db%8c%d9%85-%d9%85%d8%b9%d8%b1%d9%81%db%8c-husky-net)
+- Comming soon
+
 ## Contribution
 
 Feel free to send me a pull request!
@@ -51,7 +56,7 @@ Check out the [Contribution Page](https://alirezanet.github.io/Husky.Net/contrib
 
 - This tool inspired of [husky](https://github.com/typicode/husky) & [lint-staged](https://github.com/okonet/lint-staged) and a few other tools, for **DotNet**, so make sure to support them too!
 
-- I'd also like to thank [kaylumah](https://github.com/kaylumah) for his [article](https://kaylumah.nl/2019/09/07/using-csharp-code-your-git-hooks.html) that gave me the csharp scripting support idea.
+- I'd also like to thank [@kaylumah](https://github.com/kaylumah) for his [article](https://kaylumah.nl/2019/09/07/using-csharp-code-your-git-hooks.html) that gave me the csharp scripting support idea.
 
 ## License
 
