@@ -1,12 +1,6 @@
 {
    "tasks": [
       {
-         "name": "dotnet-format-example",
-         "command": "dotnet",
-         "args": [ "dotnet-format", "--include", "${staged}" ],
-         "include": [ "**/*.cs", "**/*.vb" ]
-      },
-      {
          "name": "welcome-message-example",
          "command": "bash",
          "args": [ "-c", "echo Husky.Net is awesome!" ],
