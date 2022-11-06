@@ -40,6 +40,13 @@ dotnet husky add pre-commit -c "dotnet husky run"
          ]
       },
       {
+         "name": "warning-check",
+         "command": "dotnet",
+         "group": "pre-push",
+         "args": ["build", "/warnaserror"],
+         "include": ["**/*.cs", "**/*.vb"]
+      },
+      {
          "name": "eslint",
          "group": "pre-commit",
          "pathMode": "absolute",
