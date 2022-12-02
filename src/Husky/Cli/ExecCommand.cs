@@ -136,7 +136,10 @@ public class ExecCommand : CommandBase
          }
          catch (Exception e)
          {
-            throw new CommandException("Unable to execute cached script", innerException: e);
+            var message = "Unable to execute cached script.";
+            if (LoggerEx.logger.Verbose)
+               message = $"{message} {e.Message}";
+            throw new CommandException(message, innerException: e);
          }
    }
 
