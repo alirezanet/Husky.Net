@@ -19,6 +19,7 @@ public class ExecCommand : CommandBase
    private readonly IFileSystem _fileSystem;
    private readonly IGit _git;
    private readonly IAssembly _assembly;
+   private const string EXTENSION = ".dll";
 
    public ExecCommand(IFileSystem fileSystem, IGit git, IAssembly assembly)
    {
@@ -98,9 +99,13 @@ public class ExecCommand : CommandBase
 
    internal async Task ExecuteCachedScript(string scriptPath)
    {
+      if (!_fileSystem.Path.IsPathFullyQualified(scriptPath))
+      {
+         var gitPath = await _git.GetGitPathAsync();
+         scriptPath = _fileSystem.Path.Combine(gitPath, scriptPath);
+      }
 
-      var gitPath = await _git.GetGitPathAsync();
-      var assembly = _assembly.LoadFile(_fileSystem.Path.Combine(gitPath, scriptPath));
+      var assembly = _assembly.LoadFile(scriptPath);
       var type = assembly.GetType("Submission#0");
       if (type == null)
       {
@@ -164,7 +169,7 @@ public class ExecCommand : CommandBase
 
       var hash = await CalculateHashAsync(fileStream);
 
-      var cachedScriptPath = _fileSystem.Path.Combine(cacheFolder, hash);
+      var cachedScriptPath = _fileSystem.Path.Combine(cacheFolder, hash + EXTENSION);
 
       return (_fileSystem.File.Exists(cachedScriptPath), cachedScriptPath);
    }
