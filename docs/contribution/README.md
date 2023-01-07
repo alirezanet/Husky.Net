@@ -6,8 +6,8 @@ start contributing to the project by submitting pull requests
 
 ## Todos
 
-- :zap: Improve the documentation
-- :zap: Add unit-tests
+-  :zap: Improve the documentation
+-  :zap: Add unit-tests
 
 ## Documentation
 
@@ -41,7 +41,8 @@ check out the [github contributing guide](https://git-scm.com/book/en/v2/GitHub-
 
 ## Contributors
 
-- [AliReZa Sabouri](https://github.com/alirezanet)
-- [Atif Aziz](https://github.com/atifaziz)
-- [Pierre Mercier](https://github.com/acesyde)
-- Add your name
+-  [AliReZa Sabouri](https://github.com/alirezanet)
+-  [Sajjad Hossein Pour](https://github.com/SajjadHosseinPour)
+-  [Atif Aziz](https://github.com/atifaziz)
+-  [Pierre Mercier](https://github.com/acesyde)
+-  Add your name
