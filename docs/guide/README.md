@@ -18,7 +18,7 @@ These two quotes from [husky](https://github.com/typicode/husky) and [lint-stage
 - Supports macOS, Linux and Windows
 - Powered by modern new Git feature (core.hooksPath)
 - User-define variables
-- Compatible with [dotnet-format](https://github.com/dotnet/format)
+- Compatible with [dotnet-format](https://github.com/dotnet/format), [CSharpier](https://csharpier.com/), [ReSharper command line tools](https://www.jetbrains.com/help/resharper/ReSharper_Command_Line_Tools.html) and other formatting tools
 - User-friendly messages
 - Git GUIs
 - Custom directories
