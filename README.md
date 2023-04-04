@@ -23,7 +23,7 @@ These two quotes from husky and lint-staged JS tools inspired me to create Husky
 - Supports macOS, Linux and Windows
 - Powered by modern new Git feature (core.hooksPath)
 - User-define variables
-- Compatible with [dotnet-format](https://github.com/dotnet/format)
+- Compatible with [dotnet-format](https://github.com/dotnet/format), [CSharpier](https://csharpier.com/), [ReSharper command line tools](https://www.jetbrains.com/help/resharper/ReSharper_Command_Line_Tools.html) and other formatting tools
 - User-friendly messages
 - Git GUIs
 - Custom directories
