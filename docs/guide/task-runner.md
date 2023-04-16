@@ -13,7 +13,9 @@ you can run and test your tasks with `dotnet husky run` command. Once you are su
 e.g
 
 ``` shell:no-line-numbers:no-v-pre
-dotnet husky add pre-commit -c "dotnet husky run"
+stages_files=$(git diff --staged --name-only --no-ext-diff --diff-filter=AM | tr '\n' ';' | sed 's/;$//')
+
+dotnet husky add pre-commit -c "dotnet husky run" --args $stages_files
 ```
 
 ::: details A real-world example.
@@ -81,6 +83,21 @@ dotnet husky add pre-commit -c "dotnet husky run"
             "command": "cmd",
             "args": ["/c", "echo Nice work! 🥂"]
          }
+      },
+      {
+         "name": "Run JB Clean Up Code",
+         "command": "cmd",
+         "pathMode": "relative",
+         "args": [
+           "/c",
+           "dotnet",
+           "jb",
+           "cleanupcode",
+           "proj.sln",
+           "--profile=Team: Full Cleanup",
+           "--include=${args}"
+         ],
+         "group": "pre-commit"
       }
    ]
 }
