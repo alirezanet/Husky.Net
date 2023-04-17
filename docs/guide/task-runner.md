@@ -81,6 +81,21 @@ dotnet husky add pre-commit -c "dotnet husky run"
             "command": "cmd",
             "args": ["/c", "echo Nice work! 🥂"]
          }
+      },
+      {
+         "name": "Run JB Clean Up Code",
+         "command": "cmd",
+         "pathMode": "relative",
+         "args": [
+           "/c",
+           "dotnet",
+           "jb",
+           "cleanupcode",
+           "proj.sln",
+           "--profile=Team: Full Cleanup",
+           "--include=${args}"
+         ],
+         "group": "pre-commit"
       }
    ]
 }
