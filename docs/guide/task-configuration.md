@@ -2,19 +2,20 @@
 
 Each task in `task-runner.json` is a JSON object with the following properties:
 
-| name     | optional | type                     | default                | description                                                            |
-|----------|----------|--------------------------|------------------------|------------------------------------------------------------------------|
-| command  | false    | string                   | -                      | path to the executable file or script or executable name               |
-| args     | true     | [string array]           | -                      | command arguments                                                      |
-| include  | true     | [array of glob]          | `**/*`                 | glob pattern to select files                                           |
-| name     | true     | string                   | command                | name of the task (recommended)                                         |
-| group    | true     | string                   | -                      | group of the task (usually it should be the hook name)                 |
-| branch   | true     | string (regex)           | -                      | run task on specific branches only                                     |
-| pathMode | true     | [absolute, relative]     | relative               | file path style (relative or absolute)                                 |
-| cwd      | true     | string                   | project root directory | current working directory for the command, can be relative or absolute |
-| output   | true     | [always, verbose, never] | always                 | output log level                                                       |
-| exclude  | true     | [array of glob]          | -                      | glob pattern to exclude files                                          |
-| windows  | true     | object                   | -                      | overrides all the above settings for windows                           |
+| name          | optional | type                     | default                | description                                                            |
+| ------------- | -------- | ------------------------ | ---------------------- | ---------------------------------------------------------------------- |
+| command       | false    | string                   | -                      | path to the executable file or script or executable name               |
+| args          | true     | [string array]           | -                      | command arguments                                                      |
+| include       | true     | [array of glob]          | `**/*`                 | glob pattern to select files                                           |
+| name          | true     | string                   | command                | name of the task (recommended)                                         |
+| group         | true     | string                   | -                      | group of the task (usually it should be the hook name)                 |
+| branch        | true     | string (regex)           | -                      | run task on specific branches only                                     |
+| pathMode      | true     | [absolute, relative]     | relative               | file path style (relative or absolute)                                 |
+| cwd           | true     | string                   | project root directory | current working directory for the command, can be relative or absolute |
+| output        | true     | [always, verbose, never] | always                 | output log level                                                       |
+| exclude       | true     | [array of glob]          | -                      | glob pattern to exclude files                                          |
+| windows       | true     | object                   | -                      | overrides all the above settings for windows                           |
+| skipAutoStage | true     | bool                     | false                  | Re-staging staged files                                                |
 
 ## Glob patterns
 
@@ -25,24 +26,24 @@ Husky.Net supports the standard dotnet `FileSystemGlobbing` patterns for include
   - path/to/file.txt
 - Wildcards * in file and directory names that represent zero to many characters not including separator characters.
 
-| Value | Description |
-|-------|-------------|
-| *.txt | All files with .txt file extension. |
-| *.*   | All files with an extension.       |
-| *     | All files in top-level directory.  |
-| .*    | File names beginning with '.'.    |
-| *word*| All files with 'word' in the filename. |
-| readme.* | All files named 'readme' with any file extension. |
-| styles/*.css | All files with extension '.css' in the directory 'styles/'. |
-| scripts/*/* | All files in 'scripts/' or one level of subdirectory under 'scripts/'. |
-| images*/* | All files in a folder with name that is or begins with 'images'. |
+| Value        | Description                                                            |
+| ------------ | ---------------------------------------------------------------------- |
+| *.txt        | All files with .txt file extension.                                    |
+| *.*          | All files with an extension.                                           |
+| *            | All files in top-level directory.                                      |
+| .*           | File names beginning with '.'.                                         |
+| *word*       | All files with 'word' in the filename.                                 |
+| readme.*     | All files named 'readme' with any file extension.                      |
+| styles/*.css | All files with extension '.css' in the directory 'styles/'.            |
+| scripts/*/*  | All files in 'scripts/' or one level of subdirectory under 'scripts/'. |
+| images*/*    | All files in a folder with name that is or begins with 'images'.       |
 
 - Arbitrary directory depth (/**/).
 
-| Value | Description |
-|-------|-------------|
-|**/* | All files in any subdirectory.|
-|dir/**/* | All files in any subdirectory under 'dir/'.|
+| Value    | Description                                 |
+| -------- | ------------------------------------------- |
+| **/*     | All files in any subdirectory.              |
+| dir/**/* | All files in any subdirectory under 'dir/'. |
 
 - Relative paths.
 

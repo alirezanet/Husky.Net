@@ -42,7 +42,10 @@ public class StagedTask : ExecutableTask
          return await PartialExecution(partialStagedFiles);
 
       var executionTime = await base.Execute();
-      await ReStageFiles(partialStagedFiles);
+
+      if (!TaskInfo.SkipAutoStage)
+         await ReStageFiles(partialStagedFiles);
+
       return executionTime;
 
    }
@@ -130,8 +133,8 @@ public class StagedTask : ExecutableTask
          }
       }
 
-      // re-staged staged files
-      await ReStageFiles(partialStagedFiles);
+      if (!TaskInfo.SkipAutoStage)
+         await ReStageFiles(partialStagedFiles);// re-staged staged files
 
       return executionTime;
    }

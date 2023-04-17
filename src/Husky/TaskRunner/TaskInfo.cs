@@ -9,7 +9,8 @@ public class TaskInfo
        string workingDirectory,
        OutputTypes outputType,
        ArgumentInfo[] argumentInfo,
-       bool noPartial
+       bool noPartial,
+       bool skipAutoStage
    )
    {
       Name = name;
@@ -19,6 +20,7 @@ public class TaskInfo
       OutputType = outputType;
       ArgumentInfo = argumentInfo;
       NoPartial = noPartial;
+      SkipAutoStage = skipAutoStage;
    }
 
    public string Name { get; set; }
@@ -28,4 +30,5 @@ public class TaskInfo
    public OutputTypes OutputType { get; set; }
    public ArgumentInfo[] ArgumentInfo { get; set; }
    public bool NoPartial { get; set; }
+   public bool SkipAutoStage { get; set; }
 }
