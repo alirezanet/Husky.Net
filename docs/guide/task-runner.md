@@ -13,9 +13,7 @@ you can run and test your tasks with `dotnet husky run` command. Once you are su
 e.g
 
 ``` shell:no-line-numbers:no-v-pre
-stages_files=$(git diff --staged --name-only --no-ext-diff --diff-filter=AM | tr '\n' ';' | sed 's/;$//')
-
-dotnet husky add pre-commit -c "dotnet husky run" --args $stages_files
+dotnet husky add pre-commit -c "dotnet husky run"
 ```
 
 ::: details A real-world example.
