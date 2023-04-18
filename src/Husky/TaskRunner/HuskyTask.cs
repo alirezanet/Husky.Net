@@ -14,4 +14,5 @@ public class HuskyTask
    public string[]? Include { get; set; }
    public string[]? Exclude { get; set; }
    public bool SkipAutoStage { get; set; }
+   public bool IgnoreValidateCommandResult { get; set; }
 }
