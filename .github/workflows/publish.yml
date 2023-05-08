@@ -28,7 +28,7 @@ jobs:
          - name: Test
            run: dotnet test --configuration Release --no-build --verbosity normal
          - name: Publish Husky
-           uses: alirezanet/publish-nuget@v3.1.0-preview1
+           uses: alirezanet/publish-nuget@v.3.1.0-preview2
            with:
               PROJECT_FILE_PATH: src/Husky/Husky.csproj
               INCLUDE_SYMBOLS: true
