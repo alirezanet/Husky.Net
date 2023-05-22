@@ -13,7 +13,7 @@ you can run and test your tasks with `dotnet husky run` command. Once you are su
 e.g
 
 ``` shell:no-line-numbers:no-v-pre
-dotnet husky add pre-commit -c "dotnet husky run"
+dotnet husky add pre-commit -c "dotnet husky run --group pre-commit"
 ```
 
 ::: details A real-world example.
