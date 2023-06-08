@@ -2,6 +2,7 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using CliFx.Exceptions;
 using Husky.Services.Contracts;
+using Husky.Stdout;
 using Microsoft.Extensions.Configuration;
 
 namespace Husky.TaskRunner;
@@ -28,12 +29,12 @@ public class HuskyTaskLoader : IHuskyTaskLoader
 
    public async Task LoadAsync()
    {
+      var gitPath = await _git.GetGitPathAsync();
+      var huskyPath = await _git.GetHuskyPathAsync();
+      Tasks = new List<HuskyTask>();
+      var dir = Path.Combine(gitPath, huskyPath, "task-runner.json");
       try
       {
-         var gitPath = await _git.GetGitPathAsync();
-         var huskyPath = await _git.GetHuskyPathAsync();
-         Tasks = new List<HuskyTask>();
-         var dir = Path.Combine(gitPath, huskyPath, "task-runner.json");
          var config = new ConfigurationBuilder()
             .AddJsonFile(dir)
             .Build();
@@ -42,6 +43,7 @@ public class HuskyTaskLoader : IHuskyTaskLoader
       }
       catch (FileNotFoundException e)
       {
+         $"task-runner.json path: '{dir}'".LogVerbose();
          throw new CommandException("Can not find task-runner.json, try 'husky install'", innerException: e);
       }
    }
