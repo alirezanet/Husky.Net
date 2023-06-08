@@ -37,6 +37,8 @@ public class InstallCommand : CommandBase
 
    protected override async ValueTask SafeExecuteAsync(IConsole console)
    {
+      "Checking git path and working directory".LogVerbose();
+
       // Ensure that we're inside a git repository
       // If git command is not found, we should return exception.
       // That's why ExitCode needs to be checked explicitly.
@@ -100,6 +102,8 @@ public class InstallCommand : CommandBase
 
    private void CreateResources(string path)
    {
+      $"Creating resources and configuration files in '{path}'".LogVerbose();
+
       // Create .husky/_
       _fileSystem.Directory.CreateDirectory(Path.Combine(path, "_"));
 
@@ -131,6 +135,8 @@ public class InstallCommand : CommandBase
 
    private async Task CreateResourcesAsync(string path)
    {
+      $"Creating resources and configuration files asynchronously in '{path}'".LogVerbose();
+
       // Create .husky/_
       _fileSystem.Directory.CreateDirectory(Path.Combine(path, "_"));
 
@@ -150,17 +156,22 @@ public class InstallCommand : CommandBase
 
       // Created task-runner.json file
       // We don't want to override this file
-      if (!_fileSystem.File.Exists(Path.Combine(path, "task-runner.json")))
+      var taskRunnerJsonPath = Path.Combine(path, "task-runner.json");
+      $"Creating task-runner.json in '{taskRunnerJsonPath}'".LogVerbose();
+
+      if (!_fileSystem.File.Exists(taskRunnerJsonPath))
       {
          await using var stream = Assembly.GetAssembly(typeof(Program))!.GetManifestResourceStream("Husky.templates.task-runner.json")!;
          using var sr = new StreamReader(stream);
          var content = await sr.ReadToEndAsync();
-         await _fileSystem.File.WriteAllTextAsync(Path.Combine(path, "task-runner.json"), content);
+         await _fileSystem.File.WriteAllTextAsync(taskRunnerJsonPath, content);
       }
    }
 
    private async Task ConfigureGitAndFilePermission(string path, string husky_shPath)
    {
+      $"Configuring Git and File permissions in {husky_shPath}".LogVerbose();
+
       // find all hooks (if exists) from .husky/ and add executable flag
       var files = _fileSystem.Directory.GetFiles(path).Where(f => !_fileSystem.FileInfo.FromFileName(f).Name.Contains('.')).ToList();
       files.Add(husky_shPath);
