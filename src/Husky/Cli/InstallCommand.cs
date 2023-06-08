@@ -111,7 +111,7 @@ public class InstallCommand : CommandBase
       _fileSystem.File.WriteAllText(Path.Combine(path, "_/.gitignore"), "*");
 
       // Copy husky.sh to .husky/_/husky.sh
-      var husky_shPath = Path.Combine(path, "_/husky.sh");
+      var husky_shPath = Path.Combine(path, "_", "husky.sh");
       {
          using var stream = Assembly.GetAssembly(typeof(Program))!.GetManifestResourceStream("Husky.templates.husky.sh")!;
          using var sr = new StreamReader(stream);
@@ -144,7 +144,7 @@ public class InstallCommand : CommandBase
       await _fileSystem.File.WriteAllTextAsync(Path.Combine(path, "_/.gitignore"), "*");
 
       // Copy husky.sh to .husky/_/husky.sh
-      var husky_shPath = Path.Combine(path, "_/husky.sh");
+      var husky_shPath = Path.Combine(path, "_", "husky.sh");
       {
          await using var stream = Assembly.GetAssembly(typeof(Program))!.GetManifestResourceStream("Husky.templates.husky.sh")!;
          using var sr = new StreamReader(stream);
@@ -170,7 +170,7 @@ public class InstallCommand : CommandBase
 
    private async Task ConfigureGitAndFilePermission(string path, string husky_shPath)
    {
-      $"Configuring Git and File permissions in {husky_shPath}".LogVerbose();
+      $"Configuring Git and File permissions in '{husky_shPath}'".LogVerbose();
 
       // find all hooks (if exists) from .husky/ and add executable flag
       var files = _fileSystem.Directory.GetFiles(path).Where(f => !_fileSystem.FileInfo.FromFileName(f).Name.Contains('.')).ToList();
