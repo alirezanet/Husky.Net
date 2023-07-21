@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using CliWrap.Buffered;
 using Husky.Services.Contracts;
 using Husky.Stdout;
@@ -22,7 +23,7 @@ public class ArgumentParser : IArgumentParser
       _git = git;
       _customVariableTasks = new Lazy<Task<IList<HuskyTask>>>(GetCustomVariableTasks);
    }
-
+   const string pattern = @"^(.*?)(\$\{[^}]+\})(.*?)$";
    public async Task<ArgumentInfo[]> ParseAsync(HuskyTask task, string[]? optionArguments = null)
    {
       var args = new List<ArgumentInfo>();
@@ -69,6 +70,14 @@ public class ArgumentParser : IArgumentParser
                await AddCustomVariable(x, matcher, args, pathMode);
                break;
             }
+            case { } x when Regex.Match(x, pattern).Success:
+            {
+               var reg = Regex.Match(x, pattern);
+
+               await AddCustomVariable(reg.Groups[2].Value, matcher, args, pathMode, reg.Groups[1].Value, reg.Groups[3].Value, true);
+
+               break;
+            }
             default:
                args.Add(new ArgumentInfo(ArgumentTypes.Static, arg));
                break;
@@ -97,7 +106,10 @@ public class ArgumentParser : IArgumentParser
        string x,
        Matcher matcher,
        List<ArgumentInfo> args,
-       PathModes pathMode
+       PathModes pathMode,
+       string arg1 = "",
+       string arg2 = "",
+       bool isCustom = false
    )
    {
       var customVariables = await _customVariableTasks.Value;
@@ -114,9 +126,34 @@ public class ArgumentParser : IArgumentParser
       var gitPath = await _git.GetGitPathAsync();
 
       // get relative paths for matcher
-      var files = (await GetCustomVariableOutput(huskyVariableTask))
+
+      var items = (await GetCustomVariableOutput(huskyVariableTask)).ToArray();
+
+      if (isCustom)
+      {
+         items = items.Where(item => !string.IsNullOrWhiteSpace(item)).ToArray();
+      }
+
+
+      if (items.Count() == 1)
+      {
+         var item = items.First();
+         if (arg1 != null && !string.IsNullOrEmpty(arg1))
+         {
+            item = arg1 + item;
+         }
+
+         if (arg2 != null && !string.IsNullOrEmpty(arg2))
+         {
+            item += arg2;
+         }
+         items = new[] { item };
+      }
+
+      var files = items
           .Where(q => !string.IsNullOrWhiteSpace(q))
           .Select(q => Path.IsPathFullyQualified(q) ? Path.GetRelativePath(gitPath, q) : q);
+
       var matches = matcher.Match(gitPath, files);
       AddMatchedFiles(args, pathMode, ArgumentTypes.CustomVariable, matches, gitPath);
    }
