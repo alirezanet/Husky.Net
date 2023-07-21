@@ -60,7 +60,9 @@ public class ExecutableTaskFactory : IExecutableTaskFactory
             cwd,
             huskyTask.Output ?? OutputTypes.Always,
             argsInfo,
-            options.NoPartial
+            options.NoPartial,
+            huskyTask.SkipAutoStage,
+            huskyTask.IgnoreValidateCommandResult
          )
       );
    }
@@ -87,7 +89,9 @@ public class ExecutableTaskFactory : IExecutableTaskFactory
             cwd,
             huskyTask.Output ?? OutputTypes.Always,
             argInfo,
-            noPartial
+            noPartial,
+            huskyTask.SkipAutoStage,
+            huskyTask.IgnoreValidateCommandResult
          );
          // staged-task
          subTasks[i] = CreateExecutableTask(taskInfo);

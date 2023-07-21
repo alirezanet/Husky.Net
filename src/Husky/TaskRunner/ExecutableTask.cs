@@ -20,7 +20,7 @@ public partial class ExecutableTask : ExecutableTaskBase
           TaskInfo.WorkingDirectory,
           TaskInfo.OutputType
       );
-      if (result.ExitCode != 0)
+      if (result.ExitCode != 0 && !TaskInfo.IgnoreValidateCommandResult)
          throw new CommandException(
              $"\n  ❌ Task '{TaskInfo.Name}' failed in {result.RunTime.TotalMilliseconds:n0}ms\n"
          );
