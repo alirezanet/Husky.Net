@@ -56,10 +56,27 @@ public class InstallCommand : CommandBase
       // Ensure that cwd is git top level
       if (!_fileSystem.Directory.Exists(Path.Combine(cwd, ".git")))
       {
-         // Need to check if we're inside a git work tree or not (issue #43)
-         // If we are we can skip installation and if we're not, we should return exception.
-         if (!(await _git.ExecBufferedAsync("rev-parse --git-dir")).StandardOutput.Contains("worktrees"))
-            throw new CommandException($".git can't be found (see {DOCS_URL})\n" + FailedMsg);
+         // Check if we're in a submodule (issue #69)
+         // https://git-scm.com/docs/git-rev-parse#Documentation/git-rev-parse.txt---show-superproject-working-tree
+         var superProjectPath = (await _git.ExecBufferedAsync("rev-parse --show-superproject-working-tree")).StandardOutput;
+         if (!string.IsNullOrWhiteSpace(superProjectPath))
+         {
+            // We're in a submodule
+
+            // Option 1: let's set path to superProjectPath and continue with the install
+            $"Submodule detected, switching install path to super project {superProjectPath}".Log(ConsoleColor.Yellow);
+            path = superProjectPath;
+
+            // Option 2: let's just skip the execution. User should have attached husky to a project outside the submodule.
+            "Submodule detected, skipping install target".Log(ConsoleColor.Yellow);
+         }
+         else
+         {
+            // Need to check if we're inside a git work tree or not (issue #43)
+            // If we are we can skip installation and if we're not, we should return exception.
+            if (!(await _git.ExecBufferedAsync("rev-parse --git-dir")).StandardOutput.Contains("worktrees"))
+               throw new CommandException($".git can't be found (see {DOCS_URL})\n" + FailedMsg);
+         }
       }
 
       if (AllowParallelism)
