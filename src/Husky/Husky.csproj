@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <PackageId>Husky</PackageId>
-    <Version>0.6.0-Preview4</Version>
+    <Version>0.6.0-Preview5</Version>
     <Title>Husky</Title>
     <Authors>AliReza Sabouri</Authors>
     <Description>Git hooks made easy, woof!</Description>
@@ -42,7 +42,7 @@
     <PackageReference Include="CliFx" Version="2.3.4" />
     <PackageReference Include="CliWrap" Version="3.6.3" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.6.0" />
-    
+
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="7.0.4" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
