@@ -37,6 +37,20 @@ dotnet husky install
 With the global installation, you don't need to add the `dotnet` prefix to the commands.
 :::
 
+## Husky and git submodules
+
+The `install` command handles the hooks differently when it's running in a git submodule. The hooks are installed in the submodule's .git directory which is located in the `modules` folder of the super project's .git directory. Husky will alert you when it detects a submodule and tell you where it will attach the hooks:
+
+```
+Submodule detected, attaching .../Repository/Project/mySubmodule/.husky hooks to .../Repository/Project/.git/modules/mySubmodule
+```
+
+If you want to ignore the hooks when your project is a submodule call `install` with the `--ignore-submodule` option. This will make the `install` step a no-op. no git configurations will be applied and your hooks won't work. A message will alert you when this is happening:
+
+```
+Submodule detected and [--ignore-when-submodule] is set, skipping install target
+```
+
 ## Add your first hook
 
 ``` shell:no-line-numbers:no-v-pre

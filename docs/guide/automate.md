@@ -20,6 +20,10 @@ check out the [Manual Attach](#manual-attach) section for more details.
 
 You can set the `HUSKY` environment variable to `0` in order to disable husky in CI/CD pipelines.
 
+## Disable husky in submodule
+
+If your project will be used as a git submodule, and you don't want the hooks for it to be attached. Call the `attach` command with the `--ignore-submodule` option. see [Manual Attach](#manual-attach) section for more details on how this should look like in your `csproj`.
+
 ## Manual Attach
 
 To manually attach husky to your project, add the below code to one of your projects (*.csproj/*.vbproj).
@@ -28,6 +32,16 @@ To manually attach husky to your project, add the below code to one of your proj
 <Target Name="husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(HUSKY)' != 0">
    <Exec Command="dotnet tool restore"  StandardOutputImportance="Low" StandardErrorImportance="High"/>
    <Exec Command="dotnet husky install" StandardOutputImportance="Low" StandardErrorImportance="High"
+         WorkingDirectory="../../" />  <!--Update this to the relative path to your project root dir -->
+</Target>
+```
+
+To skip running the target when the project is a .git submodule, update the condition for your MsBuild target to also check for the `IgnoreSubmodule` variable. The target will then look like this:
+
+``` xml:no-line-numbers:no-v-pre
+<Target Name="husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(HUSKY)' != 0  and '$(IgnoreSubmodule)' != 0">
+   <Exec Command="dotnet tool restore"  StandardOutputImportance="Low" StandardErrorImportance="High"/>
+   <Exec Command="dotnet husky install --ignore-submodule" StandardOutputImportance="Low" StandardErrorImportance="High"
          WorkingDirectory="../../" />  <!--Update this to the relative path to your project root dir -->
 </Target>
 ```
