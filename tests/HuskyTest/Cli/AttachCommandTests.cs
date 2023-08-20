@@ -96,6 +96,51 @@ public class AttachCommandTests
       _xmlIo.Received(1).Save(Arg.Any<string>(), Arg.Any<XElement>());
    }
 
+   [Fact]
+   public async Task Attach_WhenIgnoreSubmoduleIsTrue_ShouldAddSubmoduleTargetCondition()
+   {
+      // Arrange
+      _console = new FakeInMemoryConsole();
+      _xmlDoc.Add(new XElement("Target", new XAttribute("Name", "Husky")));
+      var command = new AttachCommand(_git, _io, _xmlIo) { FileName = _fileName, Force = true, IgnoreSubmodule = true };
+
+      // Act
+      await command.ExecuteAsync(_console);
+
+      // Assert
+      _xmlDoc.Descendants("Target").Should().HaveCount(1);
+      _xmlDoc.Descendants("Target")
+         .SingleOrDefault(q => q.Attribute("Name")?.Value == "Husky")?.Descendants("Exec")
+         .Should().NotBeNull().And.HaveCount(2);
+      _xmlDoc.Descendants("Target")
+         .SingleOrDefault(q => q.Attribute("Name")?.Value == "Husky")
+         ?.Attribute("Condition")
+         ?.Value.Should().Contain(" and '$(IgnoreSubmodule)' != 0");
+      _xmlIo.Received(1).Save(Arg.Any<string>(), Arg.Any<XElement>());
+   }
+
+   [Fact]
+   public async Task Attach_WhenIgnoreSubmoduleIsTrue_ShouldAddInstallSubModuleParameter()
+   {
+      // Arrange
+      _console = new FakeInMemoryConsole();
+      _xmlDoc.Add(new XElement("Target", new XAttribute("Name", "Husky")));
+      var command = new AttachCommand(_git, _io, _xmlIo) { FileName = _fileName, Force = true, IgnoreSubmodule = true };
+
+      // Act
+      await command.ExecuteAsync(_console);
+
+      // Assert
+      _xmlDoc.Descendants("Target").Should().HaveCount(1);
+
+      var targetExecElements = _xmlDoc.Descendants("Target")
+         .SingleOrDefault(q => q.Attribute("Name")?.Value == "Husky")?.Descendants("Exec");
+
+      targetExecElements.Should().NotBeNull().And.HaveCount(2);
+      targetExecElements.SingleOrDefault(e => e.Attribute("Command").Value.Contains("dotnet husky install --ignore-submodule")).Should().NotBeNull();
+      _xmlIo.Received(1).Save(Arg.Any<string>(), Arg.Any<XElement>());
+   }
+
    [Theory]
    [InlineData("/f1/f2", "/f1/f2", "project.csproj", new[] { "." })]
    [InlineData("/f1/f2/f3", "/f1/f2", "../project.csproj", new[] { "." })]

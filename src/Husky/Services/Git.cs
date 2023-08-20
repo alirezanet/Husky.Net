@@ -85,6 +85,46 @@ public class Git : IGit
       return await _huskyPath;
    }
 
+   /// <inheritdoc/>
+   /// <exception cref="Exception">Command exited in non zero code</exception>
+   /// <exception cref="CommandException">Exception while executing command</exception>
+   public async Task<bool> IsSubmodule(string path)
+   {
+      try
+      {
+         var result = await ExecBufferedAsync($"-C {path} rev-parse --show-superproject-working-tree");
+         if (result.ExitCode != 0)
+            throw new Exception($"Failed to determine git configuration: {result.ExitCode}");
+
+         return !string.IsNullOrWhiteSpace(result.StandardOutput);
+      }
+      catch (Exception e)
+      {
+         e.Message.LogVerbose(ConsoleColor.DarkRed);
+         throw new CommandException("Could not determine git configuration", innerException: e);
+      }
+   }
+
+   /// <inheritdoc/>
+   /// <exception cref="Exception">Command exited in non zero code</exception>
+   /// <exception cref="CommandException">Exception while executing command</exception>
+   public async Task<string> GetGitDirectory(string path)
+   {
+      try
+      {
+         var result = await ExecBufferedAsync($"-C {path} rev-parse --git-dir");
+         if (result.ExitCode != 0)
+            throw new Exception($"Failed to determine .git directory path: {result.ExitCode}");
+
+         return result.StandardOutput.Trim();
+      }
+      catch (Exception e)
+      {
+         e.Message.LogVerbose(ConsoleColor.DarkRed);
+         throw new CommandException("Could not determine .git directory path", innerException: e);
+      }
+   }
+
    public async Task<string[]> GetDiffStagedRecord()
    {
       try

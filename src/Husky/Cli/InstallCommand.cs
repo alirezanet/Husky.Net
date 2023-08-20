@@ -25,6 +25,9 @@ public class InstallCommand : CommandBase
                                                  "to prevent locks, when multiple instances are running")]
    public bool AllowParallelism { get; set; } = true;
 
+   [CommandOption("ignore-submodule", Description = "Ignore installation when target is a git submodule")]
+   public bool IgnoreSubmodule { get; set; } = false;
+
    // using for mutex
    private const string appGuid = "085a64e3-0998-4202-ab59-17b1ed287f6e";
 
@@ -53,12 +56,25 @@ public class InstallCommand : CommandBase
       if (!path.StartsWith(cwd))
          throw new CommandException($"{path}\nNot allowed (see {DOCS_URL})\n" + FailedMsg);
 
-      // Ensure that cwd is git top level
-      if (!_fileSystem.Directory.Exists(Path.Combine(cwd, ".git")))
+      // Check if we're in a submodule (issue #69)
+      if (await _git.IsSubmodule(cwd))
+      {
+         // We're in a submodule
+         if (IgnoreSubmodule)
+         {
+            // Option 1: this project has its own hooks and install target but is to be ignored when it's a submodule of some other git repo.
+            "Submodule detected and [--ignore-when-submodule] is set, skipping install target".Log(ConsoleColor.Yellow);
+            return;
+         }
+         // Option 2: this project has its own hooks and install target, it is a submodule of some other git repo
+         // we attach the hooks to the submodule .git pointed at by the module's .git file. (../.git/modules/Submodule)
+         $"Submodule detected, attaching {path} hooks to {await _git.GetGitDirectory(cwd)}".Log(ConsoleColor.Yellow);
+      }
+      else if (!_fileSystem.Directory.Exists(Path.Combine(cwd, ".git"))) // Ensure that cwd is git top level
       {
          // Need to check if we're inside a git work tree or not (issue #43)
          // If we are we can skip installation and if we're not, we should return exception.
-         if (!(await _git.ExecBufferedAsync("rev-parse --git-dir")).StandardOutput.Contains("worktrees"))
+         if (!(await _git.GetGitDirectory(cwd)).Contains("worktrees"))
             throw new CommandException($".git can't be found (see {DOCS_URL})\n" + FailedMsg);
       }
 

@@ -70,7 +70,7 @@ namespace HuskyTest.Cli
          var now = DateTimeOffset.Now;
          _git.ExecAsync("rev-parse").Returns(Task.FromResult(new CommandResult(0, now, now)));
          _fileSystem.Directory.Exists(Path.Combine(Environment.CurrentDirectory, ".git")).Returns(false);
-         _git.ExecBufferedAsync("rev-parse --git-dir").Returns(new BufferedCommandResult(0, now, now, "C:\\TestPath\\.git\\worktrees\\branch", ""));
+         _git.GetGitDirectory(Arg.Any<string>()).Returns(@"C:\TestPath\.git\worktrees\branch", "");
          _git.ExecAsync("config core.hooksPath .husky").Returns(Task.FromResult(new CommandResult(0, now, now)));
          _git.ExecBufferedAsync("config --local --list").Returns(new BufferedCommandResult(0, now, now, "gitflow", ""));
          _git.ExecAsync("config gitflow.path.hooks .husky").Returns(Task.FromResult(new CommandResult(0, now, now)));

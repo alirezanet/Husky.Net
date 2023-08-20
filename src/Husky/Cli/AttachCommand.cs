@@ -27,6 +27,9 @@ public class AttachCommand : CommandBase
    [CommandOption("force", 'f', Description = "This will overwrite the existing husky target tag if it exists.")]
    public bool Force { get; set; } = default!;
 
+   [CommandOption("ignore-submodule", Description = "Ignore the MsBuild target when it's a git submodule (IgnoreSubmodule != 0)")]
+   public bool IgnoreSubmodule { get; set; }
+
    protected override async ValueTask SafeExecuteAsync(IConsole console)
    {
       var currentDirectory = _io.Directory.GetCurrentDirectory();
@@ -57,7 +60,7 @@ public class AttachCommand : CommandBase
       "Husky dev-dependency successfully attached to this project.".Log(ConsoleColor.Green);
    }
 
-   public static XElement GetTarget(string condition, string rootRelativePath)
+   private XElement GetTarget(string condition, string rootRelativePath)
    {
       var target = new XElement("Target");
       target.SetAttributeValue("Name", "Husky");
@@ -69,12 +72,18 @@ public class AttachCommand : CommandBase
       exec.SetAttributeValue("StandardErrorImportance", "High");
       target.Add(exec);
       exec = new XElement("Exec");
-      exec.SetAttributeValue("Command", "dotnet husky install");
+      exec.SetAttributeValue("Command", GetInstallCommand());
       exec.SetAttributeValue("StandardOutputImportance", "Low");
       exec.SetAttributeValue("StandardErrorImportance", "High");
       exec.SetAttributeValue("WorkingDirectory", rootRelativePath);
       target.Add(exec);
       return target;
+   }
+
+   private string GetInstallCommand()
+   {
+      var parameters = IgnoreSubmodule ? " --ignore-submodule" : string.Empty;
+      return $"dotnet husky install{parameters}";
    }
 
    private async Task<string> GetRelativePath(string filepath)
@@ -85,9 +94,13 @@ public class AttachCommand : CommandBase
       return relativePath;
    }
 
-   private static string GetCondition(XContainer doc)
+   private string GetCondition(XContainer doc)
    {
       var condition = "'$(HUSKY)' != 0";
+      if (IgnoreSubmodule)
+      {
+         condition += " and '$(IgnoreSubmodule)' != 0";
+      }
       var targetFrameworks = doc.Descendants("PropertyGroup").Descendants("TargetFrameworks").FirstOrDefault();
       if (targetFrameworks != null && targetFrameworks.Value.Contains(';')) condition += " and '$(IsCrossTargetingBuild)' == 'true'";
 
