@@ -8,6 +8,7 @@ export const sidebar: SidebarConfig = {
             '/guide/README.md',
             '/guide/getting-started.md',
             '/guide/automate.md',
+            '/guide/submodules.md',
          ],
       },
       {
