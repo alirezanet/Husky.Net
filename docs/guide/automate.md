@@ -57,6 +57,6 @@ If you are using the npm, add the below code to your package.json file will auto
 
 ``` json
  "scripts": {
-    "prepare": "dotnet tool restore && dotnet husky install"
+      "prepare": "dotnet tool restore && dotnet husky install"
  }
- ```
+```
