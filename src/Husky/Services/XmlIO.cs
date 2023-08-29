@@ -15,7 +15,9 @@ public class XmlIO : IXmlIO
    {
       var settings = new XmlWriterSettings
       {
-         OmitXmlDeclaration = true
+         OmitXmlDeclaration = true,
+         Indent = true,
+         CloseOutput = true
       };
       using var xw = XmlWriter.Create(path, settings);
       document.Save(xw);
