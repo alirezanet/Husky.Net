@@ -1,3 +1,4 @@
+using System.Xml;
 using System.Xml.Linq;
 using Husky.Services.Contracts;
 
@@ -9,8 +10,14 @@ public class XmlIO : IXmlIO
    {
       return XElement.Load(path);
    }
+
    public void Save(string path, XElement document)
    {
-      document.Save(path);
+      var settings = new XmlWriterSettings
+      {
+         OmitXmlDeclaration = true
+      };
+      using var xw = XmlWriter.Create(path, settings);
+      document.Save(xw);
    }
 }
