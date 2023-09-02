@@ -92,7 +92,7 @@ public class Git : IGit
    {
       try
       {
-         var result = await ExecBufferedAsync($"-C {path} rev-parse --show-superproject-working-tree");
+         var result = await ExecBufferedAsync($"-C \"{path}\" rev-parse --show-superproject-working-tree");
          if (result.ExitCode != 0)
             throw new Exception($"Failed to determine git configuration: {result.ExitCode}");
 
@@ -112,7 +112,7 @@ public class Git : IGit
    {
       try
       {
-         var result = await ExecBufferedAsync($"-C {path} rev-parse --git-dir");
+         var result = await ExecBufferedAsync($"-C \"{path}\" rev-parse --git-dir");
          if (result.ExitCode != 0)
             throw new Exception($"Failed to determine .git directory path: {result.ExitCode}");
 
