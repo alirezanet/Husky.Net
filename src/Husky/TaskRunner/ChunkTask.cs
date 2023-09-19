@@ -15,7 +15,10 @@ public class ChunkTask : ExecutableTaskBase
    public override async Task<double> Execute()
    {
       var sw = Stopwatch.StartNew();
-      await Task.WhenAll(Chunks.Select(chunk => chunk.Execute()));
+      foreach (var chunk in Chunks)
+      {
+         await chunk.Execute();
+      }
       sw.Stop();
       return sw.ElapsedMilliseconds;
    }
