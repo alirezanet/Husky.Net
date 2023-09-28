@@ -20,6 +20,11 @@
          "include": ["**/*.cs"]
       },
       {
+         "name": "update-version",
+         "command": "dotnet",
+         "args" :["husky", "exec", ".husky/csx/version-updater.csx", "--args", "${args}"]
+      },
+      {
          "name": "echo staged files",
          "pathMode": "absolute",
          "command": "cmd",

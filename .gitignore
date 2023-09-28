@@ -405,3 +405,4 @@ nupkg
 .temp
 nuget.config*
 .vscode
+!.husky/csx
