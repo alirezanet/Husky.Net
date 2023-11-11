@@ -55,10 +55,17 @@ Feel free to send me a pull request!
 
 Check out the [Contribution Page](https://alirezanet.github.io/Husky.Net/contribution)
 
+## Contributors
+
+Thank you to everyone who has contributed to the Huskt.Net codebase. We appreciate you!
+
+<a href="https://github.com/alirezanet/Husky.Net/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=alirezanet/Husky.Net" />
+</a>
+
 ## Credits
 
 - This tool inspired of [husky](https://github.com/typicode/husky) & [lint-staged](https://github.com/okonet/lint-staged) and a few other tools, for **DotNet**, so make sure to support them too!
-
 - I'd also like to thank [@kaylumah](https://github.com/kaylumah) for his [article](https://kaylumah.nl/2019/09/07/using-csharp-code-your-git-hooks.html) that gave me the csharp scripting support idea.
 
 ## License
