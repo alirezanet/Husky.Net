@@ -1,22 +1,24 @@
 name: Build Pull Requests
 
 on:
-  pull_request:
-    branches: [ master ]
+   pull_request:
+      branches: [ master ]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    env:
-       HUSKY: 0
-    steps:
-    - name: Setup .NET 8
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: 8.0.100
-    - name: Restore dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build -c Release --no-restore
-    - name: Test
-      run: dotnet test -c Release --no-build --verbosity normal
+   build:
+      runs-on: ubuntu-latest
+      env:
+         HUSKY: 0
+      steps:
+         -  name: Checkout code
+            uses: actions/checkout@v3
+         -  name: Setup .NET 8
+            uses: actions/setup-dotnet@v3
+            with:
+               dotnet-version: 8.0.100
+         -  name: Restore dependencies
+            run: dotnet restore
+         -  name: Build
+            run: dotnet build -c Release --no-restore
+         -  name: Test
+            run: dotnet test -c Release --no-build --verbosity normal

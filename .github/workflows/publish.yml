@@ -12,23 +12,26 @@ jobs:
       env:
          HUSKY: 0
       steps:
-         - name: Setup .NET 8
-           uses: actions/setup-dotnet@v3
-           with:
-              dotnet-version: 8.0.x
-         - name: Print information
-           run: |
-              ls -la
-              dotnet --info
-         - name: Restore dependencies
-           run: dotnet restore
-         - name: Build
-           run: dotnet build --configuration Release --no-restore
-         - name: Test
-           run: dotnet test --configuration Release --no-build --verbosity normal
-         - name: Publish Husky
-           uses: alirezanet/publish-nuget@v3.1.0
-           with:
-              PROJECT_FILE_PATH: src/Husky/Husky.csproj
-              INCLUDE_SYMBOLS: true
-              NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+         -  name: Checkout code
+            uses: actions/checkout@v3
+
+         -  name: Setup .NET 8
+            uses: actions/setup-dotnet@v3
+            with:
+               dotnet-version: 8.0.x
+         -  name: Print information
+            run: |
+               ls -la
+               dotnet --info
+         -  name: Restore dependencies
+            run: dotnet restore
+         -  name: Build
+            run: dotnet build --configuration Release --no-restore
+         -  name: Test
+            run: dotnet test --configuration Release --no-build --verbosity normal
+         -  name: Publish Husky
+            uses: alirezanet/publish-nuget@v3.1.0
+            with:
+               PROJECT_FILE_PATH: src/Husky/Husky.csproj
+               INCLUDE_SYMBOLS: true
+               NUGET_KEY: ${{secrets.NUGET_API_KEY}}
