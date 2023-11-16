@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <PackageId>Husky</PackageId>
-    <Version>0.6.2</Version>
+    <Version>0.6.3</Version>
     <Title>Husky</Title>
     <Authors>AliReza Sabouri</Authors>
     <Description>Git hooks made easy, woof!</Description>
