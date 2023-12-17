@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using DotNet.Testcontainers.Images;
+using HuskyIntegrationTests;
 
 public class DockerFixture : IAsyncDisposable
 {
@@ -66,6 +67,19 @@ public class DockerFixture : IAsyncDisposable
       await container.StartAsync();
       return container;
    }
+
+
+   public async Task<IContainer> StartWithInstalledHusky([CallerMemberName] string name = null!)
+   {
+      var c = await CopyAndStartAsync(nameof(TestProjectBase), name);
+      await c.BashAsync("git init");
+      await c.BashAsync("dotnet tool restore");
+      await c.BashAsync("dotnet husky install");
+      await c.BashAsync("git add .");
+      await c.BashAsync("git commit -m 'initial commit'");
+      return c;
+   }
+
 
    private static string GenerateContainerName(string name)
    {
