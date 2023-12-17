@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using CliWrap.Buffered;
 using Husky.Services.Contracts;
 using Husky.Stdout;
@@ -12,10 +13,16 @@ public interface IArgumentParser
    Task<ArgumentInfo[]> ParseAsync(HuskyTask huskyTask, string[]? optionArguments = null);
 }
 
-public class ArgumentParser : IArgumentParser
+public partial class ArgumentParser : IArgumentParser
 {
    private readonly IGit _git;
    private readonly Lazy<Task<IList<HuskyTask>>> _customVariableTasks;
+
+   private const string StagedWithSeparatorPattern = @".*(\$\{staged(?:\:(.+))\}).*";
+#if NET7_0_OR_GREATER
+   [GeneratedRegex(StagedWithSeparatorPattern, RegexOptions.Compiled)]
+   private static partial Regex StagedPatternRegex();
+#endif
 
    public ArgumentParser(IGit git)
    {
@@ -64,6 +71,18 @@ public class ArgumentParser : IArgumentParser
                await AddStagedFiles(matcher, args, pathMode);
                break;
             }
+#if NET7_0_OR_GREATER
+            case { } x when x.Contains("${staged") && StagedPatternRegex().IsMatch(x):
+            {
+               var match = StagedPatternRegex().Match(x);
+#else
+            case { } x when x.Contains("${staged") && Regex.IsMatch(x, StagedWithSeparatorPattern, RegexOptions.Compiled):
+            {
+               var match = new Regex(StagedWithSeparatorPattern, RegexOptions.Compiled).Match(x);
+#endif
+               await AddStagedFiles(matcher, args, pathMode, match);
+               break;
+            }
             case { } x when x.StartsWith("${") && x.EndsWith("}"):
             {
                await AddCustomVariable(x, matcher, args, pathMode);
@@ -78,7 +97,7 @@ public class ArgumentParser : IArgumentParser
       return args.ToArray();
    }
 
-   private async Task AddStagedFiles(Matcher matcher, List<ArgumentInfo> args, PathModes pathMode)
+   private async Task AddStagedFiles(Matcher matcher, ICollection<ArgumentInfo> args, PathModes pathMode, Match? match = null)
    {
       var stagedFiles = (await _git.GetStagedFilesAsync())
           .Where(q => !string.IsNullOrWhiteSpace(q))
@@ -90,7 +109,11 @@ public class ArgumentParser : IArgumentParser
       // get match staged files with glob
       var matches = matcher.Match(stagedFiles);
       var gitPath = await _git.GetGitPathAsync();
-      AddMatchedFiles(args, pathMode, ArgumentTypes.StagedFile, matches, gitPath);
+
+      if (match is null || !match.Success)
+         AddMatchedFiles(args, pathMode, ArgumentTypes.StagedFile, matches, gitPath);
+      else
+         AddStaticMatchedFiles(args, pathMode, matches, gitPath, match);
    }
 
    private async Task AddCustomVariable(
@@ -197,12 +220,37 @@ public class ArgumentParser : IArgumentParser
       AddMatchedFiles(args, pathMode, ArgumentTypes.File, matches, gitPath);
    }
 
+   private static void AddStaticMatchedFiles(
+      ICollection<ArgumentInfo> args,
+      PathModes pathMode,
+      PatternMatchingResult matches,
+      string rootPath,
+      Match match)
+   {
+      if (!matches.HasMatches)
+         return;
+
+      var matchFiles = matches.Files.Select(q => $"{q.Path}").ToArray();
+      LogMatchedFiles(matchFiles);
+
+      var fileList = matchFiles.Select(f => pathMode switch
+      {
+         PathModes.Relative => f,
+         PathModes.Absolute => Path.GetFullPath(f, rootPath),
+         _ => throw new ArgumentOutOfRangeException(nameof(HuskyTask.PathMode), pathMode,
+            "Invalid path mode. Supported modes: (relative | absolute)")
+      });
+      var filesString = string.Join(match.Groups[2].Value, fileList);
+      var arg = match.Groups[0].Value.Replace(match.Groups[1].Value, filesString);
+      args.Add(new ArgumentInfo(ArgumentTypes.Static, arg));
+   }
+
    private static void AddMatchedFiles(
-       List<ArgumentInfo> args,
-       PathModes pathMode,
-       ArgumentTypes argumentType,
-       PatternMatchingResult matches,
-       string rootPath
+      ICollection<ArgumentInfo> args,
+      PathModes pathMode,
+      ArgumentTypes argumentType,
+      PatternMatchingResult matches,
+      string rootPath
    )
    {
       if (!matches.HasMatches)
