@@ -75,6 +75,8 @@ public class DockerFixture : IAsyncDisposable
       await c.BashAsync("git init");
       await c.BashAsync("dotnet tool restore");
       await c.BashAsync("dotnet husky install");
+      await c.BashAsync("git config --global user.email \"you@example.com\"");
+      await c.BashAsync("git config --global user.name \"Your Name\"");
       await c.BashAsync("git add .");
       await c.BashAsync("git commit -m 'initial commit'");
       return c;
