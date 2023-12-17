@@ -5,6 +5,7 @@ namespace HuskyIntegrationTests;
 public static class Extensions
 {
    public const string SuccessfullyExecuted = "✔ Successfully executed";
+   public const string Skipped = "💤 Skipped, no matched files";
 
    public static async Task<ExecResult> BashAsync(this IContainer container, params string[] command)
    {

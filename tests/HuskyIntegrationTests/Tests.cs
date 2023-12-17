@@ -2,7 +2,8 @@ using FluentAssertions;
 
 namespace HuskyIntegrationTests;
 
-public class Tests(DockerFixture docker, ITestOutputHelper output) : IClassFixture<DockerFixture>
+[Collection("docker fixture")]
+public class Tests(DockerFixture docker, ITestOutputHelper output)
 {
 
    [Fact]
@@ -11,6 +12,8 @@ public async Task IntegrationTestCopyFolder()
    var c = await docker.CopyAndStartAsync(nameof(TestProjectBase));
 
    await c.BashAsync("git init");
+   await c.BashAsync("dotnet new tool-manifest");
+   await c.BashAsync("dotnet tool install --no-cache --add-source /app/nupkg/ husky");
    await c.BashAsync("dotnet tool restore");
    await c.BashAsync("dotnet husky install");
    var result = await c.BashAsync(output, "dotnet husky run");
@@ -26,7 +29,7 @@ public async Task IntegrationTest()
 
    await c.BashAsync("dotnet new classlib");
    await c.BashAsync("dotnet new tool-manifest");
-   await c.BashAsync("dotnet tool install Husky");
+   await c.BashAsync("dotnet tool install --no-cache --add-source /app/nupkg/ husky");
    await c.BashAsync("git init");
    await c.BashAsync("dotnet husky install");
    var result = await c.BashAsync(output, "dotnet husky run");

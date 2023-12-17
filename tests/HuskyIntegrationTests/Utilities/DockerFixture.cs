@@ -73,6 +73,8 @@ public class DockerFixture : IAsyncDisposable
    {
       var c = await CopyAndStartAsync(nameof(TestProjectBase), name);
       await c.BashAsync("git init");
+      await c.BashAsync("dotnet new tool-manifest");
+      await c.BashAsync("dotnet tool install --no-cache --add-source /app/nupkg/ husky");
       await c.BashAsync("dotnet tool restore");
       await c.BashAsync("dotnet husky install");
       await c.BashAsync("git config --global user.email \"you@example.com\"");
