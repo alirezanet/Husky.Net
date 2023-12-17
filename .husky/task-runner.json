@@ -12,13 +12,13 @@
          "command": "dotnet",
          "args": ["husky", "exec", ".husky/csx/commit-lint.csx", "--args", "${args}"]
       },
-      {
-         "name": "dotnet-format",
-         "command": "dotnet",
-         "group": "pre-commit",
-         "args": ["dotnet-format", "--include" , "${staged}"],
-         "include": ["**/*.cs"]
-      },
+//      {
+//         "name": "dotnet-format",
+//         "command": "dotnet",
+//         "group": "pre-commit",
+//         "args": ["dotnet-format", "--include" , "${staged}"],
+//         "include": ["**/*.cs"]
+//      },
       {
          "name": "update-version",
          "command": "dotnet",
