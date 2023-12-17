@@ -25,7 +25,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Issue99\" />
       <Folder Include="TestProjectBase\" />
     </ItemGroup>
 
