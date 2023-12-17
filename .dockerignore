@@ -1,0 +1,11 @@
+# Exclude everything
+*
+
+# Include the src folder
+!src
+!README.md
+
+# Exclude build-related folders within src/Husky
+src/Husky/bin/
+src/Husky/obj/
+src/Husky/nupkg/

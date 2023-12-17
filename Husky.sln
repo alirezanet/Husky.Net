@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# 
+#
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Husky", "src\Husky\Husky.csproj", "{12AB4B33-47A6-49D5-872A-5BA6DD634E9C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{302A5F25-CB44-4ED0-A65E-06C04648D211}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HuskyTest", "tests\HuskyTest\HuskyTest.csproj", "{57EE798B-0FE0-42A4-BDB9-D168109D3E7D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HuskyIntegrationTests", "tests\HuskyIntegrationTests\HuskyIntegrationTests.csproj", "{FAF049CD-6E45-4A66-A88F-C2EB007DFCC3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,8 +23,13 @@ Global
 		{57EE798B-0FE0-42A4-BDB9-D168109D3E7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{57EE798B-0FE0-42A4-BDB9-D168109D3E7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{57EE798B-0FE0-42A4-BDB9-D168109D3E7D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FAF049CD-6E45-4A66-A88F-C2EB007DFCC3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FAF049CD-6E45-4A66-A88F-C2EB007DFCC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FAF049CD-6E45-4A66-A88F-C2EB007DFCC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FAF049CD-6E45-4A66-A88F-C2EB007DFCC3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{57EE798B-0FE0-42A4-BDB9-D168109D3E7D} = {302A5F25-CB44-4ED0-A65E-06C04648D211}
+		{FAF049CD-6E45-4A66-A88F-C2EB007DFCC3} = {302A5F25-CB44-4ED0-A65E-06C04648D211}
 	EndGlobalSection
 EndGlobal
