@@ -17,6 +17,7 @@ public static class Extensions
    public static async Task<ExecResult> BashAsync(this IContainer container, ITestOutputHelper output, params string[] command)
    {
       var result = await container.ExecAsync(["/bin/bash", "-c", ..command]);
+      output.WriteLine($"{string.Join(" ", command)}:");
 
       if (!string.IsNullOrEmpty(result.Stdout))
          output.WriteLine(result.Stdout);
