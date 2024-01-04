@@ -1,9 +1,7 @@
 # Husky.Net
 
-![GitHub](https://img.shields.io/github/license/alirezanet/husky.net) ![Nuget](https://img.shields.io/nuget/dt/husky?color=%239100ff) ![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/husky?label=latest) ![Nuget](https://img.shields.io/nuget/v/husky?label=stable) ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/alirezanet/Husky.Net/build.yml?branch=master?label=checks) 
+![GitHub](https://img.shields.io/github/license/alirezanet/husky.net) ![Nuget](https://img.shields.io/nuget/dt/husky?color=%239100ff) ![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/husky?label=latest) ![Nuget](https://img.shields.io/nuget/v/husky?label=stable) ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/alirezanet/Husky.Net/build.yml?branch=master?label=checks)
 [![NuGet version (Husky)](https://img.shields.io/nuget/v/Husky.svg?style=flat-square)](https://www.nuget.org/packages/Husky/)
-[![Discord](https://img.shields.io/badge/Discord-Join%20our%20server-blue?style=flat-square&logo=discord)](https://discord.gg/jaSXnDMv)
-
 
 ![Husky.Net WorkFlow](https://github.com/alirezanet/Husky.Net/blob/master/docs/.vuepress/public/workflow.jpg)
 
