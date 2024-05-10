@@ -30,7 +30,7 @@ while (true)
    // initialize CLI
    exitCode = await new CliApplicationBuilder()
       .AddCommandsFromThisAssembly()
-      .UseTypeActivator(BuildServiceProvider().GetService)
+      .UseTypeActivator(BuildServiceProvider().GetService!)
       .SetExecutableName("husky")
       .Build()
       .RunAsync(args);
