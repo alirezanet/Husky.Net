@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using CliFx.Exceptions;
 using Husky.Services.Contracts;
@@ -142,8 +143,9 @@ public class StagedTask : ExecutableTask
          .OfType<FileArgumentInfo>()
          .Where(q => q.ArgumentTypes == ArgumentTypes.StagedFile)
          .Except(partialStagedFiles)
-         .Select(q => q.RelativePath)
+         .Select(q => !RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? $"\"{q.RelativePath}\"" : $"\"{q.RelativePath.Replace("/", @"\")}\"")
          .ToList();
+
       if (stagedFiles.Any())
       {
          "Re-staging staged files...".LogVerbose();
