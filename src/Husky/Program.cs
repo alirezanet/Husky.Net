@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.IO.Abstractions;
 using System.Text.RegularExpressions;
 using CliFx;
@@ -13,6 +14,10 @@ using Microsoft.Extensions.DependencyInjection;
 LoggerEx.logger = new Logger(new SystemConsole());
 
 var exitCode = 0;
+
+#if TEST
+WaitForDebuggerIfNeeded();
+#endif
 
 #if DEBUG
 "Starting development mode ... ".Log(ConsoleColor.DarkGray);
@@ -73,3 +78,18 @@ ServiceProvider BuildServiceProvider()
       .AddTransient<CleanupCommand>();
    return services.BuildServiceProvider();
 }
+
+#if TEST
+        static void WaitForDebuggerIfNeeded()
+        {
+           if (Environment.GetEnvironmentVariable("HUSKY_INTEGRATION_TEST") != "1") return;
+           Console.WriteLine("Waiting for debugger to attach...");
+
+           while (!Debugger.IsAttached)
+           {
+              Thread.Sleep(100);
+           }
+
+           Console.WriteLine("Debugger attached.");
+        }
+#endif
