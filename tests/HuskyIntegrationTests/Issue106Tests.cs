@@ -3,15 +3,13 @@ using DotNet.Testcontainers.Containers;
 using FluentAssertions;
 
 namespace HuskyIntegrationTests;
-[Collection("docker fixture")]
-public class Issue106Tests (DockerFixture docker, ITestOutputHelper output) : IClassFixture<DockerFixture>
+public class Issue106Tests (ITestOutputHelper output)
 {
-
    [Fact]
-   public async Task EchoWithIncludeTask_ShouldSkip_WhenNoMatchFilesFound()
+   public async Task EchoWithIncludeTask_WhenNoMatchFilesFound_ShouldSkip()
    {
       // arrange
-      var c = await ArrangeContainer();
+      await using var c = await ArrangeContainer();
       await c.BashAsync("git add .");
 
       // act
@@ -19,12 +17,12 @@ public class Issue106Tests (DockerFixture docker, ITestOutputHelper output) : IC
 
       // assert
       result.ExitCode.Should().Be(0);
-      result.Stderr.Should().Contain(Extensions.Skipped);
+      result.Stderr.Should().Contain(DockerHelper.Skipped);
    }
 
    private async Task<IContainer> ArrangeContainer([CallerMemberName] string name = null!)
    {
-      var c = await docker.StartWithInstalledHusky(name);
+      var c = await DockerHelper.StartWithInstalledHusky(name);
       await c.BashAsync("dotnet tool restore");
       await c.BashAsync("git add .");
 

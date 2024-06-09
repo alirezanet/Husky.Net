@@ -4,14 +4,13 @@ using FluentAssertions;
 
 namespace HuskyIntegrationTests;
 
-[Collection("docker fixture")]
-public class Issue99Tests(DockerFixture docker, ITestOutputHelper output) : IClassFixture<DockerFixture>
+public class Issue99Tests(ITestOutputHelper output)
 {
    [Fact]
    public async Task StagedFiles_ShouldPassToJbCleanup_WithASemicolonSeparator()
    {
       // arrange
-      var c = await ArrangeContainer();
+      await using var c = await ArrangeContainer();
 
       // add 4 c# files
       for (var i = 2; i <= 4; i++)
@@ -28,19 +27,19 @@ public class Issue99Tests(DockerFixture docker, ITestOutputHelper output) : ICla
 
       await c.BashAsync("git add .");
 
-// act
+      // act
       var result = await c.BashAsync(output, "git commit -m 'add 4 new csharp classes'");
 
-// assert
+      // assert
       result.ExitCode.Should().Be(0);
-      result.Stderr.Should().Contain(Extensions.SuccessfullyExecuted);
+      result.Stderr.Should().Contain(DockerHelper.SuccessfullyExecuted);
    }
 
    [Fact]
    public async Task StagedFiles_ShouldSkip_WhenNoMatchFilesFound()
    {
       // arrange
-      var c = await ArrangeContainer();
+      await using var c = await ArrangeContainer(installJetBrains: false);
       await c.BashAsync("git add .");
 
       // act
@@ -48,16 +47,19 @@ public class Issue99Tests(DockerFixture docker, ITestOutputHelper output) : ICla
 
       // assert
       result.ExitCode.Should().Be(0);
-      result.Stderr.Should().Contain(Extensions.Skipped);
+      result.Stderr.Should().Contain(DockerHelper.Skipped);
    }
 
-   private async Task<IContainer> ArrangeContainer([CallerMemberName] string name = null!)
+   private async Task<IContainer> ArrangeContainer([CallerMemberName] string name = null!, bool installJetBrains = true)
    {
-      var c = await docker.StartWithInstalledHusky(name);
-      await c.BashAsync("dotnet tool install JetBrains.ReSharper.GlobalTools");
-      await c.BashAsync("dotnet tool restore");
-      await c.BashAsync("git add .");
-      await c.BashAsync("git commit -m 'add jb tool'");
+      var c = await DockerHelper.StartWithInstalledHusky(name);
+      if (installJetBrains)
+      {
+         await c.BashAsync("dotnet tool install JetBrains.ReSharper.GlobalTools --version 2024.1.3");
+         await c.BashAsync("dotnet tool restore");
+         await c.BashAsync("git add .");
+         await c.BashAsync("git commit -m 'add jb tool'");
+      }
 
       const string tasks =
          """
