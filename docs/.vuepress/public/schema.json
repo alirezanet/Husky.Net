@@ -1,0 +1,184 @@
+{
+   "$schema": "http://json-schema.org/draft-04/schema#",
+   "title": "TaskRunner",
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+      "tasks"
+   ],
+   "properties": {
+      "tasks": {
+         "type": "array",
+         "items": {
+            "$ref": "#/definitions/HuskyTask"
+         }
+      },
+      "variables": {
+         "type": [
+            "array",
+            "null"
+         ],
+         "items": {
+            "$ref": "#/definitions/VariableTask"
+         }
+      }
+   },
+   "definitions": {
+      "HuskyTask": {
+         "type": "object",
+         "additionalProperties": false,
+         "required": [
+            "name",
+            "command"
+         ],
+         "properties": {
+            "name": {
+               "type": "string",
+               "minLength": 1
+            },
+            "command": {
+               "type": "string",
+               "minLength": 1
+            },
+            "args": {
+               "type": [
+                  "array",
+                  "null"
+               ],
+               "items": {
+                  "type": "string"
+               }
+            },
+            "output": {
+               "oneOf": [
+                  {
+                     "type": "null"
+                  },
+                  {
+                     "$ref": "#/definitions/OutputTypes"
+                  }
+               ]
+            },
+            "pathMode": {
+               "oneOf": [
+                  {
+                     "type": "null"
+                  },
+                  {
+                     "$ref": "#/definitions/PathModes"
+                  }
+               ]
+            },
+            "cwd": {
+               "type": [
+                  "null",
+                  "string"
+               ]
+            },
+            "group": {
+               "type": [
+                  "null",
+                  "string"
+               ]
+            },
+            "branch": {
+               "type": [
+                  "null",
+                  "string"
+               ]
+            },
+            "windows": {
+               "oneOf": [
+                  {
+                     "type": "null"
+                  },
+                  {
+                     "$ref": "#/definitions/HuskyTask"
+                  }
+               ]
+            },
+            "include": {
+               "type": [
+                  "array",
+                  "null"
+               ],
+               "items": {
+                  "type": "string"
+               }
+            },
+            "exclude": {
+               "type": [
+                  "array",
+                  "null"
+               ],
+               "items": {
+                  "type": "string"
+               }
+            }
+         }
+      },
+      "OutputTypes": {
+         "type": "string",
+         "description": "",
+         "x-enumNames": [
+            "Always",
+            "Verbose",
+            "Never"
+         ],
+         "enum": [
+            "Always",
+            "Verbose",
+            "Never"
+         ]
+      },
+      "PathModes": {
+         "type": "string",
+         "description": "",
+         "x-enumNames": [
+            "Relative",
+            "Absolute"
+         ],
+         "enum": [
+            "Relative",
+            "Absolute"
+         ]
+      },
+      "VariableTask": {
+         "type": "object",
+         "additionalProperties": false,
+         "required": [
+            "name",
+            "command"
+         ],
+         "properties": {
+            "name": {
+               "type": "string",
+               "minLength": 1
+            },
+            "command": {
+               "type": "string",
+               "minLength": 1
+            },
+            "args": {
+               "type": [
+                  "array",
+                  "null"
+               ],
+               "items": {
+                  "type": "string"
+               }
+            },
+            "windows": {
+               "oneOf": [
+                  {
+                     "type": "null"
+                  },
+                  {
+                     "$ref": "#/definitions/VariableTask"
+                  }
+               ]
+            }
+         }
+      }
+   }
+}
