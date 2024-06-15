@@ -1,4 +1,5 @@
 {
+   "$schema": "https://alirezanet.github.io/Husky.Net/schema.json",
    "variables": [
       {
          "name": "root-dir",
@@ -12,13 +13,6 @@
          "command": "dotnet",
          "args": ["husky", "exec", ".husky/csx/commit-lint.csx", "--args", "${args}"]
       },
-//      {
-//         "name": "dotnet-format",
-//         "command": "dotnet",
-//         "group": "pre-commit",
-//         "args": ["dotnet-format", "--include" , "${staged}"],
-//         "include": ["**/*.cs"]
-//      },
       {
          "name": "update-version",
          "command": "dotnet",
@@ -29,7 +23,7 @@
          "pathMode": "absolute",
          "command": "cmd",
          "group": "pre-commit",
-         "args": [ "/c", "echo", "${staged}"],
+         "args": [ "/c", "echo", "${staged}"]
       }
    ]
 }

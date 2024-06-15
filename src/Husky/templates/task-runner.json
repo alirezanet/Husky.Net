@@ -1,4 +1,5 @@
 {
+   "$schema": "https://alirezanet.github.io/Husky.Net/schema.json",
    "tasks": [
       {
          "name": "welcome-message-example",
