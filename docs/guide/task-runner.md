@@ -20,6 +20,7 @@ dotnet husky add pre-commit -c "dotnet husky run --group pre-commit"
 
 ``` json
 {
+   "$schema": "https://alirezanet.github.io/Husky.Net/schema.json",
    "tasks": [
       {
          "name": "dotnet-format",
