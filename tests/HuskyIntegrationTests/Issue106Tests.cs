@@ -34,6 +34,7 @@ public class Issue106Tests (ITestOutputHelper output)
                      "name": "EchoWithInclude",
                      "group": "pre-commit",
                      "command": "bash",
+                     "filteringRule": "staged",
                      "args": [
                          "-c",
                          "echo Husky.Net is awesome!"
