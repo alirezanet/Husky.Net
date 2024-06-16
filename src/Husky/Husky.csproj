@@ -26,6 +26,8 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <IncludeSymbols>true</IncludeSymbols>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Configurations>Debug;Release;IntegrationTest</Configurations>
+    <Platforms>AnyCPU</Platforms>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="templates\husky.sh" />
@@ -60,4 +62,11 @@
     <Exec Command="dotnet tool restore" StandardOutputImportance="Low" StandardErrorImportance="High" />
     <Exec Command="dotnet husky install" StandardOutputImportance="Low" StandardErrorImportance="High" WorkingDirectory="..\.." />
   </Target>
+
+   <PropertyGroup Condition="'$(Configuration)' == 'IntegrationTest'">
+      <DefineConstants>TEST</DefineConstants>
+      <Optimize>false</Optimize>
+      <OutputPath>bin\IntegrationTest\</OutputPath>
+      <IntermediateOutputPath>obj\IntegrationTest\</IntermediateOutputPath>
+   </PropertyGroup>
 </Project>
