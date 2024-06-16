@@ -3,6 +3,7 @@ using Husky.Services.Contracts;
 using Husky.Stdout;
 using Husky.Utils;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileSystemGlobbing;
 
 namespace Husky.TaskRunner;
 
@@ -38,11 +39,8 @@ public class ExecutableTaskFactory : IExecutableTaskFactory
       var cwd = await _git.GetTaskCwdAsync(huskyTask);
       var argsInfo = await _argumentParser.ParseAsync(huskyTask, options.Arguments?.ToArray());
 
-      if (huskyTask.Args != null && huskyTask.Args.Length > argsInfo.Length)
-      {
-         "💤 Skipped, no matched files".Husky(ConsoleColor.Blue);
-         return null;
-      }
+      if (await CheckIfWeShouldSkipTheTask(huskyTask, argsInfo))
+         return null; // skip the task
 
       // check for chunk
       var totalCommandLength = argsInfo.Sum(q => q.Argument.Length) + huskyTask.Command.Length;
@@ -63,6 +61,35 @@ public class ExecutableTaskFactory : IExecutableTaskFactory
             options.NoPartial
          )
       );
+   }
+
+   private async Task<bool> CheckIfWeShouldSkipTheTask(HuskyTask huskyTask, ArgumentInfo[] argsInfo)
+   {
+      if (huskyTask is { FilteringRule: FilteringRules.Variable, Args: not null } && huskyTask.Args.Length > argsInfo.Length)
+      {
+         "💤 Skipped, no matched files".Husky(ConsoleColor.Blue);
+         return true;
+      }
+
+      if (huskyTask.FilteringRule != FilteringRules.Staged) return false;
+
+      var stagedFiles = (await _git.GetStagedFilesAsync())
+         .Where(q => !string.IsNullOrWhiteSpace(q))
+         .ToArray();
+      if (stagedFiles.Length == 0)
+      {
+         "💤 Skipped, no staged files".Husky(ConsoleColor.Blue);
+         return true;
+      }
+
+      var matcher = ArgumentParser.GetPatternMatcher(huskyTask);
+
+      // get match staged files with glob
+      var matches = matcher.Match(stagedFiles);
+      if (matches.HasMatches) return false;
+      "💤 Skipped, no staged matched files".Husky(ConsoleColor.Blue);
+      return true;
+
    }
 
    private IExecutableTask CreateChunkTask(

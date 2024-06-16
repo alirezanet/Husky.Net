@@ -79,6 +79,11 @@
            },
            "description": "Glob pattern to exclude files."
          },
+          "filteringRule": {
+             "$ref": "#/definitions/filteringRules",
+             "description": "The filtering rule for this task. Can be 'variable' or 'staged'.",
+             "default": "variable"
+          },
          "windows": {
            "$ref": "#/definitions/windowsOverrides",
            "description": "Overrides all settings for Windows."
@@ -211,6 +216,12 @@
        "enum": ["relative", "absolute"],
        "description": "Specifies the file path style.",
        "default": "relative"
-     }
+     },
+     "filteringRules": {
+         "type": "string",
+         "enum": ["variable", "staged"],
+         "default": "variable",
+         "description": "The filtering rule for this task. Can be 'variable' or 'staged'."
+      }
    }
  }

@@ -302,7 +302,7 @@ public partial class ArgumentParser : IArgumentParser
          "⚠️ No arguments passed to the run command".Husky(ConsoleColor.Yellow);
    }
 
-   private static Matcher GetPatternMatcher(HuskyTask task)
+   public static Matcher GetPatternMatcher(HuskyTask task)
    {
       var matcher = new Matcher();
       var hasMatcher = false;
