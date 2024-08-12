@@ -4,6 +4,8 @@ using CliFx.Exceptions;
 using Husky.Services.Contracts;
 using Husky.Stdout;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.FileProviders.Physical;
 
 namespace Husky.TaskRunner;
 
@@ -32,11 +34,12 @@ public class HuskyTaskLoader : IHuskyTaskLoader
       var gitPath = await _git.GetGitPathAsync();
       var huskyPath = await _git.GetHuskyPathAsync();
       Tasks = new List<HuskyTask>();
-      var dir = Path.Combine(gitPath, huskyPath, "task-runner.json");
+      var dir = Path.Combine(gitPath, huskyPath);
       try
       {
          var config = new ConfigurationBuilder()
-            .AddJsonFile(dir)
+            .SetFileProvider(new PhysicalFileProvider(dir, ExclusionFilters.None))
+            .AddJsonFile("task-runner.json")
             .Build();
          config.GetSection("tasks").Bind(Tasks);
          OverrideWindowsSpecifics();
