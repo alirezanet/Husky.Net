@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <PackageId>Husky</PackageId>
-    <Version>0.7.0</Version>
+    <Version>0.7.1</Version>
     <Title>Husky</Title>
     <Authors>AliReza Sabouri</Authors>
     <Description>Git hooks made easy, woof!</Description>
