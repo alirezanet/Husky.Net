@@ -89,7 +89,7 @@ public class AttachCommand : CommandBase
    private async Task<string> GetRelativePath(string filepath)
    {
       var gitPath = await _git.GetGitPathAsync();
-      var fileInfo = _io.FileInfo.FromFileName(filepath);
+      var fileInfo = _io.FileInfo.New(filepath);
       var relativePath = Path.GetRelativePath(fileInfo.DirectoryName!, gitPath);
       return relativePath;
    }

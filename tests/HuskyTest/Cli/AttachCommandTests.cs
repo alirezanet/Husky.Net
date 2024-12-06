@@ -31,7 +31,7 @@ public class AttachCommandTests
       _git.GetGitPathAsync().Returns(_currentDirectory); // usually same as current directory but can be different
       _io = Substitute.For<IFileSystem>();
       var fileInfoWrapper = new FileInfoWrapper(_io, new FileInfo(Path.Combine(_currentDirectory, _fileName)));
-      _io.FileInfo.FromFileName(Arg.Any<string>()).Returns(fileInfoWrapper);
+      _io.FileInfo.New(Arg.Any<string>()).Returns(fileInfoWrapper);
       _io.Directory.GetCurrentDirectory().Returns(_currentDirectory);
       const string _csprojXml =
          "<Project Sdk=\"Microsoft.NET.Sdk\"><PropertyGroup><TargetFramework>netcoreapp2.1</TargetFramework></PropertyGroup></Project>";
@@ -155,7 +155,7 @@ public class AttachCommandTests
       _currentDirectory = currentDirectory;
       _fileName = fileName;
       var fileInfoWrapper = new FileInfoWrapper(_io, new FileInfo(Path.Combine(_currentDirectory, _fileName)));
-      _io.FileInfo.FromFileName(Arg.Any<string>()).Returns(fileInfoWrapper);
+      _io.FileInfo.New(Arg.Any<string>()).Returns(fileInfoWrapper);
       var command = new AttachCommand(_git, _io, _xmlIo) { FileName = _fileName };
 
       // Act

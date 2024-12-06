@@ -165,7 +165,7 @@ public class ExecCommand : CommandBase
    internal async Task<(bool, string)> GetCachedScript(string scriptPath)
    {
       var cacheFolder = await GetHuskyCacheFolder();
-      await using var fileStream = _fileSystem.FileStream.Create(scriptPath, FileMode.Open);
+      await using var fileStream = _fileSystem.FileStream.New(scriptPath, FileMode.Open);
 
       var hash = await CalculateHashAsync(fileStream);
 

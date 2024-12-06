@@ -189,7 +189,7 @@ public class InstallCommand : CommandBase
       $"Configuring Git and File permissions in '{husky_shPath}'".LogVerbose();
 
       // find all hooks (if exists) from .husky/ and add executable flag
-      var files = _fileSystem.Directory.GetFiles(path).Where(f => !_fileSystem.FileInfo.FromFileName(f).Name.Contains('.')).ToList();
+      var files = _fileSystem.Directory.GetFiles(path).Where(f => !_fileSystem.FileInfo.New(f).Name.Contains('.')).ToList();
       files.Add(husky_shPath);
       await _cliWrap.SetExecutablePermission(files.ToArray());
 
