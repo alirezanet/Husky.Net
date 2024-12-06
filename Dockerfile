@@ -1,5 +1,5 @@
 # Use the official .NET SDK image as a base
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-env
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build-env
 ARG RESOURCE_REAPER_SESSION_ID="00000000-0000-0000-0000-000000000000"
 LABEL "org.testcontainers.resource-reaper-session"=$RESOURCE_REAPER_SESSION_ID
 
@@ -18,13 +18,13 @@ RUN dotnet restore /app/src/Husky
 COPY . ./
 
 # Build the application using the custom 'IntegrationTest' configuration
-RUN dotnet build --no-restore -c IntegrationTest -f net8.0 /app/src/Husky/Husky.csproj -p:Version=99.1.1-test -p:TargetFrameworks=net8.0
+RUN dotnet build --no-restore -c IntegrationTest -f net9.0 /app/src/Husky/Husky.csproj -p:Version=99.1.1-test -p:TargetFrameworks=net9.0
 
 # Create a NuGet package using the 'IntegrationTest' configuration
-RUN dotnet pack --no-build --no-restore -c IntegrationTest -o out /app/src/Husky/Husky.csproj -p:Version=99.1.1-test -p:TargetFrameworks=net8.0
+RUN dotnet pack --no-build --no-restore -c IntegrationTest -o out /app/src/Husky/Husky.csproj -p:Version=99.1.1-test -p:TargetFrameworks=net9.0
 
 # Use the same .NET SDK image for the final stage
-FROM mcr.microsoft.com/dotnet/sdk:8.0
+FROM mcr.microsoft.com/dotnet/sdk:9.0
 ARG RESOURCE_REAPER_SESSION_ID="00000000-0000-0000-0000-000000000000"
 LABEL "org.testcontainers.resource-reaper-session"=$RESOURCE_REAPER_SESSION_ID
 
