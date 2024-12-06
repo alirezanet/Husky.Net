@@ -1,0 +1,227 @@
+{
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "title": "TaskRunner",
+   "type": "object",
+   "properties": {
+     "tasks": {
+       "type": "array",
+       "items": {
+         "$ref": "#/definitions/huskyTask"
+       },
+       "description": "A list of tasks that the runner will execute. Each task is defined with specific commands and configurations."
+     },
+     "variables": {
+       "type": "array",
+       "items": {
+         "$ref": "#/definitions/variableTask"
+       },
+       "description": "A list of variable tasks that can override default settings or provide new ones."
+     }
+   },
+   "required": ["tasks"],
+   "definitions": {
+     "huskyTask": {
+       "type": "object",
+       "additionalProperties": false,
+       "properties": {
+         "name": {
+           "type": "string",
+           "minLength": 1,
+           "description": "The name of the task, recommended for identification."
+         },
+         "command": {
+           "type": "string",
+           "minLength": 1,
+           "description": "Path to the executable file, script, or executable name to run."
+         },
+         "args": {
+           "type": "array",
+           "items": {
+             "type": "string"
+           },
+           "description": "Array of command arguments. Built-in variables can be used, such as ${staged}, ${git-files}, ${last-commit}",
+           "examples": ["${staged}", "${git-files}", "${last-commit}", "${args}", "${all-files}"]
+         },
+         "output": {
+           "$ref": "#/definitions/outputTypes",
+           "description": "Specifies the output log level. Can be 'always', 'verbose', or 'never'.",
+           "default": "always"
+         },
+         "pathMode": {
+           "$ref": "#/definitions/pathModes",
+           "description": "Defines the file path style. Can be 'relative' or 'absolute'.",
+           "default": "relative"
+         },
+         "cwd": {
+           "type": "string",
+           "description": "Current working directory for the command.",
+           "default": "."
+         },
+         "group": {
+           "type": "string",
+           "description": "Group of the task, usually the hook name."
+         },
+         "branch": {
+           "type": "string",
+           "description": "Regex to run the task on specific branches only."
+         },
+         "include": {
+           "type": "array",
+           "items": {
+             "type": "string"
+           },
+           "description": "Glob pattern to select files."
+         },
+         "exclude": {
+           "type": "array",
+           "items": {
+             "type": "string"
+           },
+           "description": "Glob pattern to exclude files."
+         },
+          "filteringRule": {
+             "$ref": "#/definitions/filteringRules",
+             "description": "The filtering rule for this task. Can be 'variable' or 'staged'.",
+             "default": "variable"
+          },
+         "windows": {
+           "$ref": "#/definitions/windowsOverrides",
+           "description": "Overrides all settings for Windows."
+         }
+       },
+       "required": ["name", "command"]
+     },
+     "windowsOverrides": {
+       "type": "object",
+       "additionalProperties": false,
+       "properties": {
+         "name": {
+           "type": "string",
+           "minLength": 1,
+           "description": "Override task name for Windows."
+         },
+         "command": {
+           "type": "string",
+           "minLength": 1,
+           "description": "Override command for Windows."
+         },
+         "args": {
+           "type": "array",
+           "items": {
+             "type": "string"
+           },
+           "description": "Override arguments for Windows. Built-in variables can be used, such as ${staged}, ${git-files}, ${last-commit}",
+           "examples": ["${staged}", "${git-files}", "${last-commit}"]
+         },
+         "output": {
+           "$ref": "#/definitions/outputTypes",
+           "description": "Override output log level for Windows.",
+           "default": "always"
+         },
+         "pathMode": {
+           "$ref": "#/definitions/pathModes",
+           "description": "Override path mode for Windows.",
+           "default": "relative"
+         },
+         "cwd": {
+           "type": "string",
+           "description": "Override working directory for Windows.",
+           "default": "."
+         },
+         "group": {
+           "type": "string",
+           "description": "Override group for Windows."
+         },
+         "branch": {
+           "type": "string",
+           "description": "Override branch for Windows."
+         },
+         "include": {
+           "type": "array",
+           "items": {
+             "type": "string"
+           },
+           "description": "Override include pattern for Windows."
+         },
+         "exclude": {
+           "type": "array",
+           "items": {
+             "type": "string"
+           },
+           "description": "Override exclude pattern for Windows."
+         }
+       }
+     },
+     "variableTask": {
+       "type": "object",
+       "additionalProperties": false,
+       "properties": {
+         "name": {
+           "type": "string",
+           "minLength": 1,
+           "description": "The name of the variable task."
+         },
+         "command": {
+           "type": "string",
+           "minLength": 1,
+           "description": "Command for the variable task."
+         },
+         "args": {
+           "type": "array",
+           "items": {
+             "type": "string"
+           },
+           "description": "Arguments for the variable task command. Built-in variables can be used, such as ${staged}, ${git-files}, ${last-commit}",
+           "examples": ["${staged}", "${git-files}", "${last-commit}"]
+         },
+         "windows": {
+           "$ref": "#/definitions/variableTaskOverrides",
+           "description": "Overrides for the variable task on Windows."
+         }
+       },
+       "required": ["name", "command"]
+     },
+     "variableTaskOverrides": {
+       "type": "object",
+       "additionalProperties": false,
+       "properties": {
+         "name": {
+           "type": "string",
+           "minLength": 1,
+           "description": "Override task name for Windows."
+         },
+         "command": {
+           "type": "string",
+           "minLength": 1,
+           "description": "Override command for Windows."
+         },
+         "args": {
+           "type": "array",
+           "items": {
+             "type": "string"
+           },
+           "description": "Override arguments for Windows. Built-in variables can be used, such as ${staged}, ${git-files}, ${last-commit}",
+           "examples": ["${staged}", "${git-files}", "${last-commit}"]
+         }
+       }
+     },
+     "outputTypes": {
+       "type": "string",
+       "enum": ["always", "verbose", "never"],
+       "description": "Specifies the output log level.",
+       "default": "always"
+     },
+     "pathModes": {
+       "type": "string",
+       "enum": ["relative", "absolute"],
+       "description": "Specifies the file path style.",
+       "default": "relative"
+     },
+     "filteringRules": {
+         "type": "string",
+         "enum": ["variable", "staged"],
+         "default": "variable",
+         "description": "The filtering rule for this task. Can be 'variable' or 'staged'."
+      }
+   }
+ }
