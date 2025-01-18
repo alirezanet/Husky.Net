@@ -28,7 +28,9 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <Configurations>Debug;Release;IntegrationTest</Configurations>
     <Platforms>AnyCPU</Platforms>
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
   </PropertyGroup>
+
   <ItemGroup>
     <EmbeddedResource Include="templates\husky.sh" />
     <EmbeddedResource Include="templates\task-runner.json" />
@@ -40,16 +42,25 @@
   <ItemGroup>
     <None Include="..\..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net6.0' Or '$(TargetFramework)' == 'net7.0'">
+    <ConfigurationVersion>8.0.0</ConfigurationVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0' Or '$(TargetFramework)' == 'net9.0'">
+    <ConfigurationVersion>9.0.0</ConfigurationVersion>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="CliFx" Version="2.3.5" />
     <PackageReference Include="CliWrap" Version="3.6.7" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.12.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="$(ConfigurationVersion)" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="$(ConfigurationVersion)" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$(ConfigurationVersion)" />
+    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="$(ConfigurationVersion)" />
     <PackageReference Include="System.IO.Abstractions" Version="21.1.7" />
   </ItemGroup>
+
   <ItemGroup>
     <Compile Remove="Utils\Dotnet\ParallelRangeManager.cs" />
     <Compile Remove="Utils\Dotnet\ParallelLoopState.cs" />
