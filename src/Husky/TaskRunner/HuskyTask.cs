@@ -11,7 +11,7 @@ public class HuskyTask
    public string? Group { get; set; }
    public string? Branch { get; set; }
    public HuskyTask? Windows { get; set; }
-   public FilteringRules FilteringRule { get; set; } = FilteringRules.Variable;
+   public FilteringRules? FilteringRule { get; set; }
    public string[]? Include { get; set; }
    public string[]? Exclude { get; set; }
 }

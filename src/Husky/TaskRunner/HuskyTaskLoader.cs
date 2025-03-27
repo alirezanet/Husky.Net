@@ -90,6 +90,8 @@ public class HuskyTaskLoader : IHuskyTaskLoader
             if (value != null)
                prop.SetValue(task, value);
          }
+
+         task.FilteringRule ??= FilteringRules.Variable;
       }
    }
 }
