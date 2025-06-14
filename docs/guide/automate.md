@@ -39,7 +39,7 @@ Make sure to update the working directory depending on your folder structure it 
 ::: warning
 Adding the above code to a multiple targeted project will cause husky to run multiple times.
 e.g
-`<TargetFrameworks>netcoreapp3.1;net5.0;net6.0;net7.0</TargetFrameworks>`
+`<TargetFrameworks>net8.0;net9.0</TargetFrameworks>`
 
 to avoid this, you can add the `$(IsCrossTargetingBuild)' == 'true'` condition to the target.
 e.g
