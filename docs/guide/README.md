@@ -28,6 +28,8 @@ These two quotes from [husky](https://github.com/typicode/husky) and [lint-stage
 
 ## Why use Hooks and Husky.Net?
 
-We, as developers, love platforms like GitHub, GitLab, Atlassian, Azure DevOps etc., as our managed git system and collaboration platform. We also love clean code and keep inventing new linters and rules to enforce it. In my opinion, every commit should allow the codebase to deploy to production. There is nothing worse than commits like “fixed style errors” or “fixed build”. These are often small mistakes you want to know as early as possible in your development cycle. You don’t want to break the build for the next developer because he pulled your ‘mistake’ or waste precious build minutes of your CI server. Say you have asked your teammate to review your code; in the meantime, the build server rejects your code. That means you have to go back and fix this, and your teammate has to come back and possibly review again after the changes (i.e., approvals reset on new commit). Doing so would waste a lot of time and effort.
+As developers, we rely heavily on tools like GitHub, GitLab, Azure DevOps, and Atlassian to manage our code and collaborate efficiently. We take pride in writing clean, consistent code—and that’s why we keep adding new linters, formatters, and quality rules to our workflow. Ideally, every commit should be good enough to go straight to production. Nothing’s more annoying than commits like “fix build” or “fix lint errors.” Those small issues should be caught early, not after someone else pulls your changes or when the CI pipeline fails.
 
-Husky.Net offers a very simple way to start using git hooks or running certain tasks, write and run custom scripts and more ...
+Imagine submitting your code for review while your CI job fails in the background—you’ll have to fix it, push again, and your reviewer might need to start over. That kind of back-and-forth wastes time for everyone.
+
+Husky.Net makes it effortless to integrate git hooks, automate checks, and run your own scripts before bad commits ever reach your repository.
