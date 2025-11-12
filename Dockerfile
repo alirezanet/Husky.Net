@@ -24,7 +24,7 @@ RUN dotnet build --no-restore -c IntegrationTest -f net9.0 /app/src/Husky/Husky.
 RUN dotnet pack --no-build --no-restore -c IntegrationTest -o out /app/src/Husky/Husky.csproj -p:Version=99.1.1-test -p:TargetFrameworks=net9.0
 
 # Use the same .NET SDK image for the final stage
-FROM mcr.microsoft.com/dotnet/sdk:9.0
+FROM mcr.microsoft.com/dotnet/sdk:10.0
 ARG RESOURCE_REAPER_SESSION_ID="00000000-0000-0000-0000-000000000000"
 LABEL "org.testcontainers.resource-reaper-session"=$RESOURCE_REAPER_SESSION_ID
 
