@@ -43,6 +43,10 @@ public class HuskyTaskLoader : IHuskyTaskLoader
             .Build();
          config.GetSection("tasks").Bind(Tasks);
          OverrideWindowsSpecifics();
+
+         // set default filteringRule if not defined
+         foreach (var task in Tasks)
+            task.FilteringRule ??= FilteringRules.Variable;
       }
       catch (FileNotFoundException e)
       {
@@ -90,8 +94,6 @@ public class HuskyTaskLoader : IHuskyTaskLoader
             if (value != null)
                prop.SetValue(task, value);
          }
-
-         task.FilteringRule ??= FilteringRules.Variable;
       }
    }
 }

@@ -2,12 +2,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
+    <TargetFrameworks>net10.0;net9.0;net8.0;</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <PackageId>Husky</PackageId>
-    <Version>0.7.3</Version>
+    <Version>0.8.0</Version>
     <Title>Husky</Title>
     <Authors>AliReza Sabouri</Authors>
     <Description>Git hooks made easy, woof!</Description>
@@ -45,6 +45,9 @@
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0' Or '$(TargetFramework)' == 'net9.0'">
     <ConfigurationVersion>9.0.0</ConfigurationVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0'">
+     <ConfigurationVersion>10.0.0</ConfigurationVersion>
   </PropertyGroup>
 
   <ItemGroup>
