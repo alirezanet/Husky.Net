@@ -51,7 +51,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CliFx" Version="2.3.5" />
+    <PackageReference Include="CliFx" Version="2.3.6" />
     <PackageReference Include="CliWrap" Version="3.9.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.12.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="$(ConfigurationVersion)" />
