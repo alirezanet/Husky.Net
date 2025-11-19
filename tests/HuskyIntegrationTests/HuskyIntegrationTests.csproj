@@ -11,7 +11,7 @@
 
     <ItemGroup>
         <PackageReference Include="Docker.DotNet" Version="3.125.15" />
-        <PackageReference Include="FluentAssertions" Version="7.0.0" />
+        <PackageReference Include="FluentAssertions" Version="8.8.0" />
         <PackageReference Include="Meziantou.Xunit.ParallelTestFramework" Version="2.3.0" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
         <PackageReference Include="System.IO.Abstractions" Version="21.1.7" />
