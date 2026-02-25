@@ -3,8 +3,8 @@
    "variables": [
       {
          "name": "root-dir",
-         "command": "cmd",
-         "args": ["/c", "dir", "/b"]
+         "command": "ls",
+         "args": []
       }
    ],
    "tasks": [
@@ -21,9 +21,9 @@
       {
          "name": "echo staged files",
          "pathMode": "absolute",
-         "command": "cmd",
+         "command": "echo",
          "group": "pre-commit",
-         "args": [ "/c", "echo", "${staged}"]
+         "args": ["${staged}"]
       }
    ]
 }
