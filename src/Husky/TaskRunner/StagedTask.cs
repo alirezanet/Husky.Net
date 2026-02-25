@@ -148,7 +148,7 @@ public class StagedTask : ExecutableTask
       if (stagedFiles.Any())
       {
          "Re-staging staged files...".LogVerbose();
-         string.Join(Environment.NewLine, stagedFiles.Select(f => $"\"{f}\"")).LogVerbose();
+         string.Join(Environment.NewLine, stagedFiles).LogVerbose();
          
          // Build git add command with file paths as separate arguments
          var gitAddArgs = new List<string> { "add" };
