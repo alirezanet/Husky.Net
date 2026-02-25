@@ -185,7 +185,17 @@ public class Git : IGit
       return _cliWrap.ExecDirectAsync("git", args);
    }
 
+   public Task<CommandResult> ExecAsync(IEnumerable<string> args)
+   {
+      return _cliWrap.ExecDirectAsync("git", args);
+   }
+
    public Task<BufferedCommandResult> ExecBufferedAsync(string args)
+   {
+      return _cliWrap.ExecBufferedAsync("git", args);
+   }
+
+   public Task<BufferedCommandResult> ExecBufferedAsync(IEnumerable<string> args)
    {
       return _cliWrap.ExecBufferedAsync("git", args);
    }

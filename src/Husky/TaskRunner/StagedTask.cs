@@ -1,5 +1,4 @@
 using System.IO.Abstractions;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using CliFx.Exceptions;
 using Husky.Services.Contracts;
@@ -107,7 +106,7 @@ public class StagedTask : ExecutableTask
       foreach (var tf in tmpFiles)
       {
          // add formatted temp file to git database
-         var result = await _git.ExecBufferedAsync($"hash-object -w {tf.tmp_path}");
+         var result = await _git.ExecBufferedAsync(new[] { "hash-object", "-w", tf.tmp_path });
          var newHash = result.StandardOutput.Trim();
 
          // check if the partial hash exists
@@ -122,7 +121,7 @@ public class StagedTask : ExecutableTask
          {
             $"Updating index entry for {tf.src_path}".LogVerbose();
             await _git.ExecAsync(
-               $"update-index --cacheinfo {tf.dst_mode},{newHash},{tf.src_path}"
+               new[] { "update-index", "--cacheinfo", $"{tf.dst_mode},{newHash},{tf.src_path}" }
             );
          }
          else
@@ -143,14 +142,18 @@ public class StagedTask : ExecutableTask
          .OfType<FileArgumentInfo>()
          .Where(q => q.ArgumentTypes == ArgumentTypes.StagedFile)
          .Except(partialStagedFiles)
-         .Select(q => !RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? $"\"{q.RelativePath}\"" : $"\"{q.RelativePath.Replace("/", @"\")}\"")
+         .Select(q => q.RelativePath)
          .ToList();
 
       if (stagedFiles.Any())
       {
          "Re-staging staged files...".LogVerbose();
-         string.Join(Environment.NewLine, stagedFiles).LogVerbose();
-         await _git.ExecAsync($"add {string.Join(" ", stagedFiles)}");
+         string.Join(Environment.NewLine, stagedFiles.Select(f => $"\"{f}\"")).LogVerbose();
+         
+         // Build git add command with file paths as separate arguments
+         var gitAddArgs = new List<string> { "add" };
+         gitAddArgs.AddRange(stagedFiles);
+         await _git.ExecAsync(gitAddArgs);
       }
    }
 
