@@ -39,7 +39,7 @@ public class ExecutableTaskFactory : IExecutableTaskFactory
       var cwd = await _git.GetTaskCwdAsync(huskyTask);
       var argsInfo = await _argumentParser.ParseAsync(huskyTask, options.Arguments?.ToArray());
 
-      if (await CheckIfWeShouldSkipTheTask(huskyTask, argsInfo))
+      if (await CheckIfWeShouldSkipTheTask(huskyTask, argsInfo, options.Arguments?.ToArray()))
          return null; // skip the task
 
       // check for chunk
@@ -63,7 +63,7 @@ public class ExecutableTaskFactory : IExecutableTaskFactory
       );
    }
 
-   private async Task<bool> CheckIfWeShouldSkipTheTask(HuskyTask huskyTask, ArgumentInfo[] argsInfo)
+   private async Task<bool> CheckIfWeShouldSkipTheTask(HuskyTask huskyTask, ArgumentInfo[] argsInfo, string[]? optionArguments = null)
    {
       if (huskyTask is { FilteringRule: FilteringRules.Variable, Args: not null } && huskyTask.Args.Length > argsInfo.Length)
       {
@@ -82,7 +82,7 @@ public class ExecutableTaskFactory : IExecutableTaskFactory
          return true;
       }
 
-      var matcher = ArgumentParser.GetPatternMatcher(huskyTask);
+      var matcher = ArgumentParser.GetPatternMatcher(huskyTask, optionArguments);
 
       // get match staged files with glob
       var matches = matcher.Match(stagedFiles);
