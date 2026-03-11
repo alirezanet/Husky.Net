@@ -14,4 +14,15 @@ public static class Utils
          cwd = Path.IsPathFullyQualified(task.Cwd) ? task.Cwd : Path.GetFullPath(task.Cwd, Environment.CurrentDirectory);
       return cwd;
    }
+
+   public static async Task<string> GetTaskCwdAsync(this IGit git, HuskyVariable variable)
+   {
+      string cwd;
+      if (string.IsNullOrEmpty(variable.Cwd))
+         cwd = Path.GetFullPath(await git.GetGitPathAsync(), Environment.CurrentDirectory);
+      else
+         cwd = Path.IsPathFullyQualified(variable.Cwd) ? variable.Cwd : Path.GetFullPath(variable.Cwd, Environment.CurrentDirectory);
+      return cwd;
+   }
 }
+
