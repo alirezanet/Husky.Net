@@ -1,12 +1,5 @@
 {
    "$schema": "https://alirezanet.github.io/Husky.Net/schema.json",
-   "variables": [
-      {
-         "name": "root-dir",
-         "command": "ls",
-         "args": []
-      }
-   ],
    "tasks": [
       {
          "name": "commit-message-linter",
@@ -17,13 +10,6 @@
          "name": "update-version",
          "command": "dotnet",
          "args" :["husky", "exec", ".husky/csx/version-updater.csx", "--args", "${args}"]
-      },
-      {
-         "name": "echo staged files",
-         "pathMode": "absolute",
-         "command": "echo",
-         "group": "pre-commit",
-         "args": ["${staged}"]
       }
    ]
 }
