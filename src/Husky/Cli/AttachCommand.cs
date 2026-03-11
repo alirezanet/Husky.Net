@@ -62,10 +62,15 @@ public class AttachCommand : CommandBase
 
    private XElement GetTarget(string condition, string rootRelativePath)
    {
+      var sentinelPath = Path.Combine(rootRelativePath, ".husky", "_", "install.stamp");
+      var inputPath = Path.Combine(rootRelativePath, ".config", "dotnet-tools.json");
+
       var target = new XElement("Target");
       target.SetAttributeValue("Name", "Husky");
       target.SetAttributeValue("BeforeTargets", "Restore;CollectPackageReferences");
       target.SetAttributeValue("Condition", condition);
+      target.SetAttributeValue("Inputs", inputPath);
+      target.SetAttributeValue("Outputs", sentinelPath);
       var exec = new XElement("Exec");
       exec.SetAttributeValue("Command", "dotnet tool restore");
       exec.SetAttributeValue("StandardOutputImportance", "Low");
@@ -77,6 +82,18 @@ public class AttachCommand : CommandBase
       exec.SetAttributeValue("StandardErrorImportance", "High");
       exec.SetAttributeValue("WorkingDirectory", rootRelativePath);
       target.Add(exec);
+
+      var touch = new XElement("Touch");
+      touch.SetAttributeValue("Files", sentinelPath);
+      touch.SetAttributeValue("AlwaysCreate", "true");
+      target.Add(touch);
+
+      var itemGroup = new XElement("ItemGroup");
+      var fileWrites = new XElement("FileWrites");
+      fileWrites.SetAttributeValue("Include", sentinelPath);
+      itemGroup.Add(fileWrites);
+      target.Add(itemGroup);
+
       return target;
    }
 
