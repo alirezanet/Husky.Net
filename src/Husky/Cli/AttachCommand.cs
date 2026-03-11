@@ -67,7 +67,7 @@ public class AttachCommand : CommandBase
 
       var target = new XElement("Target");
       target.SetAttributeValue("Name", "Husky");
-      target.SetAttributeValue("BeforeTargets", "Restore;CollectPackageReferences");
+      target.SetAttributeValue("AfterTargets", "Restore");
       target.SetAttributeValue("Condition", condition);
       target.SetAttributeValue("Inputs", inputPath);
       target.SetAttributeValue("Outputs", sentinelPath);
