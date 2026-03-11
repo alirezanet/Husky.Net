@@ -37,7 +37,7 @@ public partial class ArgumentParser : IArgumentParser
          return Array.Empty<ArgumentInfo>();
 
       // this is not lazy, because each task can have different patterns
-      var matcher = GetPatternMatcher(task);
+      var matcher = GetPatternMatcher(task, optionArguments);
 
       // set default pathMode value
       var pathMode = task.PathMode ?? PathModes.Relative;
@@ -303,19 +303,19 @@ public partial class ArgumentParser : IArgumentParser
          "⚠️ No arguments passed to the run command".Husky(ConsoleColor.Yellow);
    }
 
-   public static Matcher GetPatternMatcher(HuskyTask task)
+   public static Matcher GetPatternMatcher(HuskyTask task, string[]? optionArguments = null)
    {
       var matcher = new Matcher();
       var hasMatcher = false;
       if (task.Include is { Length: > 0 })
       {
-         matcher.AddIncludePatterns(task.Include);
+         matcher.AddIncludePatterns(ResolvePatternVariables(task.Include, optionArguments));
          hasMatcher = true;
       }
 
       if (task.Exclude is { Length: > 0 })
       {
-         matcher.AddExcludePatterns(task.Exclude);
+         matcher.AddExcludePatterns(ResolvePatternVariables(task.Exclude, optionArguments));
          hasMatcher = true;
       }
 
@@ -323,5 +323,21 @@ public partial class ArgumentParser : IArgumentParser
          matcher.AddInclude("**/*");
 
       return matcher;
+   }
+
+   private static IEnumerable<string> ResolvePatternVariables(string[] patterns, string[]? optionArguments)
+   {
+      foreach (var pattern in patterns)
+      {
+         if (pattern.Contains("${args}") && optionArguments is { Length: > 0 })
+         {
+            foreach (var arg in optionArguments)
+               yield return pattern.Replace("${args}", arg);
+         }
+         else
+         {
+            yield return pattern;
+         }
+      }
    }
 }
