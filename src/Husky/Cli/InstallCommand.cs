@@ -42,11 +42,6 @@ public class InstallCommand : CommandBase
    {
       "Checking git path and working directory".LogVerbose();
 
-      // Ensure that we're inside a git repository
-      // If git command is not found, we should return exception.
-      // That's why ExitCode needs to be checked explicitly.
-      if ((await _git.ExecAsync("rev-parse")).ExitCode != 0) throw new CommandException(FailedMsg);
-
       var cwd = Environment.CurrentDirectory;
 
       // set default husky folder
@@ -55,6 +50,25 @@ public class InstallCommand : CommandBase
       // Ensure that we're not trying to install outside of cwd
       if (!path.StartsWith(cwd))
          throw new CommandException($"{path}\nNot allowed (see {DOCS_URL})\n" + FailedMsg);
+
+      if (AllowParallelism)
+      {
+         RunUnderMutexControl(path, cwd);
+      }
+      else
+      {
+         await DoInstallAsync(path, cwd);
+      }
+
+      "Git hooks installed".Log(ConsoleColor.Green);
+   }
+
+   private async Task DoInstallAsync(string path, string cwd)
+   {
+      // Ensure that we're inside a git repository
+      // If git command is not found, we should return exception.
+      // That's why ExitCode needs to be checked explicitly.
+      if ((await _git.ExecAsync("rev-parse")).ExitCode != 0) throw new CommandException(FailedMsg);
 
       // Check if we're in a submodule (issue #69)
       if (await _git.IsSubmodule(cwd))
@@ -78,42 +92,27 @@ public class InstallCommand : CommandBase
             throw new CommandException($".git can't be found (see {DOCS_URL})\n" + FailedMsg);
       }
 
-      if (AllowParallelism)
-      {
-         // breaks if another instance already running
-         if (RunUnderMutexControl(path))
-         {
-            "Resource creation skipped due to multiple executions".LogVerbose();
-            return;
-         }
-      }
-      else
-      {
-         await CreateResourcesAsync(path);
-      }
-
-      "Git hooks installed".Log(ConsoleColor.Green);
+      await CreateResourcesAsync(path);
    }
 
-   private bool RunUnderMutexControl(string path)
+   private void RunUnderMutexControl(string path, string cwd)
    {
       using var mutex = new Mutex(false, "Global\\" + appGuid);
       if (!mutex.WaitOne(0, false))
       {
          // another instance is already running
-         return true;
+         "Resource creation skipped due to multiple executions".LogVerbose();
+         return;
       }
 
       try
       {
-         CreateResources(path);
+         DoInstallAsync(path, cwd).GetAwaiter().GetResult();
       }
       finally
       {
          mutex.ReleaseMutex();
       }
-
-      return false;
    }
 
    private void CreateResources(string path)

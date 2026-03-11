@@ -135,6 +135,72 @@ namespace HuskyTest.Cli
          await command.ExecuteAsync(_console);
       }
 
+      [Fact]
+      public async Task Install_WithParallelism_ShouldNotInterleaveGitCalls()
+      {
+         // Arrange
+         var configInProgress = false;
+         var interleaved = false;
+         var configEntered = new SemaphoreSlim(0, 1);
+         var configCanExit = new SemaphoreSlim(0, 1);
+         var now = DateTimeOffset.Now;
+
+         var cliWrap = Substitute.For<ICliWrap>();
+         var fileSystem = Substitute.For<IFileSystem>();
+         fileSystem.Directory.Exists(Path.Combine(Environment.CurrentDirectory, ".git")).Returns(true);
+
+         // Install A mocks: blocks inside git config to hold the mutex open
+         var gitA = Substitute.For<IGit>();
+         gitA.ExecAsync("rev-parse").Returns(Task.FromResult(new CommandResult(0, now, now)));
+         gitA.IsSubmodule(Arg.Any<string>()).Returns(Task.FromResult(false));
+         gitA.ExecAsync(Arg.Is<string>(s => s.StartsWith("config core.hooksPath")))
+            .Returns(async _ =>
+            {
+               configInProgress = true;
+               configEntered.Release();
+               await configCanExit.WaitAsync();
+               configInProgress = false;
+               return new CommandResult(0, now, now);
+            });
+         gitA.ExecBufferedAsync("config --local --list")
+            .Returns(new BufferedCommandResult(0, now, now, "", ""));
+
+         // Install B mocks: detect if reads run while A's config is in progress
+         var gitB = Substitute.For<IGit>();
+         gitB.ExecAsync("rev-parse").Returns(_ =>
+         {
+            if (configInProgress) interleaved = true;
+            return Task.FromResult(new CommandResult(0, now, now));
+         });
+         gitB.IsSubmodule(Arg.Any<string>()).Returns(_ =>
+         {
+            if (configInProgress) interleaved = true;
+            return Task.FromResult(false);
+         });
+         gitB.ExecAsync(Arg.Is<string>(s => s.StartsWith("config core.hooksPath")))
+            .Returns(Task.FromResult(new CommandResult(0, now, now)));
+         gitB.ExecBufferedAsync("config --local --list")
+            .Returns(new BufferedCommandResult(0, now, now, "", ""));
+
+         var commandA = new InstallCommand(gitA, cliWrap, fileSystem) { AllowParallelism = true };
+         var commandB = new InstallCommand(gitB, cliWrap, fileSystem) { AllowParallelism = true };
+         var consoleA = new FakeInMemoryConsole();
+         var consoleB = new FakeInMemoryConsole();
+
+         // Act: start A, wait for it to be inside git config, then start B
+         var taskA = Task.Run(() => commandA.ExecuteAsync(consoleA).AsTask());
+         await configEntered.WaitAsync();
+
+         var taskB = Task.Run(() => commandB.ExecuteAsync(consoleB).AsTask());
+         configCanExit.Release();
+         await Task.WhenAll(taskA, taskB);
+
+         // Assert
+         interleaved.Should().BeFalse(
+            "git read operations (rev-parse, IsSubmodule) should not run while another " +
+            "process is writing git config, as this causes 'Permission denied' errors");
+      }
+
       [Fact(Skip = "Skipping this test in CICD, since it won't support it")]
       public async Task Install_WithAllowParallelism_ParallelExecutionShouldAbortResourceCreation()
       {
