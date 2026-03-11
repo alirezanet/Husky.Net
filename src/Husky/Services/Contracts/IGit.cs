@@ -35,5 +35,7 @@ public interface IGit
    /// <returns></returns>
    Task<string[]> GetDiffStagedRecord();
    Task<CommandResult> ExecAsync(string args);
+   Task<CommandResult> ExecAsync(IEnumerable<string> args);
    Task<BufferedCommandResult> ExecBufferedAsync(string args);
+   Task<BufferedCommandResult> ExecBufferedAsync(IEnumerable<string> args);
 }
