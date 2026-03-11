@@ -1,6 +1,7 @@
 # Use the official .NET SDK image as a base
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build-env
 ARG RESOURCE_REAPER_SESSION_ID="00000000-0000-0000-0000-000000000000"
+ARG CACHE_BUSTER="1"
 LABEL "org.testcontainers.resource-reaper-session"=$RESOURCE_REAPER_SESSION_ID
 
 # Set the working directory
@@ -17,6 +18,9 @@ RUN dotnet restore /app/src/Husky
 # Copy the remaining files to the container
 COPY . ./
 
+# Cache buster - ensures package is always rebuilt fresh
+RUN echo "Cache buster: ${CACHE_BUSTER}"
+
 # Build the application using the custom 'IntegrationTest' configuration
 RUN dotnet build --no-restore -c IntegrationTest -f net9.0 /app/src/Husky/Husky.csproj -p:Version=99.1.1-test -p:TargetFrameworks=net9.0
 
@@ -26,6 +30,7 @@ RUN dotnet pack --no-build --no-restore -c IntegrationTest -o out /app/src/Husky
 # Use the same .NET SDK image for the final stage
 FROM mcr.microsoft.com/dotnet/sdk:10.0
 ARG RESOURCE_REAPER_SESSION_ID="00000000-0000-0000-0000-000000000000"
+ARG CACHE_BUSTER="1"
 LABEL "org.testcontainers.resource-reaper-session"=$RESOURCE_REAPER_SESSION_ID
 
 # Set the working directory
@@ -38,6 +43,9 @@ RUN apt-get update && \
 
 # Copy the NuGet package from the build-env to the runtime image
 COPY --from=build-env /app/out/*.nupkg /app/nupkg/
+
+# Cache buster - ensures Husky package is always rebuilt
+RUN echo "Cache buster: ${CACHE_BUSTER}"
 
 # Install the specific version from the local source
 RUN dotnet tool install -g husky --version 99.1.1-test --add-source /app/nupkg/ --no-cache
