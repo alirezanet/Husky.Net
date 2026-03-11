@@ -33,9 +33,9 @@ public class AttachCommandTests
       var fileInfoWrapper = new FileInfoWrapper(_io, new FileInfo(Path.Combine(_currentDirectory, _fileName)));
       _io.FileInfo.New(Arg.Any<string>()).Returns(fileInfoWrapper);
       _io.Directory.GetCurrentDirectory().Returns(_currentDirectory);
-      const string _csprojXml =
+      const string csprojXml =
          "<Project Sdk=\"Microsoft.NET.Sdk\"><PropertyGroup><TargetFramework>netcoreapp2.1</TargetFramework></PropertyGroup></Project>";
-      _xmlDoc = XElement.Parse(_csprojXml);
+      _xmlDoc = XElement.Parse(csprojXml);
       _xmlIo = Substitute.For<IXmlIO>();
       _xmlIo.Load(Arg.Any<string>()).Returns(_xmlDoc);
    }
@@ -145,10 +145,10 @@ public class AttachCommandTests
       _xmlDoc.Descendants("Target").Should().HaveCount(1);
 
       var targetExecElements = _xmlDoc.Descendants("Target")
-         .SingleOrDefault(q => q.Attribute("Name")?.Value == "Husky")?.Descendants("Exec");
+         .SingleOrDefault(q => q.Attribute("Name")?.Value == "Husky")?.Descendants("Exec").ToList();
 
       targetExecElements.Should().NotBeNull().And.HaveCount(2);
-      targetExecElements.SingleOrDefault(e => e.Attribute("Command").Value.Contains("dotnet husky install --ignore-submodule")).Should().NotBeNull();
+      targetExecElements!.SingleOrDefault(e => e.Attribute("Command")!.Value.Contains("dotnet husky install --ignore-submodule")).Should().NotBeNull();
       _xmlIo.Received(1).Save(Arg.Any<string>(), Arg.Any<XElement>());
    }
 

@@ -106,7 +106,7 @@ public class StagedTask : ExecutableTask
       foreach (var tf in tmpFiles)
       {
          // add formatted temp file to git database
-         var result = await _git.ExecBufferedAsync(new[] { "hash-object", "-w", tf.tmp_path });
+         var result = await _git.ExecBufferedAsync(["hash-object", "-w", tf.tmp_path!]);
          var newHash = result.StandardOutput.Trim();
 
          // check if the partial hash exists

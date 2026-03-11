@@ -329,7 +329,7 @@ public partial class ArgumentParser : IArgumentParser
    {
       foreach (var pattern in patterns)
       {
-         if (pattern.Contains("${args}") && optionArguments is { Length: > 0 })
+         if (pattern.Contains("${args}") && optionArguments != null && optionArguments.Length > 0)
          {
             foreach (var arg in optionArguments)
                yield return pattern.Replace("${args}", arg);

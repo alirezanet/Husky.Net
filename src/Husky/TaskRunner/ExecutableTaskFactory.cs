@@ -37,9 +37,10 @@ public class ExecutableTaskFactory : IExecutableTaskFactory
       huskyTask.Name ??= huskyTask.Command;
 
       var cwd = await _git.GetTaskCwdAsync(huskyTask);
-      var argsInfo = await _argumentParser.ParseAsync(huskyTask, options.Arguments?.ToArray());
+      var optionArguments = options.Arguments?.ToArray() ?? [];
+      var argsInfo = await _argumentParser.ParseAsync(huskyTask, optionArguments);
 
-      if (await CheckIfWeShouldSkipTheTask(huskyTask, argsInfo, options.Arguments?.ToArray()))
+      if (await CheckIfWeShouldSkipTheTask(huskyTask, argsInfo, optionArguments))
          return null; // skip the task
 
       // check for chunk
