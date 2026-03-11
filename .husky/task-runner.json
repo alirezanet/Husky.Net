@@ -4,7 +4,7 @@
       {
          "name": "root-dir",
          "command": "bash",
-         "args": ["-c", "ls"]
+         "args": ["-c", "pwd"]
       }
    ],
    "tasks": [
@@ -19,7 +19,7 @@
          "args" :["husky", "exec", ".husky/csx/version-updater.csx", "--args", "${args}"]
       },
       {
-         "name": "echo staged files",
+         "name": "echo-staged-files",
          "pathMode": "absolute",
          "command": "echo",
          "group": "pre-commit",
