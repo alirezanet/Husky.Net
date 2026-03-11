@@ -25,15 +25,29 @@ You can set the `HUSKY` environment variable to `0` in order to disable husky in
 To manually attach husky to your project, add the below code to one of your projects (*.csproj/*.vbproj).
 
 ``` xml:no-line-numbers:no-v-pre
-<Target Name="husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(HUSKY)' != 0">
+<Target Name="husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(HUSKY)' != 0"
+        Inputs="../../.config/dotnet-tools.json"
+        Outputs="../../.husky/_/install.stamp">
    <Exec Command="dotnet tool restore"  StandardOutputImportance="Low" StandardErrorImportance="High"/>
    <Exec Command="dotnet husky install" StandardOutputImportance="Low" StandardErrorImportance="High"
          WorkingDirectory="../../" />  <!--Update this to the relative path to your project root dir -->
+   <Touch Files="../../.husky/_/install.stamp" AlwaysCreate="true" />
+   <ItemGroup>
+      <FileWrites Include="../../.husky/_/install.stamp" />
+   </ItemGroup>
 </Target>
 ```
 
 ::: tip
-Make sure to update the working directory depending on your folder structure it should be a relative path to your project root dir
+Make sure to update the working directory and the `Inputs`/`Outputs`/`Touch`/`FileWrites` paths depending on your folder structure. All paths should be relative to your project and point to the repository root dir.
+:::
+
+::: tip
+The target uses MSBuild incremental build support (`Inputs`/`Outputs`) to avoid re-running on every build. It only re-runs when `.config/dotnet-tools.json` changes (e.g. tool version update) or after `dotnet clean`. The stamp file is created inside `.husky/_/` which is already gitignored.
+:::
+
+::: tip
+For solutions with multiple projects, consider placing the target in a `Directory.Build.targets` file at the repository root. When placed at the root, you can replace relative paths (e.g. `../../`) with `$(MSBuildThisFileDirectory)` which resolves to the directory containing the targets file.
 :::
 
 ::: warning
