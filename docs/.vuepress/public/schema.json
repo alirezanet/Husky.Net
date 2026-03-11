@@ -174,6 +174,16 @@
            "description": "Arguments for the variable task command. Built-in variables can be used, such as ${staged}, ${git-files}, ${last-commit}",
            "examples": ["${staged}", "${git-files}", "${last-commit}"]
          },
+         "cwd": {
+           "type": "string",
+           "description": "Current working directory for the variable command.",
+           "default": "."
+         },
+         "staged": {
+           "type": "boolean",
+           "description": "When true, files returned by this variable are treated as staged files, enabling re-staging after formatting (same behavior as the built-in ${staged} variable).",
+           "default": false
+         },
          "windows": {
            "$ref": "#/definitions/variableTaskOverrides",
            "description": "Overrides for the variable task on Windows."

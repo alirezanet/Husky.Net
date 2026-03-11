@@ -97,3 +97,34 @@ defining custom `${root-dir-files}` variable to access root directory files
    ]
 }
 ```
+
+#### `staged` property for custom variables
+
+By default, custom variables do not trigger re-staging of formatted files after a task runs. If your custom variable returns a list of staged files (e.g., output of `git diff --cached --name-only`), you can set `"staged": true` on the variable definition to enable the same re-staging behavior as the built-in `${staged}` variable.
+
+e.g.
+
+Using a custom staged variable with a broader diff filter that also re-stages formatted files
+
+``` json
+{
+   "variables": [
+      {
+         "name": "staged-diff-files",
+         "command": "git",
+         "args": ["diff", "--cached", "--name-only", "--no-ext-diff", "--diff-filter=ACMRTUXB"],
+         "staged": true
+      }
+   ],
+   "tasks": [
+      {
+         "name": "Run csharpier",
+         "group": "pre-commit",
+         "command": "dotnet",
+         "args": ["csharpier", "${staged-diff-files}"],
+         "include": ["**/*.cs"]
+      }
+   ]
+}
+```
+

@@ -3,8 +3,8 @@
    "variables": [
       {
          "name": "root-dir",
-         "command": "cmd",
-         "args": ["/c", "dir", "/b"]
+         "command": "bash",
+         "args": ["-c", "pwd"]
       }
    ],
    "tasks": [
@@ -19,11 +19,11 @@
          "args" :["husky", "exec", ".husky/csx/version-updater.csx", "--args", "${args}"]
       },
       {
-         "name": "echo staged files",
+         "name": "echo-staged-files",
          "pathMode": "absolute",
-         "command": "cmd",
+         "command": "echo",
          "group": "pre-commit",
-         "args": [ "/c", "echo", "${staged}"]
+         "args": ["${staged}"]
       }
    ]
 }

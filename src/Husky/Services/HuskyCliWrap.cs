@@ -26,6 +26,23 @@ public class HuskyCliWrap : ICliWrap
       }
    }
 
+   public async Task<BufferedCommandResult> ExecBufferedAsync(string fileName, IEnumerable<string> args)
+   {
+      try
+      {
+         var result = await CliWrap.Cli
+             .Wrap(fileName)
+             .WithArguments(args)
+             .ExecuteBufferedAsync();
+         return result;
+      }
+      catch (Exception)
+      {
+         $"failed to execute command '{fileName}'".LogErr();
+         throw;
+      }
+   }
+
    public async ValueTask SetExecutablePermission(params string[] files)
    {
       if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -42,6 +59,18 @@ public class HuskyCliWrap : ICliWrap
    }
 
    public async Task<CommandResult> ExecDirectAsync(string fileName, string args)
+   {
+      var result = await CliWrap.Cli
+          .Wrap(fileName)
+          .WithArguments(args)
+          .WithValidation(CommandResultValidation.None)
+          .WithStandardOutputPipe(PipeTarget.ToDelegate(q => q.Log()))
+          .WithStandardErrorPipe(PipeTarget.ToDelegate(q => q.LogErr()))
+          .ExecuteAsync();
+      return result;
+   }
+
+   public async Task<CommandResult> ExecDirectAsync(string fileName, IEnumerable<string> args)
    {
       var result = await CliWrap.Cli
           .Wrap(fileName)
