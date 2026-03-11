@@ -151,8 +151,7 @@ public class StagedTask : ExecutableTask
          string.Join(Environment.NewLine, stagedFiles).LogVerbose();
          
          // Build git add command with file paths as separate arguments
-         var gitAddArgs = new List<string> { "add" };
-         gitAddArgs.AddRange(stagedFiles);
+         List<string> gitAddArgs = ["add", ..stagedFiles];
          await _git.ExecAsync(gitAddArgs);
       }
    }
