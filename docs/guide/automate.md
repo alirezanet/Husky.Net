@@ -25,7 +25,7 @@ You can set the `HUSKY` environment variable to `0` in order to disable husky in
 To manually attach husky to your project, add the below code to one of your projects (*.csproj/*.vbproj).
 
 ``` xml:no-line-numbers:no-v-pre
-<Target Name="husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(HUSKY)' != 0"
+<Target Name="husky" AfterTargets="Restore" Condition="'$(HUSKY)' != 0"
         Inputs="../../.config/dotnet-tools.json"
         Outputs="../../.husky/_/install.stamp">
    <Exec Command="dotnet tool restore"  StandardOutputImportance="Low" StandardErrorImportance="High"/>
@@ -59,7 +59,7 @@ to avoid this, you can add the `$(IsCrossTargetingBuild)' == 'true'` condition t
 e.g
 
 ``` xml:no-line-numbers:no-v-pre
-<Target Name="husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(HUSKY)' != 0 and '$(IsCrossTargetingBuild)' == 'true'">
+<Target Name="husky" AfterTargets="Restore" Condition="'$(HUSKY)' != 0 and '$(IsCrossTargetingBuild)' == 'true'">
 ...
 ```
 

@@ -66,6 +66,9 @@ public class AttachCommandTests
       huskyTarget.Descendants("ItemGroup").Descendants("FileWrites").Should().HaveCount(1);
 
       _console.ReadOutputString().Trim().Should().Be("Husky dev-dependency successfully attached to this project.");
+
+      huskyTarget.Attribute("AfterTargets")?.Value.Should().Be("Restore");
+      huskyTarget.Attribute("BeforeTargets").Should().BeNull();
    }
 
    [Fact]
