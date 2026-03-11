@@ -14,5 +14,4 @@ public class HuskyTask
    public FilteringRules? FilteringRule { get; set; }
    public string[]? Include { get; set; }
    public string[]? Exclude { get; set; }
-   public bool Staged { get; set; }
 }

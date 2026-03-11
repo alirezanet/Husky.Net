@@ -16,7 +16,7 @@ public interface IArgumentParser
 public partial class ArgumentParser : IArgumentParser
 {
    private readonly IGit _git;
-   private readonly Lazy<Task<IList<HuskyTask>>> _customVariableTasks;
+   private readonly Lazy<Task<IList<HuskyVariable>>> _customVariableTasks;
 
    private const string StagedWithSeparatorPattern = @".*(\$\{staged(?:\:(.+))\}).*";
 #if NET7_0_OR_GREATER
@@ -27,7 +27,7 @@ public partial class ArgumentParser : IArgumentParser
    public ArgumentParser(IGit git)
    {
       _git = git;
-      _customVariableTasks = new Lazy<Task<IList<HuskyTask>>>(GetCustomVariableTasks);
+      _customVariableTasks = new Lazy<Task<IList<HuskyVariable>>>(GetCustomVariableTasks);
    }
 
    public async Task<ArgumentInfo[]> ParseAsync(HuskyTask task, string[]? optionArguments = null)
@@ -133,29 +133,29 @@ public partial class ArgumentParser : IArgumentParser
          return;
       }
 
-      var huskyVariableTask = customVariables.Last(q => q.Name == variable);
+      var huskyVariable = customVariables.Last(q => q.Name == variable);
       var gitPath = await _git.GetGitPathAsync();
 
       // get relative paths for matcher
-      var files = (await GetCustomVariableOutput(huskyVariableTask))
+      var files = (await GetCustomVariableOutput(huskyVariable))
           .Where(q => !string.IsNullOrWhiteSpace(q))
           .Select(q => Path.IsPathFullyQualified(q) ? Path.GetRelativePath(gitPath, q) : q);
       var matches = matcher.Match(gitPath, files);
-      var argumentType = huskyVariableTask.Staged ? ArgumentTypes.StagedFile : ArgumentTypes.CustomVariable;
+      var argumentType = huskyVariable.Staged ? ArgumentTypes.StagedFile : ArgumentTypes.CustomVariable;
       AddMatchedFiles(args, pathMode, argumentType, matches, gitPath);
    }
 
-   private async Task<IEnumerable<string>> GetCustomVariableOutput(HuskyTask task)
+   private async Task<IEnumerable<string>> GetCustomVariableOutput(HuskyVariable variable)
    {
       var output = Array.Empty<string>();
       try
       {
-         if (task.Command == null || task.Args == null)
+         if (variable.Command == null || variable.Args == null)
             return output;
-         var cwd = await _git.GetTaskCwdAsync(task);
+         var cwd = await _git.GetTaskCwdAsync(variable);
          var result = await CliWrap.Cli
-             .Wrap(task.Command)
-             .WithArguments(task.Args)
+             .Wrap(variable.Command)
+             .WithArguments(variable.Args)
              .WithWorkingDirectory(cwd)
              .ExecuteBufferedAsync();
          if (result.ExitCode == 0)
@@ -173,17 +173,17 @@ public partial class ArgumentParser : IArgumentParser
       return output;
    }
 
-   private async Task<IList<HuskyTask>> GetCustomVariableTasks()
+   private async Task<IList<HuskyVariable>> GetCustomVariableTasks()
    {
       var dir = Path.Combine(
           await _git.GetGitPathAsync(),
           await _git.GetHuskyPathAsync(),
           "task-runner.json"
       );
-      var tasks = new List<HuskyTask>();
+      var variables = new List<HuskyVariable>();
       var config = new ConfigurationBuilder().AddJsonFile(dir).Build();
-      config.GetSection("variables").Bind(tasks);
-      return tasks;
+      config.GetSection("variables").Bind(variables);
+      return variables;
    }
 
    private async Task AddAllFiles(Matcher matcher, List<ArgumentInfo> args, PathModes pathMode)
