@@ -141,7 +141,8 @@ public partial class ArgumentParser : IArgumentParser
           .Where(q => !string.IsNullOrWhiteSpace(q))
           .Select(q => Path.IsPathFullyQualified(q) ? Path.GetRelativePath(gitPath, q) : q);
       var matches = matcher.Match(gitPath, files);
-      AddMatchedFiles(args, pathMode, ArgumentTypes.CustomVariable, matches, gitPath);
+      var argumentType = huskyVariableTask.Staged ? ArgumentTypes.StagedFile : ArgumentTypes.CustomVariable;
+      AddMatchedFiles(args, pathMode, argumentType, matches, gitPath);
    }
 
    private async Task<IEnumerable<string>> GetCustomVariableOutput(HuskyTask task)
