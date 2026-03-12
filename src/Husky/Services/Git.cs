@@ -213,7 +213,7 @@ public class Git : IGit
       catch (Exception e)
       {
          e.Message.LogVerbose(ConsoleColor.DarkRed);
-         throw new CommandException("Could not find Husky path", innerException: e);
+         throw new CommandException("Could not find Husky path. Make sure Husky is installed (run: dotnet husky install)", innerException: e);
       }
    }
 
