@@ -7,7 +7,7 @@ using Husky.Stdout;
 
 namespace Husky.Cli;
 
-[Command("hook rm", Description = "Remove a husky hook")]
+[Command("hook remove", Description = "Remove a husky hook")]
 public class HookRemoveCommand : CommandBase
 {
    private readonly IGit _git;

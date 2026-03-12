@@ -58,6 +58,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="$(ConfigurationVersion)" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$(ConfigurationVersion)" />
     <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="$(ConfigurationVersion)" />
+    <PackageReference Include="Spectre.Console" Version="0.54.0" />
     <PackageReference Include="System.IO.Abstractions" Version="21.1.7" />
   </ItemGroup>
 
@@ -68,9 +69,7 @@
     <Compile Remove="Utils\Dotnet\ParallelETWProvider.cs" />
     <Compile Remove="Utils\Dotnet\Parallel.cs" />
   </ItemGroup>
-  <Target Name="Husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(HUSKY)' != 0 and '$(IsCrossTargetingBuild)' == 'true'"
-          Inputs="../../.config/dotnet-tools.json"
-          Outputs="../../.husky/_/install.stamp">
+  <Target Name="Husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(HUSKY)' != 0 and '$(IsCrossTargetingBuild)' == 'true'" Inputs="../../.config/dotnet-tools.json" Outputs="../../.husky/_/install.stamp">
     <Exec Command="dotnet tool restore" StandardOutputImportance="Low" StandardErrorImportance="High" />
     <Exec Command="dotnet husky install" StandardOutputImportance="Low" StandardErrorImportance="High" WorkingDirectory="..\.." />
     <Touch Files="../../.husky/_/install.stamp" AlwaysCreate="true" />

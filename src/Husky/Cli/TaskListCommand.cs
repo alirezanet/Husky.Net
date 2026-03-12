@@ -8,7 +8,7 @@ using Husky.Stdout;
 
 namespace Husky.Cli;
 
-[Command("task ls", Description = "List all tasks in task-runner.json")]
+[Command("task list", Description = "List all tasks in task-runner.json")]
 public class TaskListCommand : CommandBase
 {
    private readonly IGit _git;

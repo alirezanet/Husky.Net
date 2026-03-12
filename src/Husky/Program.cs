@@ -77,11 +77,15 @@ ServiceProvider BuildServiceProvider()
       .AddTransient<UninstallCommand>()
       .AddTransient<CleanupCommand>()
       .AddTransient<TaskListCommand>()
+      .AddTransient<TaskLsCommand>()
       .AddTransient<TaskAddCommand>()
       .AddTransient<TaskUpdateCommand>()
       .AddTransient<TaskRemoveCommand>()
+      .AddTransient<TaskRmCommand>()
       .AddTransient<HookListCommand>()
-      .AddTransient<HookRemoveCommand>();
+      .AddTransient<HookLsCommand>()
+      .AddTransient<HookRemoveCommand>()
+      .AddTransient<HookRmCommand>();
    return services.BuildServiceProvider();
 }
 

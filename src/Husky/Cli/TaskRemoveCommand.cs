@@ -9,7 +9,7 @@ using Husky.Stdout;
 
 namespace Husky.Cli;
 
-[Command("task rm", Description = "Remove a task from task-runner.json")]
+[Command("task remove", Description = "Remove a task from task-runner.json")]
 public class TaskRemoveCommand : CommandBase
 {
    private readonly IGit _git;

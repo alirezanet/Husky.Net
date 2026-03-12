@@ -7,7 +7,7 @@ using Husky.Stdout;
 
 namespace Husky.Cli;
 
-[Command("hook ls", Description = "List all husky hooks")]
+[Command("hook list", Description = "List all husky hooks")]
 public class HookListCommand : CommandBase
 {
    private readonly IGit _git;
