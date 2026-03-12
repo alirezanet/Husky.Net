@@ -11,7 +11,15 @@ namespace Husky.TaskRunner;
 public interface IArgumentParser
 {
    Task<ArgumentInfo[]> ParseAsync(HuskyTask huskyTask, string[]? optionArguments = null);
-   Task<bool> HasVariableMatchAsync(HuskyTask huskyTask, string variableName, string[]? optionArguments = null);
+
+   /// <summary>
+   /// Builds a pattern matcher for the given task, resolving any custom variable references
+   /// (e.g. <c>${my-variable}</c>) in <c>include</c>/<c>exclude</c> patterns by executing
+   /// the corresponding variable command.
+   /// Returns <c>null</c> when all include patterns were custom-variable references that
+   /// produced no output, signalling that the task should be skipped.
+   /// </summary>
+   Task<Matcher?> GetPatternMatcherAsync(HuskyTask huskyTask, string[]? optionArguments = null);
 }
 
 public partial class ArgumentParser : IArgumentParser
@@ -38,7 +46,10 @@ public partial class ArgumentParser : IArgumentParser
          return Array.Empty<ArgumentInfo>();
 
       // this is not lazy, because each task can have different patterns
-      var matcher = GetPatternMatcher(task, optionArguments);
+      // GetPatternMatcherAsync resolves custom-variable references in include/exclude;
+      // it returns null when all include patterns were empty variables (skip signal).
+      // In that case we still parse args so the Variable filtering-rule count check works.
+      var matcher = await GetPatternMatcherAsync(task, optionArguments) ?? CreateEmptyMatcher();
 
       // set default pathMode value
       var pathMode = task.PathMode ?? PathModes.Relative;
@@ -98,26 +109,42 @@ public partial class ArgumentParser : IArgumentParser
       return args.ToArray();
    }
 
-   public async Task<bool> HasVariableMatchAsync(HuskyTask huskyTask, string variableName, string[]? optionArguments = null)
+   public async Task<Matcher?> GetPatternMatcherAsync(HuskyTask task, string[]? optionArguments = null)
    {
-      var customVariables = await _customVariableTasks.Value;
+      var matcher = new Matcher();
+      var hasMatcher = false;
+      var hadCustomVariableInInclude = false;
 
-      if (customVariables.All(q => q.Name != variableName))
+      if (task.Include is { Length: > 0 })
       {
-         $"⚠️ the filtering variable '{variableName}' not found".Husky(ConsoleColor.Yellow);
-         return false;
+         hadCustomVariableInInclude = task.Include.Any(IsCustomVariablePattern);
+         var resolved = (await ResolvePatternVariablesAsync(task.Include, optionArguments)).ToList();
+         if (resolved.Count > 0)
+         {
+            matcher.AddIncludePatterns(resolved);
+            hasMatcher = true;
+         }
       }
 
-      var huskyVariable = customVariables.Last(q => q.Name == variableName);
-      var gitPath = await _git.GetGitPathAsync();
+      // If every include entry was a custom-variable reference that resolved to nothing,
+      // signal "skip this task" by returning null.
+      if (hadCustomVariableInInclude && !hasMatcher)
+         return null;
 
-      var files = (await GetCustomVariableOutput(huskyVariable))
-          .Where(q => !string.IsNullOrWhiteSpace(q))
-          .Select(q => Path.IsPathFullyQualified(q) ? Path.GetRelativePath(gitPath, q) : q);
+      if (task.Exclude is { Length: > 0 })
+      {
+         var resolved = (await ResolvePatternVariablesAsync(task.Exclude, optionArguments)).ToList();
+         if (resolved.Count > 0)
+         {
+            matcher.AddExcludePatterns(resolved);
+            hasMatcher = true;
+         }
+      }
 
-      var matcher = GetPatternMatcher(huskyTask, optionArguments);
-      var matches = matcher.Match(gitPath, files);
-      return matches.HasMatches;
+      if (!hasMatcher)
+         matcher.AddInclude("**/*");
+
+      return matcher;
    }
 
    private async Task AddStagedFiles(Matcher matcher, ICollection<ArgumentInfo> args, PathModes pathMode, Match? match = null)
@@ -348,6 +375,42 @@ public partial class ArgumentParser : IArgumentParser
       return matcher;
    }
 
+   private async Task<IEnumerable<string>> ResolvePatternVariablesAsync(string[] patterns, string[]? optionArguments)
+   {
+      var result = new List<string>();
+      foreach (var pattern in patterns)
+      {
+         if (IsCustomVariablePattern(pattern))
+         {
+            // Expand custom variable to the file paths returned by its command
+            var varName = pattern[2..^1];
+            var customVariables = await _customVariableTasks.Value;
+            if (customVariables.All(q => q.Name != varName))
+            {
+               $"⚠️ the custom variable '{varName}' not found in include/exclude pattern".Husky(ConsoleColor.Yellow);
+               // Variable not found → contributes nothing (may trigger skip)
+               continue;
+            }
+
+            var huskyVariable = customVariables.Last(q => q.Name == varName);
+            var files = (await GetCustomVariableOutput(huskyVariable))
+                .Where(q => !string.IsNullOrWhiteSpace(q));
+            result.AddRange(files);
+         }
+         else if (pattern.Contains("${args}") && optionArguments != null && optionArguments.Length > 0)
+         {
+            foreach (var arg in optionArguments)
+               result.Add(pattern.Replace("${args}", arg));
+         }
+         else
+         {
+            result.Add(pattern);
+         }
+      }
+
+      return result;
+   }
+
    private static IEnumerable<string> ResolvePatternVariables(string[] patterns, string[]? optionArguments)
    {
       foreach (var pattern in patterns)
@@ -362,5 +425,27 @@ public partial class ArgumentParser : IArgumentParser
             yield return pattern;
          }
       }
+   }
+
+   /// <summary>
+   /// Returns true when the pattern is a bare <c>${variable-name}</c> reference to a custom
+   /// variable (not a built-in like <c>${staged}</c>, <c>${args}</c>, etc.).
+   /// </summary>
+   private static bool IsCustomVariablePattern(string pattern)
+   {
+      if (!pattern.StartsWith("${") || !pattern.EndsWith("}"))
+         return false;
+
+      var name = pattern[2..^1];
+      return name is not ("args" or "staged" or "git-files" or "all-files" or "last-commit")
+             && !name.StartsWith("staged:");
+   }
+
+   /// <summary>Returns a matcher that never matches any file path.</summary>
+   private static Matcher CreateEmptyMatcher()
+   {
+      var m = new Matcher();
+      m.AddInclude("__no_match__/__no_match__");
+      return m;
    }
 }

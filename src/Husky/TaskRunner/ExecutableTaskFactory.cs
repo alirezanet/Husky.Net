@@ -66,46 +66,45 @@ public class ExecutableTaskFactory : IExecutableTaskFactory
 
    private async Task<bool> CheckIfWeShouldSkipTheTask(HuskyTask huskyTask, ArgumentInfo[] argsInfo, string[]? optionArguments = null)
    {
+      // Variable rule: skip when a variable in args resolved to no files
       if (huskyTask is { FilteringRule: FilteringRules.Variable, Args: not null } && huskyTask.Args.Length > argsInfo.Length)
       {
          "💤 Skipped, no matched files".Husky(ConsoleColor.Blue);
          return true;
       }
 
-      if (huskyTask.FilteringRule == FilteringRules.Staged)
+      // Variable rule: skip when all include patterns were custom-variable references
+      // that produced no output (GetPatternMatcherAsync returns null in that case)
+      if (huskyTask.FilteringRule == FilteringRules.Variable)
       {
-         var stagedFiles = (await _git.GetStagedFilesAsync())
-            .Where(q => !string.IsNullOrWhiteSpace(q))
-            .ToArray();
-         if (stagedFiles.Length == 0)
-         {
-            "💤 Skipped, no staged files".Husky(ConsoleColor.Blue);
-            return true;
-         }
-
-         var matcher = ArgumentParser.GetPatternMatcher(huskyTask, optionArguments);
-
-         // get match staged files with glob
-         var matches = matcher.Match(stagedFiles);
-         if (!matches.HasMatches)
-         {
-            "💤 Skipped, no staged matched files".Husky(ConsoleColor.Blue);
-            return true;
-         }
-      }
-
-      if (!string.IsNullOrWhiteSpace(huskyTask.FilteringRuleVariable))
-      {
-         var hasMatches = await _argumentParser.HasVariableMatchAsync(huskyTask, huskyTask.FilteringRuleVariable, optionArguments);
-         if (!hasMatches)
+         var matcher = await _argumentParser.GetPatternMatcherAsync(huskyTask, optionArguments);
+         if (matcher == null)
          {
             "💤 Skipped, no matched files".Husky(ConsoleColor.Blue);
             return true;
          }
       }
 
-      return false;
+      if (huskyTask.FilteringRule != FilteringRules.Staged) return false;
 
+      var stagedFiles = (await _git.GetStagedFilesAsync())
+         .Where(q => !string.IsNullOrWhiteSpace(q))
+         .ToArray();
+      if (stagedFiles.Length == 0)
+      {
+         "💤 Skipped, no staged files".Husky(ConsoleColor.Blue);
+         return true;
+      }
+
+      // Use async matcher so that custom-variable references in include/exclude are resolved
+      var stagedMatcher = await _argumentParser.GetPatternMatcherAsync(huskyTask, optionArguments)
+                          ?? ArgumentParser.GetPatternMatcher(huskyTask, optionArguments);
+
+      // get match staged files with glob
+      var matches = stagedMatcher.Match(stagedFiles);
+      if (matches.HasMatches) return false;
+      "💤 Skipped, no staged matched files".Husky(ConsoleColor.Blue);
+      return true;
    }
 
    private IExecutableTask CreateChunkTask(

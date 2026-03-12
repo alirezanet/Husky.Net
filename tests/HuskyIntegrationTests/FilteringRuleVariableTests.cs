@@ -4,12 +4,16 @@ using FluentAssertions;
 
 namespace HuskyIntegrationTests;
 
+/// <summary>
+/// Tests for using custom variable references (e.g. <c>${variable-name}</c>) directly in
+/// <c>include</c> / <c>exclude</c> patterns to conditionally skip tasks.
+/// </summary>
 public class FilteringRuleVariableTests(ITestOutputHelper output)
 {
    [Fact]
-   public async Task FilteringRuleVariable_WithMatchingFiles_ShouldRunTask()
+   public async Task VariableInInclude_WithMatchingFiles_ShouldRunTask()
    {
-      // Arrange
+      // Arrange: include uses a custom variable; variable returns .cs files that are being staged
       const string taskRunner =
          """
          {
@@ -26,30 +30,30 @@ public class FilteringRuleVariableTests(ITestOutputHelper output)
                      "group": "pre-commit",
                      "command": "echo",
                      "args": ["dotnet test executed"],
-                     "include": ["**/*.cs"],
-                     "filteringRuleVariable": "staged-cs-files"
+                     "include": ["${staged-cs-files}"]
                  }
              ]
          }
          """;
       await using var c = await ArrangeContainer(taskRunner);
 
-      // stage a .cs file - should trigger the task
+      // stage a .cs file – the variable will return it, so include resolves to that file
       await c.AddCsharpClass("public class MyClass { }", "MyClass.cs");
       await c.BashAsync("git add .");
 
       // act
       var result = await c.BashAsync(output, "git commit -m 'add MyClass.cs'");
 
-      // assert - task should run because variable returns matching .cs files
+      // assert - task should run because include variable has output
       result.ExitCode.Should().Be(0);
       result.Stderr.Should().Contain(DockerHelper.SuccessfullyExecuted);
    }
 
    [Fact]
-   public async Task FilteringRuleVariable_WithNoMatchingFiles_ShouldSkipTask()
+   public async Task VariableInInclude_WithNoMatchingFiles_ShouldSkipTask()
    {
-      // Arrange - task only runs for .cs files but we'll only stage a .ts file
+      // Arrange: task has ${staged-cs-files} as its only include pattern.
+      // We only stage a .ts file, so the variable returns nothing matching .cs.
       const string taskRunner =
          """
          {
@@ -57,7 +61,7 @@ public class FilteringRuleVariableTests(ITestOutputHelper output)
                  {
                      "name": "staged-cs-files",
                      "command": "git",
-                     "args": ["diff", "--cached", "--name-only", "--diff-filter=AM"]
+                     "args": ["diff", "--cached", "--name-only", "--diff-filter=AM", "--", "*.cs"]
                  }
              ],
              "tasks": [
@@ -66,30 +70,29 @@ public class FilteringRuleVariableTests(ITestOutputHelper output)
                      "group": "pre-commit",
                      "command": "echo",
                      "args": ["dotnet test executed"],
-                     "include": ["**/*.cs"],
-                     "filteringRuleVariable": "staged-cs-files"
+                     "include": ["${staged-cs-files}"]
                  }
              ]
          }
          """;
       await using var c = await ArrangeContainer(taskRunner);
 
-      // only stage a .ts file - should NOT trigger the .cs task
+      // only stage a .ts file – variable will return nothing
       await c.BashAsync("echo 'const x = 1;' > /test/app.ts");
       await c.BashAsync("git add .");
 
       // act
-      var result = await c.BashAsync(output, "git commit -m 'add app.ts only'");
+      var result = await c.BashAsync(output, "git commit -m 'add ts file only'");
 
-      // assert - task should be skipped because variable returns no .cs files
+      // assert - task should be skipped because include variable returned no files
       result.ExitCode.Should().Be(0);
       result.Stderr.Should().Contain(DockerHelper.Skipped);
    }
 
    [Fact]
-   public async Task FilteringRuleVariable_WithNonExistentVariable_ShouldSkipTask()
+   public async Task VariableInInclude_WithNonExistentVariable_ShouldSkipTask()
    {
-      // Arrange - filteringRuleVariable references a variable that doesn't exist
+      // Arrange: include references a variable that does not exist
       const string taskRunner =
          """
          {
@@ -100,8 +103,7 @@ public class FilteringRuleVariableTests(ITestOutputHelper output)
                      "group": "pre-commit",
                      "command": "echo",
                      "args": ["dotnet test executed"],
-                     "include": ["**/*.cs"],
-                     "filteringRuleVariable": "non-existent-variable"
+                     "include": ["${non-existent-variable}"]
                  }
              ]
          }
@@ -114,26 +116,24 @@ public class FilteringRuleVariableTests(ITestOutputHelper output)
       // act
       var result = await c.BashAsync(output, "git commit -m 'add MyClass.cs'");
 
-      // assert - task should be skipped because the variable is not found
+      // assert - task should be skipped because the variable was not found (empty output)
       result.ExitCode.Should().Be(0);
       result.Stderr.Should().Contain(DockerHelper.Skipped);
    }
 
    [Fact]
-   public async Task FilteringRuleVariable_WithoutVariableInArgs_ShouldFilterByVariableOutput()
+   public async Task VariableInInclude_MixedWithGlob_VariableEmptyButGlobPresent_ShouldRunTask()
    {
-      // This test specifically validates the new feature:
-      // A task with NO variable in its args can still be filtered by filteringRuleVariable.
-      // Previously, the only way to filter by variable was to include the variable in args.
-
+      // Arrange: include has both a glob pattern AND a custom variable.
+      // The variable returns nothing, but the glob "**/*.cs" still matches → task runs.
       const string taskRunner =
          """
          {
              "variables": [
                  {
-                     "name": "staged-cs-files",
+                     "name": "extra-files",
                      "command": "git",
-                     "args": ["diff", "--cached", "--name-only", "--diff-filter=AM"]
+                     "args": ["diff", "--cached", "--name-only", "--diff-filter=AM", "--", "*.ts"]
                  }
              ],
              "tasks": [
@@ -141,25 +141,24 @@ public class FilteringRuleVariableTests(ITestOutputHelper output)
                      "name": "dotnet-test",
                      "group": "pre-commit",
                      "command": "echo",
-                     "args": ["running dotnet test"],
-                     "include": ["**/*.cs"],
-                     "filteringRuleVariable": "staged-cs-files"
+                     "args": ["dotnet test executed"],
+                     "include": ["**/*.cs", "${extra-files}"]
                  }
              ]
          }
          """;
-      // Note: "args" does NOT contain "${staged-cs-files}" - it only has static args.
-      // The task should still be filtered by the variable's output.
-
       await using var c = await ArrangeContainer(taskRunner);
 
-      // Stage only non-.cs files
-      await c.BashAsync("echo 'const x = 1;' > /test/app.ts");
+      // stage a .cs file (matches the glob); variable returns nothing (no .ts changes)
+      await c.AddCsharpClass("public class MyClass { }", "MyClass.cs");
       await c.BashAsync("git add .");
 
-      var skipResult = await c.BashAsync(output, "git commit -m 'add ts file - should skip'");
-      skipResult.ExitCode.Should().Be(0);
-      skipResult.Stderr.Should().Contain(DockerHelper.Skipped);
+      // act
+      var result = await c.BashAsync(output, "git commit -m 'add MyClass.cs'");
+
+      // assert - task should run because "**/*.cs" glob still provides include patterns
+      result.ExitCode.Should().Be(0);
+      result.Stderr.Should().Contain(DockerHelper.SuccessfullyExecuted);
    }
 
    private async Task<IContainer> ArrangeContainer(string taskRunner, [CallerMemberName] string name = null!)

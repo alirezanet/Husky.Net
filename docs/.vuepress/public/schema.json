@@ -70,23 +70,19 @@
            "items": {
              "type": "string"
            },
-           "description": "Glob pattern to select files."
+           "description": "Glob patterns to select files. Supports ${args} and custom variable references (e.g. ${my-variable}). When all entries are custom-variable references that produce no output the task is skipped automatically."
          },
          "exclude": {
            "type": "array",
            "items": {
              "type": "string"
            },
-           "description": "Glob pattern to exclude files."
+           "description": "Glob patterns to exclude files. Supports ${args} and custom variable references (e.g. ${my-variable})."
          },
           "filteringRule": {
              "$ref": "#/definitions/filteringRules",
              "description": "The filtering rule for this task. Can be 'variable' or 'staged'.",
              "default": "variable"
-          },
-          "filteringRuleVariable": {
-             "type": "string",
-             "description": "Name of a variable (defined in the 'variables' section) whose output is used to filter task execution. If the variable returns no files matching the task's include/exclude patterns, the task is skipped. Works independently of the filteringRule setting."
           },
          "windows": {
            "$ref": "#/definitions/windowsOverrides",
