@@ -29,7 +29,7 @@ public class HookRemoveCommand : CommandBase
       if (!_fileSystem.File.Exists(Path.Combine(huskyPath, "_", "husky.sh")))
          throw new CommandException("can not find husky required files (try: husky install)");
 
-      if (HookName.Contains(Path.PathSeparator))
+      if (HookName.Contains(Path.DirectorySeparatorChar) || HookName.Contains(Path.AltDirectorySeparatorChar))
          throw new CommandException("hook name can not contain path separator", showHelp: true);
 
       var hookPath = Path.Combine(huskyPath, HookName);

@@ -131,7 +131,7 @@ namespace HuskyTest.Cli
          var console = new FakeInMemoryConsole();
          LoggerEx.logger = new Logger(console);
          _fileSystem.File.Exists(Path.Combine(HuskyPath, "_", "husky.sh")).Returns(true);
-         var command = new HookRemoveCommand(_git, _fileSystem) { HookName = $"pre-commit{Path.PathSeparator}commit" };
+         var command = new HookRemoveCommand(_git, _fileSystem) { HookName = $"pre-commit{Path.DirectorySeparatorChar}commit" };
 
          // Act
          Func<Task> act = async () => await command.ExecuteAsync(console);
