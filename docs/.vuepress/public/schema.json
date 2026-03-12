@@ -70,14 +70,14 @@
            "items": {
              "type": "string"
            },
-           "description": "Glob pattern to select files."
+           "description": "Glob patterns to select files. Supports ${args} and custom variable references (e.g. ${my-variable}). When all entries are custom-variable references that produce no output the task is skipped automatically."
          },
          "exclude": {
            "type": "array",
            "items": {
              "type": "string"
            },
-           "description": "Glob pattern to exclude files."
+           "description": "Glob patterns to exclude files. Supports ${args} and custom variable references (e.g. ${my-variable})."
          },
           "filteringRule": {
              "$ref": "#/definitions/filteringRules",
