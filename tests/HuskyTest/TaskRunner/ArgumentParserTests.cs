@@ -182,5 +182,137 @@ namespace HuskyTest.TaskRunner
          // Assert
          args.Should().BeEmpty();
       }
+
+      [Fact]
+      public async Task HasVariableMatchAsync_WithMatchingFiles_ReturnsTrue()
+      {
+         // Arrange
+         var (cmd, cmdArgs) = GetEchoCommand("src/MyClass.cs");
+         var argsJson = string.Join(", ", cmdArgs.Select(a => $"\"{a}\""));
+         WriteTaskRunner($$"""
+         {
+            "variables": [
+               {
+                  "name": "cs-files",
+                  "command": "{{cmd}}",
+                  "args": [{{argsJson}}]
+               }
+            ],
+            "tasks": []
+         }
+         """);
+
+         var parser = new ArgumentParser(_git);
+         var huskyTask = new HuskyTask
+         {
+            Name = "dotnet-test",
+            Command = "dotnet",
+            Args = ["test"],
+            Include = ["**/*.cs"]
+         };
+
+         // Act
+         var result = await parser.HasVariableMatchAsync(huskyTask, "cs-files");
+
+         // Assert
+         result.Should().BeTrue();
+      }
+
+      [Fact]
+      public async Task HasVariableMatchAsync_WithNoMatchingFiles_ReturnsFalse()
+      {
+         // Arrange
+         var (cmd, cmdArgs) = GetEchoCommand("src/MyComponent.ts");
+         var argsJson = string.Join(", ", cmdArgs.Select(a => $"\"{a}\""));
+         WriteTaskRunner($$"""
+         {
+            "variables": [
+               {
+                  "name": "ts-files",
+                  "command": "{{cmd}}",
+                  "args": [{{argsJson}}]
+               }
+            ],
+            "tasks": []
+         }
+         """);
+
+         var parser = new ArgumentParser(_git);
+         var huskyTask = new HuskyTask
+         {
+            Name = "dotnet-test",
+            Command = "dotnet",
+            Args = ["test"],
+            Include = ["**/*.cs"]
+         };
+
+         // Act
+         var result = await parser.HasVariableMatchAsync(huskyTask, "ts-files");
+
+         // Assert
+         result.Should().BeFalse();
+      }
+
+      [Fact]
+      public async Task HasVariableMatchAsync_WithNonExistentVariable_ReturnsFalse()
+      {
+         // Arrange
+         WriteTaskRunner("""
+         {
+            "variables": [],
+            "tasks": []
+         }
+         """);
+
+         var parser = new ArgumentParser(_git);
+         var huskyTask = new HuskyTask
+         {
+            Name = "dotnet-test",
+            Command = "dotnet",
+            Args = ["test"],
+            Include = ["**/*.cs"]
+         };
+
+         // Act
+         var result = await parser.HasVariableMatchAsync(huskyTask, "non-existent-variable");
+
+         // Assert
+         result.Should().BeFalse();
+      }
+
+      [Fact]
+      public async Task HasVariableMatchAsync_WithNoIncludePatterns_AndNonEmptyOutput_ReturnsTrue()
+      {
+         // Arrange
+         var (cmd, cmdArgs) = GetEchoCommand("some-file.txt");
+         var argsJson = string.Join(", ", cmdArgs.Select(a => $"\"{a}\""));
+         WriteTaskRunner($$"""
+         {
+            "variables": [
+               {
+                  "name": "any-files",
+                  "command": "{{cmd}}",
+                  "args": [{{argsJson}}]
+               }
+            ],
+            "tasks": []
+         }
+         """);
+
+         var parser = new ArgumentParser(_git);
+         var huskyTask = new HuskyTask
+         {
+            Name = "my-task",
+            Command = "echo",
+            Args = ["hello"]
+            // No Include patterns - should match all files
+         };
+
+         // Act
+         var result = await parser.HasVariableMatchAsync(huskyTask, "any-files");
+
+         // Assert
+         result.Should().BeTrue();
+      }
    }
 }

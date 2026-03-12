@@ -11,6 +11,7 @@ namespace Husky.TaskRunner;
 public interface IArgumentParser
 {
    Task<ArgumentInfo[]> ParseAsync(HuskyTask huskyTask, string[]? optionArguments = null);
+   Task<bool> HasVariableMatchAsync(HuskyTask huskyTask, string variableName, string[]? optionArguments = null);
 }
 
 public partial class ArgumentParser : IArgumentParser
@@ -95,6 +96,28 @@ public partial class ArgumentParser : IArgumentParser
       }
 
       return args.ToArray();
+   }
+
+   public async Task<bool> HasVariableMatchAsync(HuskyTask huskyTask, string variableName, string[]? optionArguments = null)
+   {
+      var customVariables = await _customVariableTasks.Value;
+
+      if (customVariables.All(q => q.Name != variableName))
+      {
+         $"⚠️ the filtering variable '{variableName}' not found".Husky(ConsoleColor.Yellow);
+         return false;
+      }
+
+      var huskyVariable = customVariables.Last(q => q.Name == variableName);
+      var gitPath = await _git.GetGitPathAsync();
+
+      var files = (await GetCustomVariableOutput(huskyVariable))
+          .Where(q => !string.IsNullOrWhiteSpace(q))
+          .Select(q => Path.IsPathFullyQualified(q) ? Path.GetRelativePath(gitPath, q) : q);
+
+      var matcher = GetPatternMatcher(huskyTask, optionArguments);
+      var matches = matcher.Match(gitPath, files);
+      return matches.HasMatches;
    }
 
    private async Task AddStagedFiles(Matcher matcher, ICollection<ArgumentInfo> args, PathModes pathMode, Match? match = null)

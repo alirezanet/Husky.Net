@@ -72,24 +72,39 @@ public class ExecutableTaskFactory : IExecutableTaskFactory
          return true;
       }
 
-      if (huskyTask.FilteringRule != FilteringRules.Staged) return false;
-
-      var stagedFiles = (await _git.GetStagedFilesAsync())
-         .Where(q => !string.IsNullOrWhiteSpace(q))
-         .ToArray();
-      if (stagedFiles.Length == 0)
+      if (huskyTask.FilteringRule == FilteringRules.Staged)
       {
-         "💤 Skipped, no staged files".Husky(ConsoleColor.Blue);
-         return true;
+         var stagedFiles = (await _git.GetStagedFilesAsync())
+            .Where(q => !string.IsNullOrWhiteSpace(q))
+            .ToArray();
+         if (stagedFiles.Length == 0)
+         {
+            "💤 Skipped, no staged files".Husky(ConsoleColor.Blue);
+            return true;
+         }
+
+         var matcher = ArgumentParser.GetPatternMatcher(huskyTask, optionArguments);
+
+         // get match staged files with glob
+         var matches = matcher.Match(stagedFiles);
+         if (!matches.HasMatches)
+         {
+            "💤 Skipped, no staged matched files".Husky(ConsoleColor.Blue);
+            return true;
+         }
       }
 
-      var matcher = ArgumentParser.GetPatternMatcher(huskyTask, optionArguments);
+      if (!string.IsNullOrWhiteSpace(huskyTask.FilteringRuleVariable))
+      {
+         var hasMatches = await _argumentParser.HasVariableMatchAsync(huskyTask, huskyTask.FilteringRuleVariable, optionArguments);
+         if (!hasMatches)
+         {
+            "💤 Skipped, no matched files".Husky(ConsoleColor.Blue);
+            return true;
+         }
+      }
 
-      // get match staged files with glob
-      var matches = matcher.Match(stagedFiles);
-      if (matches.HasMatches) return false;
-      "💤 Skipped, no staged matched files".Husky(ConsoleColor.Blue);
-      return true;
+      return false;
 
    }
 
