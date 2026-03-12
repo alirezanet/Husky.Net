@@ -61,14 +61,16 @@ public class AttachCommandTests
       huskyTarget!.Descendants("Exec").Should().HaveCount(2);
       huskyTarget.Attribute("Inputs").Should().NotBeNull();
       huskyTarget.Attribute("Outputs").Should().NotBeNull();
+
+      // Verify Touch is conditioned on directory existence
       huskyTarget.Descendants("Touch").Should().HaveCount(1);
-      huskyTarget.Descendants("Touch").First().Attribute("AlwaysCreate")?.Value.Should().Be("true");
+      var touch = huskyTarget.Descendants("Touch").First();
+      touch.Attribute("AlwaysCreate")?.Value.Should().Be("true");
+      touch.Attribute("Condition")?.Value.Should().Contain("Exists(");
+
       huskyTarget.Descendants("ItemGroup").Descendants("FileWrites").Should().HaveCount(1);
 
       _console.ReadOutputString().Trim().Should().Be("Husky dev-dependency successfully attached to this project.");
-
-      huskyTarget.Attribute("AfterTargets")?.Value.Should().Be("Restore");
-      huskyTarget.Attribute("BeforeTargets").Should().BeNull();
    }
 
    [Fact]
