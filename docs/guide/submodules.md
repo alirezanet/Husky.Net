@@ -34,10 +34,17 @@ The `attach` command offers a `--ignore-submodule` options that generates an MsB
 The generated block will look something like this, If you're attaching husky manually copy the target to your `.csproj` and adjust `WorkingDirectory` accordingly.
 
 ```xml:no-line-numbers:no-v-pre
-<Target Name="husky" AfterTargets="Restore" Condition="'$(HUSKY)' != 0  and '$(IgnoreSubmodule)' != 0">
+<Target Name="husky" AfterTargets="Restore" Condition="'$(HUSKY)' != 0  and '$(IgnoreSubmodule)' != 0"
+        Inputs="../../.config/dotnet-tools.json"
+        Outputs="../../.husky/_/install.stamp">
    <Exec Command="dotnet tool restore"  StandardOutputImportance="Low" StandardErrorImportance="High"/>
    <Exec Command="dotnet husky install --ignore-submodule" StandardOutputImportance="Low" StandardErrorImportance="High"
          WorkingDirectory="../../" />  <!--Update this to the relative path to your project root dir -->
+   <Touch Files="../../.husky/_/install.stamp" AlwaysCreate="true"
+          Condition="Exists('../../.husky/_')" />
+   <ItemGroup>
+      <FileWrites Include="../../.husky/_/install.stamp" />
+   </ItemGroup>
 </Target>
 ```
 

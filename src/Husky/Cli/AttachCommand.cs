@@ -83,9 +83,11 @@ public class AttachCommand : CommandBase
       exec.SetAttributeValue("WorkingDirectory", rootRelativePath);
       target.Add(exec);
 
+      var huskyDir = Path.Combine(rootRelativePath, ".husky", "_");
       var touch = new XElement("Touch");
       touch.SetAttributeValue("Files", sentinelPath);
       touch.SetAttributeValue("AlwaysCreate", "true");
+      touch.SetAttributeValue("Condition", $"Exists('{huskyDir}')");
       target.Add(touch);
 
       var itemGroup = new XElement("ItemGroup");

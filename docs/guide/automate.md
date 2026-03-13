@@ -31,7 +31,8 @@ To manually attach husky to your project, add the below code to one of your proj
    <Exec Command="dotnet tool restore"  StandardOutputImportance="Low" StandardErrorImportance="High"/>
    <Exec Command="dotnet husky install" StandardOutputImportance="Low" StandardErrorImportance="High"
          WorkingDirectory="../../" />  <!--Update this to the relative path to your project root dir -->
-   <Touch Files="../../.husky/_/install.stamp" AlwaysCreate="true" />
+   <Touch Files="../../.husky/_/install.stamp" AlwaysCreate="true"
+          Condition="Exists('../../.husky/_')" />
    <ItemGroup>
       <FileWrites Include="../../.husky/_/install.stamp" />
    </ItemGroup>
