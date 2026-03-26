@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Runtime.InteropServices;
 using CliWrap;
 using CliWrap.Buffered;
@@ -19,9 +20,9 @@ public class HuskyCliWrap : ICliWrap
              .ExecuteBufferedAsync();
          return result;
       }
-      catch (Exception)
+      catch (Exception e)
       {
-         $"failed to execute command '{fileName}'".LogErr();
+         LogCommandError(fileName, e);
          throw;
       }
    }
@@ -36,9 +37,9 @@ public class HuskyCliWrap : ICliWrap
              .ExecuteBufferedAsync();
          return result;
       }
-      catch (Exception)
+      catch (Exception e)
       {
-         $"failed to execute command '{fileName}'".LogErr();
+         LogCommandError(fileName, e);
          throw;
       }
    }
@@ -148,5 +149,17 @@ public class HuskyCliWrap : ICliWrap
                 "Supported (always, never, verbose)"
             );
       }
+   }
+
+   private static void LogCommandError(string fileName, Exception e)
+   {
+      const int errorFileNotFound = 2;
+      const int errorPathNotFound = 3;
+
+      if (e is Win32Exception { NativeErrorCode: errorFileNotFound or errorPathNotFound } ||
+          e.InnerException is Win32Exception { NativeErrorCode: errorFileNotFound or errorPathNotFound })
+         $"'{fileName}' executable not found. Make sure '{fileName}' is installed and available in your PATH.".LogErr();
+      else
+         $"failed to execute command '{fileName}'".LogErr();
    }
 }
