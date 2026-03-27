@@ -182,5 +182,163 @@ namespace HuskyTest.TaskRunner
          // Assert
          args.Should().BeEmpty();
       }
+
+      [Fact]
+      public async Task GetPatternMatcherAsync_WithVariableInInclude_AndMatchingOutput_ReturnsMatcher()
+      {
+         // Arrange: variable returns a .cs file path which becomes the include pattern
+         var (cmd, cmdArgs) = GetEchoCommand("src/MyClass.cs");
+         var argsJson = string.Join(", ", cmdArgs.Select(a => $"\"{a}\""));
+         WriteTaskRunner($$"""
+         {
+            "variables": [
+               {
+                  "name": "cs-files",
+                  "command": "{{cmd}}",
+                  "args": [{{argsJson}}]
+               }
+            ],
+            "tasks": []
+         }
+         """);
+
+         var parser = new ArgumentParser(_git);
+         var huskyTask = new HuskyTask
+         {
+            Name = "dotnet-test",
+            Command = "dotnet",
+            Args = ["test"],
+            Include = ["${cs-files}"]
+         };
+
+         // Act
+         var matcher = await parser.GetPatternMatcherAsync(huskyTask);
+
+         // Assert - should return a non-null matcher (variable had output)
+         matcher.Should().NotBeNull();
+      }
+
+      [Fact]
+      public async Task GetPatternMatcherAsync_WithVariableInInclude_AndEmptyOutput_ReturnsNull()
+      {
+         // Arrange: variable returns nothing; include only contains the variable ref
+         var (cmd, cmdArgs) = GetEchoCommand(string.Empty);
+         var argsJson = string.Join(", ", cmdArgs.Select(a => $"\"{a}\""));
+         WriteTaskRunner($$"""
+         {
+            "variables": [
+               {
+                  "name": "empty-files",
+                  "command": "{{cmd}}",
+                  "args": [{{argsJson}}]
+               }
+            ],
+            "tasks": []
+         }
+         """);
+
+         var parser = new ArgumentParser(_git);
+         var huskyTask = new HuskyTask
+         {
+            Name = "dotnet-test",
+            Command = "dotnet",
+            Args = ["test"],
+            Include = ["${empty-files}"]
+         };
+
+         // Act
+         var matcher = await parser.GetPatternMatcherAsync(huskyTask);
+
+         // Assert - null signals "should skip" (all include patterns were empty variable refs)
+         matcher.Should().BeNull();
+      }
+
+      [Fact]
+      public async Task GetPatternMatcherAsync_MixedInclude_VariableEmptyButGlobPresent_ReturnsMatcher()
+      {
+         // Arrange: mixed include - glob stays even when variable is empty
+         var (cmd, cmdArgs) = GetEchoCommand(string.Empty);
+         var argsJson = string.Join(", ", cmdArgs.Select(a => $"\"{a}\""));
+         WriteTaskRunner($$"""
+         {
+            "variables": [
+               {
+                  "name": "empty-files",
+                  "command": "{{cmd}}",
+                  "args": [{{argsJson}}]
+               }
+            ],
+            "tasks": []
+         }
+         """);
+
+         var parser = new ArgumentParser(_git);
+         var huskyTask = new HuskyTask
+         {
+            Name = "dotnet-test",
+            Command = "dotnet",
+            Args = ["test"],
+            Include = ["**/*.cs", "${empty-files}"]  // glob remains even if variable is empty
+         };
+
+         // Act
+         var matcher = await parser.GetPatternMatcherAsync(huskyTask);
+
+         // Assert - not null because the glob "**/*.cs" still provides a pattern
+         matcher.Should().NotBeNull();
+      }
+
+      [Fact]
+      public async Task GetPatternMatcherAsync_WithNonExistentVariable_ReturnsNull()
+      {
+         // Arrange
+         WriteTaskRunner("""
+         {
+            "variables": [],
+            "tasks": []
+         }
+         """);
+
+         var parser = new ArgumentParser(_git);
+         var huskyTask = new HuskyTask
+         {
+            Name = "dotnet-test",
+            Command = "dotnet",
+            Args = ["test"],
+            Include = ["${non-existent-variable}"]
+         };
+
+         // Act
+         var matcher = await parser.GetPatternMatcherAsync(huskyTask);
+
+         // Assert - null because variable not found → treated as empty
+         matcher.Should().BeNull();
+      }
+
+      [Fact]
+      public async Task GetPatternMatcherAsync_WithNoInclude_ReturnsMatcher()
+      {
+         // Arrange: no include patterns at all → default "**/*" matcher
+         WriteTaskRunner("""
+         {
+            "variables": [],
+            "tasks": []
+         }
+         """);
+
+         var parser = new ArgumentParser(_git);
+         var huskyTask = new HuskyTask
+         {
+            Name = "my-task",
+            Command = "echo",
+            Args = ["hello"]
+         };
+
+         // Act
+         var matcher = await parser.GetPatternMatcherAsync(huskyTask);
+
+         // Assert - returns a valid matcher (match-all by default)
+         matcher.Should().NotBeNull();
+      }
    }
 }
