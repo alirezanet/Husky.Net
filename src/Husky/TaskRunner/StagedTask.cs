@@ -32,17 +32,25 @@ public class StagedTask : ExecutableTask
       // Check if any partial staged files are present
       var diffNames = await _git.GetDiffNameOnlyAsync();
       var fileArgumentInfo = TaskInfo.ArgumentInfo.OfType<FileArgumentInfo>().ToList();
+
+      // Partial execution (temp file swapping) only works when staged files are
+      // individual command arguments. When all staged files are tracking-only
+      // (e.g., from ${staged:;} pattern where files are in a combined string),
+      // partial execution is not supported.
+      var canPartialExecute = fileArgumentInfo.Any(f => !f.ExcludeFromCommandArgs);
+
       var partialStagedFiles = fileArgumentInfo
          .IntersectBy(diffNames, q => q.RelativePath)
          .ToList();
 
       var hasAnyPartialStagedFiles = partialStagedFiles.Any();
 
-      if (hasAnyPartialStagedFiles)
+      if (hasAnyPartialStagedFiles && canPartialExecute)
          return await PartialExecution(partialStagedFiles);
 
       var executionTime = await base.Execute();
-      await ReStageFiles(partialStagedFiles);
+      // When partial execution is not supported, restage all files
+      await ReStageFiles(canPartialExecute ? partialStagedFiles : Array.Empty<FileArgumentInfo>());
       return executionTime;
 
    }
