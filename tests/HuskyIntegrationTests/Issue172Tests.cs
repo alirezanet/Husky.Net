@@ -5,11 +5,11 @@ using FluentAssertions;
 namespace HuskyIntegrationTests;
 
 /// <summary>
-/// Tests for issue #173: ${staged:separator} pattern does not re-stage files after task execution.
+/// Tests for issue #172: ${staged:separator} pattern does not re-stage files after task execution.
 /// When using ${staged:;} (with separator), formatting changes made by the task should be
 /// re-staged before the commit is finalized.
 /// </summary>
-public class Issue173Tests(ITestOutputHelper output)
+public class Issue172Tests(ITestOutputHelper output)
 {
    [Fact]
    public async Task StagedSeparator_FormattedChanges_ShouldBeCommitted()
