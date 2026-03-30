@@ -113,7 +113,11 @@ public partial class ArgumentParser : IArgumentParser
       if (match is null || !match.Success)
          AddMatchedFiles(args, pathMode, ArgumentTypes.StagedFile, matches, gitPath);
       else
+      {
          AddStaticMatchedFiles(args, pathMode, matches, gitPath, match);
+         // Track individual staged files for StagedTask routing and re-staging
+         AddMatchedFiles(args, pathMode, ArgumentTypes.StagedFile, matches, gitPath, excludeFromCommandArgs: true);
+      }
    }
 
    private async Task AddCustomVariable(
@@ -251,7 +255,8 @@ public partial class ArgumentParser : IArgumentParser
       PathModes pathMode,
       ArgumentTypes argumentType,
       PatternMatchingResult matches,
-      string rootPath
+      string rootPath,
+      bool excludeFromCommandArgs = false
    )
    {
       if (!matches.HasMatches)
@@ -262,7 +267,8 @@ public partial class ArgumentParser : IArgumentParser
          switch (pathMode)
          {
             case PathModes.Relative:
-               args.Add(new FileArgumentInfo(argumentType, pathMode, f));
+               args.Add(new FileArgumentInfo(argumentType, pathMode, f,
+                  excludeFromCommandArgs: excludeFromCommandArgs));
                break;
             case PathModes.Absolute:
                args.Add(
@@ -270,7 +276,8 @@ public partial class ArgumentParser : IArgumentParser
                        argumentType,
                        pathMode,
                        f,
-                       Path.GetFullPath(f, rootPath)
+                       Path.GetFullPath(f, rootPath),
+                       excludeFromCommandArgs
                    )
                );
                break;

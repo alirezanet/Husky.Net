@@ -10,8 +10,9 @@ public class FileArgumentInfo : ArgumentInfo
        ArgumentTypes argumentTypes,
        PathModes pathMode,
        string relativePath,
-       string absolutePath = ""
-   ) : base(argumentTypes, pathMode == PathModes.Relative ? relativePath : absolutePath)
+       string absolutePath = "",
+       bool excludeFromCommandArgs = false
+   ) : base(argumentTypes, pathMode == PathModes.Relative ? relativePath : absolutePath, excludeFromCommandArgs)
    {
       PathMode = pathMode;
       RelativePath = relativePath;
