@@ -136,6 +136,48 @@ namespace HuskyTest.Cli
       }
 
       [Fact]
+      public async Task Install_CreatesGitAttributesInHuskyDirectory()
+      {
+         // Arrange
+         var command = new InstallCommand(_git, _cliWrap, _fileSystem) { AllowParallelism = false };
+         var now = DateTimeOffset.Now;
+         _git.ExecAsync("rev-parse").Returns(Task.FromResult(new CommandResult(0, now, now)));
+         _fileSystem.Directory.Exists(Path.Combine(Environment.CurrentDirectory, ".git")).Returns(true);
+         _git.ExecAsync("config core.hooksPath .husky").Returns(Task.FromResult(new CommandResult(0, now, now)));
+         _git.ExecBufferedAsync("config --local --list").Returns(new BufferedCommandResult(0, now, now, "", ""));
+
+         // Act
+         await command.ExecuteAsync(_console);
+
+         // Assert
+         await _fileSystem.File.Received(1).WriteAllTextAsync(
+            Path.Combine(Environment.CurrentDirectory, ".husky", ".gitattributes"),
+            "* text eol=lf\n");
+      }
+
+      [Fact]
+      public async Task Install_WhenGitAttributesAlreadyExists_DoesNotOverwriteIt()
+      {
+         // Arrange
+         var command = new InstallCommand(_git, _cliWrap, _fileSystem) { AllowParallelism = false };
+         var now = DateTimeOffset.Now;
+         var gitAttributesPath = Path.Combine(Environment.CurrentDirectory, ".husky", ".gitattributes");
+         _git.ExecAsync("rev-parse").Returns(Task.FromResult(new CommandResult(0, now, now)));
+         _fileSystem.Directory.Exists(Path.Combine(Environment.CurrentDirectory, ".git")).Returns(true);
+         _fileSystem.File.Exists(gitAttributesPath).Returns(true);
+         _git.ExecAsync("config core.hooksPath .husky").Returns(Task.FromResult(new CommandResult(0, now, now)));
+         _git.ExecBufferedAsync("config --local --list").Returns(new BufferedCommandResult(0, now, now, "", ""));
+
+         // Act
+         await command.ExecuteAsync(_console);
+
+         // Assert
+         await _fileSystem.File.DidNotReceive().WriteAllTextAsync(
+            gitAttributesPath,
+            Arg.Any<string>());
+      }
+
+      [Fact]
       public async Task Install_WithParallelism_ShouldNotInterleaveGitCalls()
       {
          // Arrange
