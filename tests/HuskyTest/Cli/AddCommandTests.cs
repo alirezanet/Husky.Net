@@ -58,5 +58,28 @@ namespace HuskyTest.Cli
 
          await act.Should().ThrowAsync<CommandException>().WithMessage($"hook name can not contain path separator");
       }
+
+      [Fact]
+      public async Task Add_WhenHookExists_NormalizesLineEndingsAfterAppendingCommand()
+      {
+         // Arrange
+         const string huskyPath = ".husky";
+         const string hookName = "pre-commit";
+         var hookPath = Path.Combine(huskyPath, hookName);
+         var command = new AddCommand(_serviceProvider, _io) { Command = "echo first\r\necho second", HookName = hookName };
+
+         _git.GetHuskyPathAsync().Returns(Task.FromResult(huskyPath));
+         _io.File.Exists(Path.Combine(huskyPath, "_", "husky.sh")).Returns(true);
+         _io.File.Exists(hookPath).Returns(true);
+         _io.File.ReadAllTextAsync(hookPath).Returns(Task.FromResult("#!/bin/sh\r\necho existing\r\n"));
+
+         // Act
+         await command.ExecuteAsync(_console);
+
+         // Assert
+         await _io.File.Received(1).WriteAllTextAsync(
+            hookPath,
+            "#!/bin/sh\necho existing\necho first\necho second\n");
+      }
    }
 }
