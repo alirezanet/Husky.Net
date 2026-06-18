@@ -71,15 +71,13 @@
   <PropertyGroup>
     <HuskyRoot Condition="'$(HuskyRoot)' == ''">../../</HuskyRoot>
   </PropertyGroup>
-  <Target Name="Husky" AfterTargets="Restore" Condition="'$(HUSKY)' != 0 and '$(IsCrossTargetingBuild)' == 'true'"
-          Inputs="$(HuskyRoot).config/dotnet-tools.json"
-          Outputs="$(HuskyRoot).husky/_/install.stamp">
+  <Target Name="Husky" AfterTargets="Restore" Condition="'$(HUSKY)' != 0 and '$(IsCrossTargetingBuild)' == 'true' and !Exists('$(HuskyRoot).husky/_/install.stamp')">
     <Exec Command="dotnet tool restore" StandardOutputImportance="Low" StandardErrorImportance="High" />
     <Exec Command="dotnet husky install" StandardOutputImportance="Low" StandardErrorImportance="High" WorkingDirectory="$(HuskyRoot)"/>
     <Touch Files="$(HuskyRoot).husky/_/install.stamp" AlwaysCreate="true" Condition="Exists('$(HuskyRoot).husky/_')" />
-    <ItemGroup>
-      <FileWrites Include="$(HuskyRoot).husky/_/install.stamp" />
-    </ItemGroup>
+  </Target>
+  <Target Name="HuskyClean" AfterTargets="Clean">
+    <Delete Files="$(HuskyRoot).husky/_/install.stamp" />
   </Target>
 
    <PropertyGroup Condition="'$(Configuration)' == 'IntegrationTest'">
