@@ -40,6 +40,23 @@ namespace HuskyTest.TaskRunner
          File.WriteAllText(Path.Combine(_huskyDir, "task-runner.json"), content);
       }
 
+      [Fact]
+      public async Task ParseAsync_WithInlineArgs_PreservesLiteralCasing()
+      {
+         var parser = new ArgumentParser(_git);
+         var task = new HuskyTask
+         {
+            Name = "test",
+            Command = "echo",
+            Args = ["--Output=Build/${args}"]
+         };
+
+         var args = await parser.ParseAsync(task, ["MyFile.cs"]);
+
+         args.Should().ContainSingle()
+            .Which.Argument.Should().Be("--Output=Build/MyFile.cs");
+      }
+
       private (string command, string[] args) GetEchoCommand(string output)
       {
          if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
