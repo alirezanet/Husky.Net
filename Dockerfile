@@ -1,5 +1,5 @@
 # Use the official .NET SDK image as a base
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build-env
+FROM mcr.microsoft.com/dotnet/sdk:11.0 AS build-env
 ARG RESOURCE_REAPER_SESSION_ID="00000000-0000-0000-0000-000000000000"
 ARG CACHE_BUSTER="1"
 LABEL "org.testcontainers.resource-reaper-session"=$RESOURCE_REAPER_SESSION_ID
@@ -22,13 +22,13 @@ COPY . ./
 RUN echo "Cache buster: ${CACHE_BUSTER}"
 
 # Build the application using the custom 'IntegrationTest' configuration
-RUN dotnet build --no-restore -c IntegrationTest -f net9.0 /app/src/Husky/Husky.csproj -p:Version=99.1.1-test -p:TargetFrameworks=net9.0
+RUN dotnet build --no-restore -c IntegrationTest -f net11.0 /app/src/Husky/Husky.csproj -p:Version=99.1.1-test -p:TargetFrameworks=net11.0
 
 # Create a NuGet package using the 'IntegrationTest' configuration
-RUN dotnet pack --no-build --no-restore -c IntegrationTest -o out /app/src/Husky/Husky.csproj -p:Version=99.1.1-test -p:TargetFrameworks=net9.0
+RUN dotnet pack --no-build --no-restore -c IntegrationTest -o out /app/src/Husky/Husky.csproj -p:Version=99.1.1-test -p:TargetFrameworks=net11.0
 
 # Use the same .NET SDK image for the final stage
-FROM mcr.microsoft.com/dotnet/sdk:10.0
+FROM mcr.microsoft.com/dotnet/sdk:11.0
 ARG RESOURCE_REAPER_SESSION_ID="00000000-0000-0000-0000-000000000000"
 ARG CACHE_BUSTER="1"
 LABEL "org.testcontainers.resource-reaper-session"=$RESOURCE_REAPER_SESSION_ID
