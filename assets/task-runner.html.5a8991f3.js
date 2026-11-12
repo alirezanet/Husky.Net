@@ -1,0 +1,1 @@
+const e={key:"v-74ae684d",path:"/guide/task-runner.html",title:"Task Runner",lang:"en-US",frontmatter:{},excerpt:"",headers:[{level:2,title:"Why task runner?",slug:"why-task-runner",children:[]},{level:2,title:"task-runner.json",slug:"task-runner-json",children:[]}],git:{updatedTime:1718490285e3},filePathRelative:"guide/task-runner.md"};export{e as data};
