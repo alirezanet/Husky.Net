@@ -26,4 +26,10 @@
       <ProjectReference Include="..\..\src\Husky\Husky.csproj" />
    </ItemGroup>
 
+   <ItemGroup>
+      <Content Include="xunit.runner.json">
+         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+   </ItemGroup>
+
 </Project>
