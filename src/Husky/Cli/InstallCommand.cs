@@ -5,6 +5,7 @@ using CliFx.Exceptions;
 using CliFx.Infrastructure;
 using Husky.Services.Contracts;
 using Husky.Stdout;
+using Husky.Utils;
 
 namespace Husky.Cli;
 
@@ -16,6 +17,8 @@ public class InstallCommand : CommandBase
    private readonly IFileSystem _fileSystem;
    private const string FailedMsg = "Git hooks installation failed";
    private const string HUSKY_FOLDER_NAME = ".husky";
+   private const string GIT_ATTRIBUTES_FILE_NAME = ".gitattributes";
+   private const string GIT_ATTRIBUTES_CONTENT = "* text eol=lf\n";
    private const string DOCS_URL = "https://alirezanet.github.io/Husky.Net/guide/getting-started";
 
    [CommandOption("dir", 'd', Description = "The custom directory to install Husky hooks.")]
@@ -115,39 +118,6 @@ public class InstallCommand : CommandBase
       }
    }
 
-   private void CreateResources(string path)
-   {
-      $"Creating resources and configuration files in '{path}'".LogVerbose();
-
-      // Create .husky/_
-      _fileSystem.Directory.CreateDirectory(Path.Combine(path, "_"));
-
-      // Create .husky/_/.  ignore
-      _fileSystem.File.WriteAllText(Path.Combine(path, "_/.gitignore"), "*");
-
-      // Copy husky.sh to .husky/_/husky.sh
-      var husky_shPath = Path.Combine(path, "_", "husky.sh");
-      {
-         using var stream = Assembly.GetAssembly(typeof(Program))!.GetManifestResourceStream("Husky.templates.husky.sh")!;
-         using var sr = new StreamReader(stream);
-         var content = sr.ReadToEnd();
-         _fileSystem.File.WriteAllText(husky_shPath, content);
-      }
-
-      // here we have to run the `ConfigureGitAndFilePermission` synchronously because mutex will fail if thread changes
-      ConfigureGitAndFilePermission(path, husky_shPath).GetAwaiter().GetResult();
-
-      // Created task-runner.json file
-      // We don't want to override this file
-      if (!_fileSystem.File.Exists(Path.Combine(path, "task-runner.json")))
-      {
-         using var stream = Assembly.GetAssembly(typeof(Program))!.GetManifestResourceStream("Husky.templates.task-runner.json")!;
-         using var sr = new StreamReader(stream);
-         var content = sr.ReadToEnd();
-         _fileSystem.File.WriteAllText(Path.Combine(path, "task-runner.json"), content);
-      }
-   }
-
    private async Task CreateResourcesAsync(string path)
    {
       $"Creating resources and configuration files asynchronously in '{path}'".LogVerbose();
@@ -158,12 +128,17 @@ public class InstallCommand : CommandBase
       // Create .husky/_/.  ignore
       await _fileSystem.File.WriteAllTextAsync(Path.Combine(path, "_/.gitignore"), "*");
 
+      // Keep Husky hook scripts LF-only even when users have core.autocrlf enabled.
+      var gitAttributesPath = Path.Combine(path, GIT_ATTRIBUTES_FILE_NAME);
+      if (!_fileSystem.File.Exists(gitAttributesPath))
+         await _fileSystem.File.WriteAllTextAsync(gitAttributesPath, GIT_ATTRIBUTES_CONTENT);
+
       // Copy husky.sh to .husky/_/husky.sh
       var husky_shPath = Path.Combine(path, "_", "husky.sh");
       {
          await using var stream = Assembly.GetAssembly(typeof(Program))!.GetManifestResourceStream("Husky.templates.husky.sh")!;
          using var sr = new StreamReader(stream);
-         var content = await sr.ReadToEndAsync();
+         var content = ShellScriptLineEndings.Normalize(await sr.ReadToEndAsync());
          await _fileSystem.File.WriteAllTextAsync(husky_shPath, content);
       }
 
