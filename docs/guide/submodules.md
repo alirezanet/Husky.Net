@@ -38,17 +38,16 @@ The generated block will look something like this, If you're attaching husky man
    <!-- Update this to the relative path from your project to the repo root -->
    <HuskyRoot Condition="'$(HuskyRoot)' == ''">../../</HuskyRoot>
 </PropertyGroup>
-<Target Name="Husky" AfterTargets="Restore" Condition="'$(HUSKY)' != 0  and '$(IgnoreSubmodule)' != 0"
-        Inputs="$(HuskyRoot).config/dotnet-tools.json"
-        Outputs="$(HuskyRoot).husky/_/install.stamp">
+<Target Name="Husky" AfterTargets="Restore"
+        Condition="'$(HUSKY)' != 0  and '$(IgnoreSubmodule)' != 0 and !Exists('$(HuskyRoot).husky/_/install.stamp')">
    <Exec Command="dotnet tool restore"  StandardOutputImportance="Low" StandardErrorImportance="High"/>
    <Exec Command="dotnet husky install --ignore-submodule" StandardOutputImportance="Low" StandardErrorImportance="High"
          WorkingDirectory="$(HuskyRoot)" />
    <Touch Files="$(HuskyRoot).husky/_/install.stamp" AlwaysCreate="true"
           Condition="Exists('$(HuskyRoot).husky/_')" />
-   <ItemGroup>
-      <FileWrites Include="$(HuskyRoot).husky/_/install.stamp" />
-   </ItemGroup>
+</Target>
+<Target Name="HuskyClean" AfterTargets="Clean">
+   <Delete Files="$(HuskyRoot).husky/_/install.stamp" />
 </Target>
 ```
 

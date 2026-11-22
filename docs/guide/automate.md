@@ -29,17 +29,16 @@ To manually attach husky to your project, add the below code to one of your proj
    <!-- Update this to the relative path from your project to the repo root -->
    <HuskyRoot Condition="'$(HuskyRoot)' == ''">../../</HuskyRoot>
 </PropertyGroup>
-<Target Name="Husky" AfterTargets="Restore" Condition="'$(HUSKY)' != 0"
-        Inputs="$(HuskyRoot).config/dotnet-tools.json"
-        Outputs="$(HuskyRoot).husky/_/install.stamp">
+<Target Name="Husky" AfterTargets="Restore"
+        Condition="'$(HUSKY)' != 0 and !Exists('$(HuskyRoot).husky/_/install.stamp')">
    <Exec Command="dotnet tool restore"  StandardOutputImportance="Low" StandardErrorImportance="High"/>
    <Exec Command="dotnet husky install" StandardOutputImportance="Low" StandardErrorImportance="High"
          WorkingDirectory="$(HuskyRoot)" />
    <Touch Files="$(HuskyRoot).husky/_/install.stamp" AlwaysCreate="true"
           Condition="Exists('$(HuskyRoot).husky/_')" />
-   <ItemGroup>
-      <FileWrites Include="$(HuskyRoot).husky/_/install.stamp" />
-   </ItemGroup>
+</Target>
+<Target Name="HuskyClean" AfterTargets="Clean">
+   <Delete Files="$(HuskyRoot).husky/_/install.stamp" />
 </Target>
 ```
 
@@ -48,7 +47,7 @@ Update the `HuskyRoot` property value to match the relative path from your proje
 :::
 
 ::: tip
-The target uses MSBuild incremental build support (`Inputs`/`Outputs`) to avoid re-running on every build. It only re-runs when `.config/dotnet-tools.json` changes (e.g. tool version update) or after `dotnet clean`. The stamp file is created inside `.husky/_/` which is already gitignored.
+The `Husky` target skips when `.husky/_/install.stamp` exists, avoiding re-runs on every build. The `HuskyClean` target removes the stamp on `dotnet clean`, so the next build re-installs. If you update your tool versions, run `dotnet clean` to pick up the change.
 :::
 
 ::: tip
