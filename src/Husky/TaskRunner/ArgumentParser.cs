@@ -49,7 +49,8 @@ public partial class ArgumentParser : IArgumentParser
                AddCustomArguments(args, optionArguments);
                break;
             case var value when value.Contains("${args}") && optionArguments is not null && optionArguments.Any():
-               args.Add(new ArgumentInfo(ArgumentTypes.Static, value.Replace("${args}", string.Join(' ', optionArguments!))));
+               args.Add(new ArgumentInfo(ArgumentTypes.Static,
+                  arg.Replace("${args}", string.Join(' ', optionArguments!), StringComparison.OrdinalIgnoreCase)));
                break;
             case "${last-commit}":
             {
