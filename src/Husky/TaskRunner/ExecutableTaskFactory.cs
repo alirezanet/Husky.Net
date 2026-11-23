@@ -44,7 +44,8 @@ public class ExecutableTaskFactory : IExecutableTaskFactory
          return null; // skip the task
 
       // check for chunk
-      var totalCommandLength = argsInfo.Sum(q => q.Argument.Length) + huskyTask.Command.Length;
+      var commandArgs = argsInfo.Where(q => !q.ExcludeFromCommandArgs).Select(q => q.Argument).ToArray();
+      var totalCommandLength = commandArgs.Sum(q => q.Length) + huskyTask.Command.Length;
       if (
          RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
          && totalCommandLength > MAX_ARG_LENGTH
@@ -55,7 +56,7 @@ public class ExecutableTaskFactory : IExecutableTaskFactory
          new TaskInfo(
             huskyTask.Name,
             huskyTask.Command,
-            argsInfo.Select(q => q.Argument).ToArray(),
+            commandArgs,
             cwd,
             huskyTask.Output ?? OutputTypes.Always,
             argsInfo,
@@ -96,25 +97,28 @@ public class ExecutableTaskFactory : IExecutableTaskFactory
    private IExecutableTask CreateChunkTask(
       HuskyTask huskyTask,
       int totalCommandLength,
-      ArgumentInfo[] args,
+      ArgumentInfo[] allArgs,
       string cwd,
       bool noPartial
    )
    {
-      var chunks = GetChunks(totalCommandLength, args);
+      var commandArgs = allArgs.Where(q => !q.ExcludeFromCommandArgs).ToArray();
+      var trackingArgs = allArgs.Where(q => q.ExcludeFromCommandArgs).ToArray();
+      var chunks = GetChunks(totalCommandLength, commandArgs);
       var chunkLength = chunks.Count;
       var subTasks = new IExecutableTask[chunkLength];
       for (var i = 0; i < chunkLength; i++)
       {
          var argInfo = chunks.Dequeue();
          var chunkedArgs = argInfo.Select(w => w.Argument).ToArray();
+         var fullArgInfo = argInfo.Concat(trackingArgs).ToArray();
          var taskInfo = new TaskInfo(
             huskyTask.Name!,
             huskyTask.Command!,
             chunkedArgs,
             cwd,
             huskyTask.Output ?? OutputTypes.Always,
-            argInfo,
+            fullArgInfo,
             noPartial
          );
          // staged-task
