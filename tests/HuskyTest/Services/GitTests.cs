@@ -41,6 +41,24 @@ namespace HuskyTest.Services
       }
 
       [Fact]
+      public async Task GetHuskyPath_WhenGitCommandFails_ThrowsCommandExceptionWithInstallHint()
+      {
+         // Arrange
+         var git = new Git(_cliWrap);
+         var now = DateTime.UtcNow;
+         _cliWrap.ExecBufferedAsync("git", "config --get core.hooksPath")
+            .Returns(Task.FromResult(new CliWrap.Buffered.BufferedCommandResult(1, now, now, string.Empty, string.Empty)));
+
+         // Act
+         Func<Task> act = async () => await git.GetHuskyPathAsync();
+
+         // Assert
+         await act.Should()
+            .ThrowAsync<CommandException>()
+            .WithMessage("*dotnet husky install*");
+      }
+
+      [Fact]
       public async Task GetStagedFiles_Return_StagedFiles()
       {
          // Arrange
