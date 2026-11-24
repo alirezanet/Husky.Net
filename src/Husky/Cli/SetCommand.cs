@@ -41,8 +41,9 @@ public class SetCommand : CommandBase
       {
          await using var stream = Assembly.GetAssembly(typeof(Program))!.GetManifestResourceStream("Husky.templates.hook")!;
          using var sr = new StreamReader(stream);
-         var content = await sr.ReadToEndAsync();
-         await _fileSystem.File.WriteAllTextAsync(hookPath, $"{content}\n{Command}\n");
+         var content = ShellScriptLineEndings.Normalize(await sr.ReadToEndAsync());
+         var hookContent = ShellScriptLineEndings.Normalize($"{content}\n{Command}\n");
+         await _fileSystem.File.WriteAllTextAsync(hookPath, hookContent);
       }
 
       // needed for linux

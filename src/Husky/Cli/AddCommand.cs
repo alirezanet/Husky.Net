@@ -2,6 +2,7 @@ using System.IO.Abstractions;
 using CliFx.Attributes;
 using CliFx.Infrastructure;
 using Husky.Stdout;
+using Husky.Utils;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Husky.Cli;
@@ -40,7 +41,9 @@ public class AddCommand : CommandBase
          return;
       }
 
-      await _fileSystem.File.AppendAllTextAsync(hookPath, $"{Command}\n");
+      var existingHookContent = await _fileSystem.File.ReadAllTextAsync(hookPath);
+      var hookContent = ShellScriptLineEndings.Normalize($"{existingHookContent}{Command}\n");
+      await _fileSystem.File.WriteAllTextAsync(hookPath, hookContent);
       $"added to '{hookPath}' hook".Log(ConsoleColor.Green);
    }
 }
